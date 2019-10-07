@@ -477,7 +477,6 @@
             this.labName.TabIndex = 2;
             this.labName.Text = "Name";
             this.labName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.labName.Click += new System.EventHandler(this.LabName_Click);
             // 
             // labID
             // 

@@ -55,6 +55,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Form1_FileLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1_Utils.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Graph.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
