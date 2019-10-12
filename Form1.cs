@@ -1,33 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CoffeeLogger
+namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "$Revision: 2.1 $";
+        string Revision = "DE1 Log View v1.3";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
-        string AcaiaLoggerFile = "";
 
         // to draw GBR bars in listData_DrawItem
         readonly int _BP1 = 20;
         readonly int _BP2 = 30;
-        readonly double _REF_BEAN = 18.5;
+        readonly double _REF_BEAN = 18.0;
 
         // these are used to color-code values, in listData_DrawItem only
-        readonly double _MIN_P = 3.1;
-        readonly double _RANGE_P = 7.1;
         readonly double _MIN_R = 1.5;
         readonly double _RANGE_R = 1.2;
 
-        GraphPainter GraphWeight = null;
-        GraphPainter GraphPressure = null;
+        GraphPainter GraphTop = null;
+        GraphPainter GraphBot = null;
 
         List<int> WeightPoints = new List<int>();
 
@@ -45,23 +43,23 @@ namespace CoffeeLogger
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Text = "Coffee Logger  v" + Revision.Replace("Revision:", "").Replace("$", "").Trim() +
-                "   Brew points = " + _BP1.ToString() + "/" + _BP2.ToString() + "  Ref Bean weight = " + _REF_BEAN.ToString();
+            this.Text = Revision;
 
-            GraphWeight = new GraphPainter(splitContainer2.Panel1, this.Font);
-            GraphWeight.SetAxisTitles("", "Weight/Flow, g");
-
-            GraphPressure = new GraphPainter(splitContainer2.Panel2, this.Font);
-            GraphPressure.SetAxisTitles("Time, sec", "Pressure, bar");
+            GraphTop = new GraphPainter(splitContainer2.Panel1, this.Font);
+            GraphBot = new GraphPainter(splitContainer2.Panel2, this.Font);
 
             ApplicationDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
             ApplicationNameNoExt = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
 
             LoadSettings();
 
+
             string data_fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".csv";
-            if (File.Exists(data_fname))
-                ReadDataFromFile(data_fname, true);
+            string old_data_fname = ApplicationDirectory + "\\CoffeeLogger.csv";
+            if ((File.Exists(data_fname) == false) && (File.Exists(old_data_fname) == true))
+                ReadOldFileFormat(old_data_fname);
+            else if (File.Exists(data_fname))
+                ReadAllRecords(data_fname);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -83,61 +81,59 @@ namespace CoffeeLogger
 
             labNotes.Text = String.IsNullOrEmpty(Data[key].notes) ? "" : Data[key].notes;
 
-            // plot weight
-            GraphWeight.SetAxisTitles("", radioWeight.Checked ? "Weight, g" : "Flow, g/s");
-
-            GraphWeight.data.Clear();
-
-            List<double> y = radioWeight.Checked ? Data[key].data_increasing : Data[key].flow;
-            List<double> x = new List<double>();
-            for (int i = 0; i < y.Count; i++)
-                x.Add(i);
-
-            GraphWeight.SetData(0, x, y, Color.Blue, 4, GraphPainter.Style.Solid);
-
-            for (int si = 0; si < SelectedPlots.Count; si++)
-            {
-                var skey = SelectedPlots[si];
-
-                List<double> sy = radioWeight.Checked ?
-                                    (chkNoPreinf.Checked ? Data[skey].data_increasing_nopi : Data[skey].data_increasing)
-                                  : (chkNoPreinf.Checked ? Data[skey].flow_nopi : Data[skey].flow);
-                List<double> sx = new List<double>();
-                for (int i = 0; i < sy.Count; i++)
-                    sx.Add(i);
-
-                GraphWeight.SetData(si + 1, sx, sy, GetPenColor(si), 4, GraphPainter.Style.Solid);
-            }
-
-            GraphWeight.SetAutoLimits();
-            splitContainer2.Panel1.Refresh();
+            PlotDataRec(GraphTop, Data[key]);
 
             // plot pressure
-            GraphPressure.data.Clear();
+            /*
+            GraphBot.data.Clear();
 
             y = Data[key].pressure;
             x.Clear();
             for (int i = 0; i < y.Count; i++)
-                x.Add(i);
+            x.Add(i);
 
-            GraphPressure.SetData(0, x, y, Color.Blue, 4, GraphPainter.Style.Solid);
+            GraphBot.SetData(0, x, y, Color.Blue, 4, GraphPainter.Style.Solid);
 
             for (int si = 0; si < SelectedPlots.Count; si++)
             {
-                var skey = SelectedPlots[si];
+            var skey = SelectedPlots[si];
 
-                List<double> sy = chkNoPreinf.Checked ? Data[skey].pressure_nopi : Data[skey].pressure;
-                List<double> sx = new List<double>();
-                for (int i = 0; i < sy.Count; i++)
-                    sx.Add(i);
+            List<double> sy = Data[skey].pressure;
+            List<double> sx = new List<double>();
+            for (int i = 0; i < sy.Count; i++)
+            sx.Add(i);
 
-                GraphPressure.SetData(si + 1, sx, sy, GetPenColor(si), 4, GraphPainter.Style.Solid);
+            GraphBot.SetData(si + 1, sx, sy, GetPenColor(si), 4, GraphPainter.Style.Solid);
             }
 
-            GraphPressure.SetAutoLimits();
+            GraphBot.SetAutoLimits();
 
             splitContainer2.Panel2.Refresh();
+            */
         }
+
+        private void PlotDataRec(GraphPainter gp, DataStruct ds)
+        {
+            labelTopL.Text = ds.name + "  " + ds.profile;
+            labelTopR.Text = ds.coffee_weight.ToString() + "g";
+
+            gp.SetAxisTitles("", "");
+
+            gp.data.Clear();
+
+            gp.SetData(0, ds.elapsed, ds.flow_goal, Color.Blue, 2, DashStyle.Dash);
+            gp.SetData(1, ds.elapsed, ds.pressure_goal, Color.LimeGreen, 2, DashStyle.Dash);
+
+            gp.SetData(2, ds.elapsed, ds.flow, Color.Blue, 3, DashStyle.Solid);
+            gp.SetData(3, ds.elapsed, ds.pressure, Color.LimeGreen, 3, DashStyle.Solid);
+
+            gp.SetData(4, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid);
+
+            gp.SetAutoLimits();
+
+            gp.panel.Refresh();
+        }
+
 
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
@@ -197,7 +193,7 @@ namespace CoffeeLogger
             e.Graphics.DrawString(ddd, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labBrewType.Left; myrec.Width = labBrewType.Width;
-            e.Graphics.DrawString(d.getBrewType().ToString().Substring(0, 1), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            //e.Graphics.DrawString(d.getBrewType().ToString().Substring(0, 1), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
             e.Graphics.DrawString((d.bean_weight - _REF_BEAN).ToString("0.0").PadLeft(4), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -223,15 +219,6 @@ namespace CoffeeLogger
             e.Graphics.DrawString(PrintGBR ? (wp[2] * 100).ToString("0") : d.time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
 
-            myrec.X = labPressure.Left; myrec.Width = labPressure.Width;
-            var max_p = d.GetMaxPressure();
-            if (max_p != double.MinValue)
-            {
-                var c = getHeatmapColor((max_p - _MIN_P) / _RANGE_P, HeatMapP);
-                e.Graphics.FillRectangle(c, myrec);
-            }
-            e.Graphics.DrawString(d.GetPressureString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
 
             myrec.Y -= 5; // adjust back
 
@@ -243,28 +230,25 @@ namespace CoffeeLogger
                 e.Graphics.FillRectangle(GetBrushColor(d.saved_plot_index), myrec);
 
             // plot weight points - LAST! - as we change myrec size
-            if (d.getBrewType() != BrewType.Flt)
-            {
 
-                myrec.X = labGBR.Left - 5; myrec.Width = labGBR.Width / 3;
+            myrec.X = labGBR.Left - 5; myrec.Width = labGBR.Width / 3;
 
-                var original_height = myrec.Height;
-                var original_y = myrec.Y;
+            var original_height = myrec.Height;
+            var original_y = myrec.Y;
 
-                myrec.Height = (int)(original_height * wp[0]);
-                myrec.Y = original_y + (original_height - myrec.Height);
-                e.Graphics.FillRectangle(Brushes.SeaGreen, myrec);
+            myrec.Height = (int)(original_height * wp[0]);
+            myrec.Y = original_y + (original_height - myrec.Height);
+            e.Graphics.FillRectangle(Brushes.SeaGreen, myrec);
 
-                myrec.X += myrec.Width;
-                myrec.Height = (int)(original_height * wp[1]);
-                myrec.Y = original_y + (original_height - myrec.Height);
-                e.Graphics.FillRectangle(Brushes.Blue, myrec);
+            myrec.X += myrec.Width;
+            myrec.Height = (int)(original_height * wp[1]);
+            myrec.Y = original_y + (original_height - myrec.Height);
+            e.Graphics.FillRectangle(Brushes.Blue, myrec);
 
-                myrec.X += myrec.Width;
-                myrec.Height = (int)(original_height * wp[2]);
-                myrec.Y = original_y + (original_height - myrec.Height);
-                e.Graphics.FillRectangle(Brushes.Red, myrec);
-            }
+            myrec.X += myrec.Width;
+            myrec.Height = (int)(original_height * wp[2]);
+            myrec.Y = original_y + (original_height - myrec.Height);
+            e.Graphics.FillRectangle(Brushes.Red, myrec);
         }
 
         private bool CanAddLine()
@@ -298,13 +282,13 @@ namespace CoffeeLogger
 
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
-            if (GraphWeight != null)
-                GraphWeight.Plot(e.Graphics);
+            if (GraphTop != null)
+                GraphTop.Plot(e.Graphics);
         }
         private void splitContainer2_Panel2_Paint(object sender, PaintEventArgs e)
         {
-            if (GraphPressure != null)
-                GraphPressure.Plot(e.Graphics);
+            if (GraphBot != null)
+                GraphBot.Plot(e.Graphics);
         }
 
         private void txtFilterName_TextChanged(object sender, EventArgs e)
@@ -312,9 +296,45 @@ namespace CoffeeLogger
             FilterData();
         }
 
-        private void radioEspro_CheckedChanged(object sender, EventArgs e)
+        private void FilterData()
         {
-            FilterData();
+            List<string> sorted_keys = new List<string>();
+
+            var flt_name = txtFilterName.Text.Trim().ToLower();
+
+            foreach (var key in Data.Keys)
+            {
+                if (!String.IsNullOrEmpty(flt_name) && Data[key].name.Contains(flt_name) == false)
+                    continue;
+
+                if (Data[key].bean_weight < 0)
+                    continue;
+
+                sorted_keys.Add(key);
+            }
+
+            sorted_keys.Sort();
+
+
+            string saved_key = "";
+            if (listData.SelectedIndex != -1)
+                saved_key = (string)listData.Items[listData.SelectedIndex];
+
+            listData.Items.Clear();
+            bool saved_key_set = false;
+            for (int i = sorted_keys.Count - 1; i >= 0; i--)
+            {
+                listData.Items.Add(sorted_keys[i]);
+                if (sorted_keys[i] == saved_key)
+                {
+                    listData.SelectedItem = sorted_keys[i];
+                    saved_key_set = true;
+                }
+            }
+            if (!saved_key_set && listData.Items.Count != 0)
+                listData.SelectedIndex = 0;
+
+            listData.Refresh();
         }
 
         private void txtFilterName_KeyDown(object sender, KeyEventArgs e)
@@ -326,7 +346,7 @@ namespace CoffeeLogger
         private void splitContainer1_Panel2_Resize(object sender, EventArgs e)
         {
             listData.Height = splitContainer1.Panel2.Height - panel1.Height - panel2.Height - panel3.Height
-                - panel4.Height - panel5.Height - 5;
+            - panel4.Height - panel5.Height - 5;
         }
 
         List<string> SelectedPlots = new List<string>();
@@ -431,14 +451,13 @@ namespace CoffeeLogger
 
             sb.Append("#" + d.id.ToString() + " " + d.date.ToString("MMM:y").Replace(":", "'") + " ");
 
-            string t = d.getBrewType().ToString().Substring(0, 1);
+            string t = "";
             sb.Append(t + ": ");
             sb.Append(d.bean_weight.ToString() + " -> ");
             sb.Append(d.coffee_weight.ToString("0.0") + " in ");
             sb.Append(d.time.ToString() + " sec, ratio ");
             sb.Append((d.coffee_weight / d.bean_weight).ToString("0.00") + " grind ");
             sb.Append(d.grind + " press ");
-            sb.Append(d.GetPressureString());
 
             txtCopy.Text = sb.ToString();
             txtCopy.SelectAll();
@@ -497,6 +516,5 @@ namespace CoffeeLogger
             listData.Focus();
             listData_SelectedIndexChanged(null, EventArgs.Empty);
         }
-
     }
 }

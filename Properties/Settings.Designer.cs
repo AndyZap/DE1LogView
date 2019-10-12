@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CoffeeLogger.Properties
+namespace DE1LogView.Properties
 {
 
 

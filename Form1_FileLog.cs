@@ -1,25 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CoffeeLogger
+namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        enum BrewType { Espro, EsproBloom, Am, Flt }
+        string ShotsFolder = "";
+
+        Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
 
         class DataStruct
         {
-            readonly double _MAX_ESPRO_WEIGHT = 60;
-            readonly double _MAX_AM_WEIGHT = 150;
-            readonly double _GOOD_FLOW_VALUE = 1;
-            readonly double _BLOOM_TIME_INDEX = 30;
-            readonly double _GOOD_FLOW_SMALL_VALUE = 0.1;
-
             public int id = 0;
             public string name = "";
             public string date_str = "";
@@ -29,97 +23,91 @@ namespace CoffeeLogger
             public string grind = "";
             public double time = 0;
             public string notes = "";
+            public string profile = "";
 
-            private List<double> data = new List<double>();
-
-            public List<double> data_increasing = new List<double>();
-            public List<double> flow = new List<double>();
+            public List<double> elapsed = new List<double>();
             public List<double> pressure = new List<double>();
+            public List<double> weight = new List<double>();
+            public List<double> flow = new List<double>();
+            public List<double> flow_weight = new List<double>();
+            public List<double> temperature_basket = new List<double>();
+            public List<double> temperature_mix = new List<double>();
+            public List<double> pressure_goal = new List<double>();
+            public List<double> flow_goal = new List<double>();
+            public List<double> temperature_goal = new List<double>();
 
-            // data without preinf
+            public DataStruct() { }
 
-            private int good_flow_index = 0;
+            public void WriteRecord(StringBuilder sb)
+            {
+                sb.AppendLine("clock " + date_str);
+                sb.AppendLine("record_id " + id.ToString());
+                sb.AppendLine("name " + name);
+                sb.AppendLine("bean_weight " + bean_weight.ToString());
+                sb.AppendLine("coffee_weight " + coffee_weight.ToString());
+                sb.AppendLine("grind " + grind);
+                sb.AppendLine("notes " + notes);
+                sb.AppendLine("profile " + profile);
 
-            public List<double> data_increasing_nopi = new List<double>();
-            public List<double> flow_nopi = new List<double>();
-            public List<double> pressure_nopi = new List<double>();
+                sb.AppendLine(WriteList(elapsed, "elapsed", "0.0##"));
+                sb.AppendLine(WriteList(pressure, "pressure", "0.0#"));
+                sb.AppendLine(WriteList(weight, "weight", "0.0"));
+                sb.AppendLine(WriteList(flow, "flow", "0.0#"));
+                sb.AppendLine(WriteList(flow_weight, "flow_weight", "0.0#"));
+                sb.AppendLine(WriteList(temperature_basket, "temperature_basket", "0.0"));
+                sb.AppendLine(WriteList(temperature_mix, "temperature_mix", "0.0"));
+                sb.AppendLine(WriteList(pressure_goal, "pressure_goal", "0.0"));
+                sb.AppendLine(WriteList(flow_goal, "flow_goal", "0.0"));
+                sb.AppendLine(WriteList(temperature_goal, "temperature_goal", "0.0"));
+                sb.AppendLine();
+            }
 
-            public int saved_plot_index = -1;  // -1 means this has not been saved in the data struct
+            public string WriteList(List<double> list, string key, string format)
+            {
+                StringBuilder sb = new StringBuilder();
 
-            public DataStruct(string s, string flt_name, string flt_grind, FileVersion version) // init from the csv file line
+                sb.Append(key + " {");
+                foreach (var x in list)
+                    sb.Append(x.ToString(format) + " ");
+
+                sb.Append("}");
+
+                return sb.ToString().Replace(" }", "}");
+            }
+
+            // These are functions to work with the old format --------------------------
+
+            public DataStruct(string s) // init from the csv file line
             {
                 var words = s.Replace("\"", "").Split(',');
 
-                if (version == FileVersion.Brewmaster)
-                {
-                    name = words[1].ToLower();
-                    date_str = words[2];
-                    bean_weight = Convert.ToDouble(words[3]);
-                    grind = words[4];
-                    notes = words[6].Trim();
-                    time = Convert.ToDouble(words[7]);
-                    coffee_weight = Convert.ToDouble(words[9]);
+                date_str = words[0];
+                name = words[1].ToLower();
+                bean_weight = Convert.ToDouble(words[2]);
+                coffee_weight = Convert.ToDouble(words[3]);
+                grind = words[4];
+                time = Convert.ToDouble(words[5]);
+                notes = words[6].Trim();
 
-                    var vector_data = words[10].Split(';');
-                    int num = 0;
-                    double sum = 0;
+                var vector_data = words[7].Split(';');
+                foreach (var v in vector_data)
+                {
+                    if (String.IsNullOrEmpty(v.Trim()))
+                        continue;
+
+                    weight.Add(Convert.ToDouble(v));
+                }
+
+                if (words.Length > 8)
+                {
+                    vector_data = words[8].Split(';');
                     foreach (var v in vector_data)
                     {
                         if (String.IsNullOrEmpty(v.Trim()))
                             continue;
 
-                        sum += Convert.ToDouble(v);
-                        num++;
-
-                        if (num == 5) // 5 times per set sampling rate
-                        {
-                            data.Add(sum / (double)num);
-                            num = 0;
-                            sum = 0;
-                        }
+                        pressure.Add(Convert.ToDouble(v));
                     }
-
-                    UpdateBrewTimeBrewM();
-                }
-                else if (version == FileVersion.AcaiaLogger)
-                {
-                    date_str = words[0];
-                    name = words[1].ToLower();
-                    bean_weight = Convert.ToDouble(words[2]);
-                    coffee_weight = Convert.ToDouble(words[3]);
-                    grind = words[4];
-                    time = Convert.ToDouble(words[5]);
-                    notes = words[6].Trim();
-
-                    var vector_data = words[7].Split(';');
-                    foreach (var v in vector_data)
-                    {
-                        if (String.IsNullOrEmpty(v.Trim()))
-                            continue;
-
-                        data.Add(Convert.ToDouble(v));
-                    }
-
-                    if (words.Length > 8)
-                    {
-                        vector_data = words[8].Split(';');
-                        foreach (var v in vector_data)
-                        {
-                            if (String.IsNullOrEmpty(v.Trim()))
-                                continue;
-
-                            pressure.Add(Convert.ToDouble(v));
-                        }
-                    }
-                }
-
-                // fix for the filter
-                if (coffee_weight > _MAX_AM_WEIGHT)
-                {
-                    if (flt_name != "")
-                        name = flt_name;
-                    if (flt_grind != "")
-                        grind = flt_grind;
                 }
 
                 SetupIncreasingAndFlowArrays();
@@ -129,79 +117,31 @@ namespace CoffeeLogger
                 date = DateTime.Parse(date_str);
                 date_str = date.ToString("yyyy MM dd ddd HH:mm");
             }
-
-            public override string ToString()
-            {
-                // Brewmaster format
-                /*
-                string str = ",";                       // 0
-                str += name + ",";                      // 1
-                str += date_str + ",";                  // 2
-                str += bean_weight.ToString() + ",";    // 3
-                str += grind + ",";                     // 4
-                str += ",";                             // 5
-                str += notes + ",";                     // 6
-                str += time.ToString() + ",";           // 7
-                str += ",";                             // 8
-                str += coffee_weight.ToString() + ",";  // 9
-                */
-
-                // Acaia logger format
-                string str = date_str + ",";                // 0
-                str += name + ",";                          // 1
-                str += bean_weight.ToString("0.0") + ",";   // 2
-                str += coffee_weight.ToString("0.0") + ","; // 3
-                str += grind + ",";                         // 4
-                str += time.ToString() + ",";               // 5
-                str += notes + ",";                         // 6
-
-                foreach (var d in data)
-                    str += d.ToString("0.0") + ";";         // 7
-                str += ",";                                 // closing comma
-
-                foreach (var d in pressure)
-                    str += d.ToString("0.0") + ";";         // 7
-                str += ",";                                 // closing comma
-
-                return str;
-            }
-
-            public void UpdateBrewTimeBrewM()
-            {
-                var last_different = data.Count - 1;
-                while (last_different > 1)
-                {
-                    if (data[last_different] == data[last_different - 1])
-                        last_different--;
-                    else
-                        break;
-                }
-
-                time = last_different;
-            }
-
             public void SetupIncreasingAndFlowArrays()
             {
                 List<double> tmp = new List<double>();
-                foreach (var d in data)
+                int counter = 0;
+                foreach (var d in weight)
                 {
-                    data_increasing.Add(d);
-                    flow.Add(0.0);
+                    elapsed.Add(counter);
+                    flow_weight.Add(0.0);
                     tmp.Add(0.0);
-                    if (pressure.Count < data.Count)
+                    if (pressure.Count < weight.Count)
                         pressure.Add(0.0);
+
+                    counter++;
                 }
 
-                if (data.Count < 3)  // no processing, simply copy the data
+                if (weight.Count < 3)  // no processing, simply copy the data
                     return;
 
                 // chop the possible bump in the weight graphs at the beginning - e.g. after tare
-                if (data.Count > 5)
+                if (weight.Count > 5)
                 {
                     for (int i = 5; i >= 1; i--)
                     {
-                        if (data[i] < data[i - 1])
-                            data[i - 1] = data[i];
+                        if (weight[i] < weight[i - 1])
+                            weight[i - 1] = weight[i];
                     }
                 }
 
@@ -215,59 +155,32 @@ namespace CoffeeLogger
                     }
                 }
 
-                var value = data_increasing[0];
-                for (int i = 0; i < data_increasing.Count; i++)
-                {
-                    if (data_increasing[i] < value)
-                        data_increasing[i] = value;
+                for (int i = 1; i < weight.Count; i++)
+                    tmp[i] = weight[i] - weight[i - 1];
 
+                for (int i = 1; i < weight.Count - 1; i++)  // average over 3 sec
+                    flow_weight[i] = (tmp[i] + tmp[i - 1] + tmp[i + 1]) / 3.0;
 
-                    value = data_increasing[i];
-                }
-
-
-                for (int i = 1; i < data_increasing.Count; i++)
-                    tmp[i] = data_increasing[i] - data_increasing[i - 1];
-
-                for (int i = 1; i < data_increasing.Count - 1; i++)  // average over 3 sec
-                    flow[i] = (tmp[i] + tmp[i - 1] + tmp[i + 1]) / 3.0;
-
-                flow[data_increasing.Count - 1] = flow[data_increasing.Count - 2];
+                flow_weight[weight.Count - 1] = flow_weight[weight.Count - 2];
 
 
             }
-
-            public BrewType getBrewType()
-            {
-                if (coffee_weight < _MAX_ESPRO_WEIGHT)
-                {
-                    if (good_flow_index > _BLOOM_TIME_INDEX)
-                        return BrewType.EsproBloom;
-                    else
-                        return BrewType.Espro;
-                }
-                else if (coffee_weight < _MAX_AM_WEIGHT)
-                    return BrewType.Am;
-                else
-                    return BrewType.Flt;
-            }
-
             public void SetupNoPreinfArrays()
             {
                 // copy data
-                foreach (var d in data_increasing)
+                foreach (var d in weight)
                     data_increasing_nopi.Add(d);
 
                 foreach (var d in pressure)
                     pressure_nopi.Add(d);
 
-                foreach (var d in flow)
+                foreach (var d in flow_weight)
                     flow_nopi.Add(d);
 
-                // find first point when the flow is about 1 g/s
-                for (int i = 0; i < flow.Count; i++)
+                // find first point when the flow_weight is about 1 g/s
+                for (int i = 0; i < flow_weight.Count; i++)
                 {
-                    if (flow[i] > _GOOD_FLOW_VALUE)
+                    if (flow_weight[i] > _GOOD_FLOW_VALUE)
                     {
                         good_flow_index = i;
                         break;
@@ -280,7 +193,7 @@ namespace CoffeeLogger
                 {
                     if (good_flow_index > _BLOOM_TIME_INDEX)
                     {
-                        if (flow[i] < _GOOD_FLOW_VALUE / 2) // Bloom algo - get the half-point
+                        if (flow_weight[i] < _GOOD_FLOW_VALUE / 2) // Bloom algo - get the half-point
                         {
                             tokeep_index = i;
                             break;
@@ -288,7 +201,7 @@ namespace CoffeeLogger
                     }
                     else
                     {
-                        if (flow[i] < _GOOD_FLOW_SMALL_VALUE) // all the rest algo - check against small value
+                        if (flow_weight[i] < _GOOD_FLOW_SMALL_VALUE) // all the rest algo - check against small value
                         {
                             tokeep_index = i;
                             break;
@@ -302,66 +215,6 @@ namespace CoffeeLogger
                 pressure_nopi.RemoveRange(0, tokeep_index);
                 flow_nopi.RemoveRange(0, tokeep_index);
             }
-
-            public string GetPressureString()
-            {
-                if (pressure.Count < 2)
-                    return "--";
-
-                // find the middle
-                List<double> sorted_pressure = new List<double>();
-                foreach (var p in pressure)
-                    sorted_pressure.Add(p);
-
-                sorted_pressure.Sort();
-                double median = sorted_pressure[sorted_pressure.Count / 2];
-
-                if (median == 0)
-                    return "--";
-
-                // option 1 - use above median
-
-                // option 2 - use above 1 bar
-                median = 1.0;
-
-                double max = double.MinValue;
-                double sum = 0.0;
-                int num = 0;
-
-                for (int i = 0; i < pressure.Count - 3; i++)
-                {
-                    var p = pressure[i];
-
-                    max = Math.Max(max, p);
-
-                    if (p < median)
-                        continue;
-
-                    sum += p;
-                    num++;
-                }
-
-                double value = sum / (double)num;
-
-                return value.ToString("0.0") + "/" + max.ToString("0.0");
-            }
-
-            public double GetMaxPressure()
-            {
-                if (pressure.Count < 2)
-                    return double.MinValue;
-
-                double max = double.MinValue;
-
-                foreach (var p in pressure)
-                    max = Math.Max(max, p);
-
-                if (max == 0.0)
-                    return double.MinValue;
-
-                return max;
-            }
-
             public List<double> getWeightPoints(List<int> points)
             {
                 if (points.Count != 2)
@@ -371,7 +224,7 @@ namespace CoffeeLogger
 
                 // make an array which extends after the last point
                 List<double> values = new List<double>();
-                foreach (var d in data_increasing)
+                foreach (var d in weight)
                     values.Add(d);
 
                 while (values.Count < points[1] + 10)
@@ -387,94 +240,87 @@ namespace CoffeeLogger
 
                 return output;
             }
+
+            // derived vars
+            readonly double _GOOD_FLOW_VALUE = 1;
+            readonly double _BLOOM_TIME_INDEX = 30;
+            readonly double _GOOD_FLOW_SMALL_VALUE = 0.1;
+
+            private int good_flow_index = 0;
+            public List<double> data_increasing_nopi = new List<double>();
+            public List<double> flow_nopi = new List<double>();
+            public List<double> pressure_nopi = new List<double>();
+            public int saved_plot_index = -1;  // -1 means this has not been saved in the data struct
         }
 
-        Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
-
-        private void btnImportDataBrewM_Click(object sender, EventArgs e)
+        static List<double> ReadList(string line, string key, double min_limit = 0.0)
         {
-            if (openFileDialog1.ShowDialog() != DialogResult.OK)
-                return;
+            var str = line.Remove(0, key.Length);
 
-            var fname = openFileDialog1.FileName;
-            openFileDialog1.InitialDirectory = Path.GetDirectoryName(fname);
+            str = str.Replace("{", "").Replace("}", "").Trim();
 
-            ImportData(fname);
-        }
+            List<double> res = new List<double>();
 
-        private void btnImportDataAcaiaLog_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(AcaiaLoggerFile))
-                ImportData(AcaiaLoggerFile);
-            else
-                MessageBox.Show("ERROR: AcaiaLoggerFile location is not set");
+            if (String.IsNullOrEmpty(str))
+                return res;
 
-        }
-        private void ImportData(string fname)
-        {
-            int records_added = ReadDataFromFile(fname, false);
-
-            MessageBox.Show(records_added.ToString() + " records added", this.Text);
-        }
-
-        private void FilterData()
-        {
-            List<string> sorted_keys = new List<string>();
-
-            var flt_name = txtFilterName.Text.Trim().ToLower();
-
-            foreach (var key in Data.Keys)
+            var words = str.Split(' ');
+            foreach (var w in words)
             {
-                if (!String.IsNullOrEmpty(flt_name) && Data[key].name.Contains(flt_name) == false)
-                    continue;
-
-                if (Data[key].bean_weight < 0)
-                    continue;
-
-                BrewType bt = Data[key].getBrewType();
-                if (radioEspro.Checked && bt != BrewType.Espro)
-                    continue;
-
-                if (radioAm.Checked && bt != BrewType.Am)
-                    continue;
-
-                if (radioFlt.Checked && bt != BrewType.Flt)
-                    continue;
-
-                sorted_keys.Add(key);
+                var x = Convert.ToDouble(w.Trim());
+                x = Math.Max(x, min_limit);
+                res.Add(x);
             }
 
-            sorted_keys.Sort();
-
-
-            string saved_key = "";
-            if (listData.SelectedIndex != -1)
-                saved_key = (string)listData.Items[listData.SelectedIndex];
-
-            listData.Items.Clear();
-            bool saved_key_set = false;
-            for (int i = sorted_keys.Count - 1; i >= 0; i--)
+            return res;
+        }
+        static string ReadString(string line, string key)
+        {
+            var str = line.Remove(0, key.Length);
+            return str.Replace("{", "").Replace("}", "").Trim();
+        }
+        static double ReadDouble(string line, string key)
+        {
+            return Convert.ToDouble(ReadString(line, key));
+        }
+        void btnImportData_Click(object sender, EventArgs e)  // this comes from button
+        {
+            if (!Directory.Exists(ShotsFolder))
             {
-                listData.Items.Add(sorted_keys[i]);
-                if (sorted_keys[i] == saved_key)
+                MessageBox.Show("ERROR: ShotsFolder location is not set");
+                return;
+            }
+            var old_count = Data.Count;
+
+            var files = Directory.GetFiles(ShotsFolder, "*.shot", SearchOption.TopDirectoryOnly);
+            foreach (var f in files)
+            {
+                if (Path.GetFileNameWithoutExtension(f) == "0") // skip 0.shot, this is a config file for DE1Win10
+                    continue;
+
+                var key = ReadDateFromShotFile(f);
+                if (Data.ContainsKey(key))
+                    continue;
+
+                if (key == "")
                 {
-                    listData.SelectedItem = sorted_keys[i];
-                    saved_key_set = true;
+                    MessageBox.Show("ERROR: when reading date from shot file " + f);
+                    return;
+                }
+
+                if (!ImportShotFile(f))
+                {
+                    MessageBox.Show("ERROR: when reading shot file " + f);
+                    return;
                 }
             }
-            if (!saved_key_set && listData.Items.Count != 0)
-                listData.SelectedIndex = 0;
+            FilterData();
 
-            listData.Refresh();
+            MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files");
         }
-
-        enum FileVersion { Brewmaster, AcaiaLogger }
-
-        private int ReadDataFromFile(string fname, bool from_database)
+        bool ImportShotFile(string fname)
         {
-            int records_added = 0;
-
-            FileVersion version = FileVersion.Brewmaster;
+            DataStruct d = new DataStruct();
 
             var lines = File.ReadAllLines(fname);
             foreach (var s in lines)
@@ -483,35 +329,256 @@ namespace CoffeeLogger
                 if (String.IsNullOrEmpty(line))
                     continue;
 
-                if (line.StartsWith("id,name,createdAt"))
+                if (line.StartsWith("clock "))
                 {
-                    version = FileVersion.Brewmaster;
-                    continue;
-                }
-                else if (line.StartsWith("date,beanName,beanWeight,coffeeWeight"))
-                {
-                    version = FileVersion.AcaiaLogger;
-                    continue;
-                }
+                    string clock_str = line.Replace("clock ", "").Trim();
+                    d.date = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(clock_str)).LocalDateTime;
+                    d.date_str = d.date.ToString("yyyy MM dd ddd HH:mm");
 
-                DataStruct d = new DataStruct(line, from_database ? "" : txtFltImportName.Text,
-                                                    from_database ? "" : txtFltImportGrind.Text,
-                                              version);
-
-                if (!Data.ContainsKey(d.date_str))
+                }
+                else if (line.StartsWith("espresso_elapsed {"))
                 {
-                    d.id = Data.Count;
-                    Data.Add(d.date_str, d);
-                    records_added++;
+                    d.elapsed = ReadList(line, "espresso_elapsed ");
+                }
+                else if (line.StartsWith("espresso_pressure {"))
+                {
+                    d.pressure = ReadList(line, "espresso_pressure ");
+                }
+                else if (line.StartsWith("espresso_weight {"))
+                {
+                    d.weight = ReadList(line, "espresso_weight ");
+                }
+                else if (line.StartsWith("espresso_flow {"))
+                {
+                    d.flow = ReadList(line, "espresso_flow ");
+                }
+                else if (line.StartsWith("espresso_flow_weight {"))
+                {
+                    d.flow_weight = ReadList(line, "espresso_flow_weight ");
+                }
+                else if (line.StartsWith("espresso_temperature_basket {"))
+                {
+                    d.temperature_basket = ReadList(line, "espresso_temperature_basket ");
+                }
+                else if (line.StartsWith("espresso_temperature_mix {"))
+                {
+                    d.temperature_mix = ReadList(line, "espresso_temperature_mix ");
+                }
+                else if (line.StartsWith("espresso_pressure_goal {"))
+                {
+                    d.pressure_goal = ReadList(line, "espresso_pressure_goal ");
+                }
+                else if (line.StartsWith("espresso_flow_goal {"))
+                {
+                    d.flow_goal = ReadList(line, "espresso_flow_goal ");
+                }
+                else if (line.StartsWith("espresso_temperature_goal {"))
+                {
+                    d.temperature_goal = ReadList(line, "espresso_temperature_goal ");
+                }
+                else if (line.StartsWith("drink_weight "))
+                {
+                    d.coffee_weight = ReadDouble(line, "drink_weight ");
+                }
+                else if (line.StartsWith("dsv2_bean_weight "))
+                {
+                    d.bean_weight = ReadDouble(line, "dsv2_bean_weight ");
+                }
+                else if (line.StartsWith("grinder_setting {"))
+                {
+                    d.grind = ReadString(line, "grinder_setting ");
+                }
+                else if (line.StartsWith("bean_brand {"))
+                {
+                    d.name = ReadString(line, "bean_brand ");
+                }
+                else if (line.StartsWith("espresso_notes {"))
+                {
+                    d.notes = ReadString(line, "espresso_notes ");
+                }
+                else if (line.StartsWith("profile_title {"))
+                {
+                    d.profile = ReadString(line, "profile_title ");
                 }
             }
 
-            FilterData();
+            if (d.elapsed.Count == 0)
+                return false;
 
-            return records_added;
+
+            // setup the fields which are not saved in the file
+            d.time = d.elapsed[d.elapsed.Count - 1];
+            d.id = Data.Count;
+
+
+
+            // finally add to the master list
+            Data.Add(d.date_str, d);
+
+            return true;
         }
+        string ReadDateFromShotFile(string fname)
+        {
+            var lines = File.ReadAllLines(fname);
+            foreach (var s in lines)
+            {
+                var line = s.Trim();
+                if (String.IsNullOrEmpty(line))
+                    continue;
 
-        private void btnSaveData_Click(object sender, EventArgs e)
+                if (line.StartsWith("clock "))
+                {
+                    string clock_str = line.Replace("clock ", "").Trim();
+                    DateTime dt = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(clock_str)).LocalDateTime;
+
+                    return dt.ToString("yyyy MM dd ddd HH:mm");
+                }
+            }
+
+            return "";
+        }
+        private DataStruct ReadRecord(List<string> lines)
+        {
+            DataStruct d = new DataStruct();
+
+            try
+            {
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("clock "))
+                    {
+                        d.date_str = line.Replace("clock ", "").Trim();
+                        d.date = DateTime.Parse(d.date_str);
+                    }
+                    else if (line.StartsWith("record_id "))
+                    {
+                        d.id = (int)ReadDouble(line, "record_id ");
+                    }
+                    else if (line.StartsWith("name "))
+                    {
+                        d.name = ReadString(line, "name ");
+                    }
+                    else if (line.StartsWith("bean_weight "))
+                    {
+                        d.bean_weight = ReadDouble(line, "bean_weight ");
+                    }
+                    else if (line.StartsWith("coffee_weight "))
+                    {
+                        d.coffee_weight = ReadDouble(line, "coffee_weight ");
+                    }
+                    else if (line.StartsWith("grind "))
+                    {
+                        d.grind = ReadString(line, "grind ");
+                    }
+                    else if (line.StartsWith("notes "))
+                    {
+                        d.notes = ReadString(line, "notes ");
+                    }
+                    else if (line.StartsWith("profile "))
+                    {
+                        d.profile = ReadString(line, "profile ");
+                    }
+
+                    else if (line.StartsWith("elapsed {"))
+                    {
+                        d.elapsed = ReadList(line, "elapsed {");
+                    }
+                    else if (line.StartsWith("pressure {"))
+                    {
+                        d.pressure = ReadList(line, "pressure {");
+                    }
+                    else if (line.StartsWith("weight {"))
+                    {
+                        d.weight = ReadList(line, "weight {");
+                    }
+                    else if (line.StartsWith("flow {"))
+                    {
+                        d.flow = ReadList(line, "flow {");
+                    }
+                    else if (line.StartsWith("flow_weight {"))
+                    {
+                        d.flow_weight = ReadList(line, "flow_weight {");
+                    }
+                    else if (line.StartsWith("temperature_basket {"))
+                    {
+                        d.temperature_basket = ReadList(line, "temperature_basket {");
+                    }
+                    else if (line.StartsWith("temperature_mix {"))
+                    {
+                        d.temperature_mix = ReadList(line, "temperature_mix {");
+                    }
+                    else if (line.StartsWith("pressure_goal {"))
+                    {
+                        d.pressure_goal = ReadList(line, "pressure_goal {");
+                    }
+                    else if (line.StartsWith("flow_goal {"))
+                    {
+                        d.flow_goal = ReadList(line, "flow_goal {");
+                    }
+                    else if (line.StartsWith("temperature_goal {"))
+                    {
+                        d.temperature_goal = ReadList(line, "temperature_goal {");
+                    }
+                    else
+                        return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return d;
+        }
+        private void ReadAllRecords(string fname)
+        {
+            List<string> record_lines = new List<string>();
+
+            var lines = File.ReadAllLines(fname);
+            var counter = 0;
+            foreach (var s in lines)
+            {
+                counter++;
+                var line = s.TrimStart();
+                if (String.IsNullOrEmpty(line))
+                    continue;
+
+                if (line.StartsWith("clock "))
+                {
+                    if (record_lines.Count != 0)
+                    {
+                        DataStruct d = ReadRecord(record_lines);
+                        if (d == null)
+                        {
+                            MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString());
+                            return;
+                        }
+
+                        Data.Add(d.date_str, d);
+                    }
+                    record_lines.Clear();
+                }
+
+                record_lines.Add(line);
+            }
+
+            if (record_lines.Count != 0)
+            {
+                DataStruct d = ReadRecord(record_lines);
+
+                if (d == null)
+                {
+                    MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString());
+                    return;
+                }
+
+
+                Data.Add(d.date_str, d);
+            }
+
+            FilterData();
+        }
+        private void btnSaveData_Click(object sender, EventArgs e) // TODO
         {
             List<string> sorted_keys = new List<string>();
             foreach (var key in Data.Keys)
@@ -520,17 +587,40 @@ namespace CoffeeLogger
             sorted_keys.Sort();
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("date,beanName,beanWeight,coffeeWeight,grind,time,notes,weightEverySec,pressureEverySec");  // Acaia Logger format
 
             foreach (var key in sorted_keys)
-                sb.AppendLine(Data[key].ToString());
+                Data[key].WriteRecord(sb);
 
             string data_fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".csv";
             File.WriteAllText(data_fname, sb.ToString());
 
-            data_fname = "D:\\" + ApplicationNameNoExt + ".csv";
-            File.WriteAllText(data_fname, sb.ToString());
+            //data_fname = "D:\\" + ApplicationNameNoExt + ".csv";
+            //File.WriteAllText(data_fname, sb.ToString());
         }
 
+        // OLD format ------------------
+        private void ReadOldFileFormat(string fname)
+        {
+            var lines = File.ReadAllLines(fname);
+            foreach (var s in lines)
+            {
+                var line = s.Trim();
+                if (String.IsNullOrEmpty(line))
+                    continue;
+
+                if (line.StartsWith("date,beanName,beanWeight,coffeeWeight,grind"))   // skip the header
+                    continue;
+
+                DataStruct d = new DataStruct(line);
+
+                if (!Data.ContainsKey(d.date_str))
+                {
+                    d.id = Data.Count;
+                    Data.Add(d.date_str, d);
+                }
+            }
+
+            FilterData();
+        }
     }
 }

@@ -13,76 +13,76 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using System.Drawing.Drawing2D;
 
-namespace CoffeeLogger
+namespace DE1LogView
 {
     /*
-       GraphPainter G_Orders = null;
+    GraphPainter G_Orders = null;
 
-       // in FormLoad --
-       G_Orders = new GraphPainter(splitContainer3.Panel1, this.Font);
-       G_Orders.SetAxisTitles("BTC_ETH price", "Order Volume");
+    // in FormLoad --
+    G_Orders = new GraphPainter(splitContainer3.Panel1, this.Font);
+    G_Orders.SetAxisTitles("BTC_ETH price", "Order Volume");
 
 
 
-        // paint utils
-        private void splitContainer3_Panel1_Paint(object sender, PaintEventArgs e)
-        {
-            //if(G_Orders != null)
-            //    G_Orders.Plot(e.Graphics);
-        }
-        private void splitContainer3_Panel1_MouseLeave(object sender, EventArgs e)
-        {
-            //labMktGraphPos.Text = "";
-        }
-        private void splitContainer3_Panel1_MouseMove(object sender, MouseEventArgs e)
-        {
-            //labMktGraphPos.Text = G_Orders.ToDataX(e.X).ToString("0.######") + ", " + G_Orders.ToDataY(e.Y).ToString("0.#");
-        }
+    // paint utils
+    private void splitContainer3_Panel1_Paint(object sender, PaintEventArgs e)
+    {
+    //if(G_Orders != null)
+    //    G_Orders.Plot(e.Graphics);
+    }
+    private void splitContainer3_Panel1_MouseLeave(object sender, EventArgs e)
+    {
+    //labMktGraphPos.Text = "";
+    }
+    private void splitContainer3_Panel1_MouseMove(object sender, MouseEventArgs e)
+    {
+    //labMktGraphPos.Text = G_Orders.ToDataX(e.X).ToString("0.######") + ", " + G_Orders.ToDataY(e.Y).ToString("0.#");
+    }
 
-        // Plotting/printing market data as it arrives
-        private void PlotMktData()
-        {
-            G_Orders.data.Clear();
+    // Plotting/printing market data as it arrives
+    private void PlotMktData()
+    {
+    G_Orders.data.Clear();
 
-            if(MktResultsAll.Count == 0)
-            {
-                G_Orders.SetAutoLimits();
-                return;
-            }
+    if(MktResultsAll.Count == 0)
+    {
+    G_Orders.SetAutoLimits();
+    return;
+    }
 
-            foreach (ConsolidatedOrderBookEntry entry in MktResultsAll)
-            {
-                List<double> x = new List<double>();
-                List<double> y = new List<double>();
+    foreach (ConsolidatedOrderBookEntry entry in MktResultsAll)
+    {
+    List<double> x = new List<double>();
+    List<double> y = new List<double>();
 
-                x.Add(entry.price);
-                y.Add(0.0);
-                x.Add(entry.price);
-                y.Add(entry.is_bid ? entry.volume : -entry.volume);
+    x.Add(entry.price);
+    y.Add(0.0);
+    x.Add(entry.price);
+    y.Add(entry.is_bid ? entry.volume : -entry.volume);
 
-                if (entry.exch == ExchangeEnum.KRK)
-                    G_Orders.SetData(G_Orders.data.Count, x, y, Color.Blue, 3, GraphPainter.Style.Solid);
-                else if (entry.exch == ExchangeEnum.PLN)
-                    G_Orders.SetData(G_Orders.data.Count, x, y, Color.Green, 3, GraphPainter.Style.Solid);
-            }
+    if (entry.exch == ExchangeEnum.KRK)
+    G_Orders.SetData(G_Orders.data.Count, x, y, Color.Blue, 3, GraphPainter.Style.Solid);
+    else if (entry.exch == ExchangeEnum.PLN)
+    G_Orders.SetData(G_Orders.data.Count, x, y, Color.Green, 3, GraphPainter.Style.Solid);
+    }
 
-            G_Orders.SetAutoLimits();
+    G_Orders.SetAutoLimits();
 
-            List<double> x0 = new List<double>();
-            List<double> y0 = new List<double>();
-            x0.Add(G_Orders.xmin);
-            y0.Add(0);
-            x0.Add(G_Orders.xmax);
-            y0.Add(0);
-            G_Orders.SetData(G_Orders.data.Count, x0, y0, Color.Black, 2, GraphPainter.Style.Solid);
+    List<double> x0 = new List<double>();
+    List<double> y0 = new List<double>();
+    x0.Add(G_Orders.xmin);
+    y0.Add(0);
+    x0.Add(G_Orders.xmax);
+    y0.Add(0);
+    G_Orders.SetData(G_Orders.data.Count, x0, y0, Color.Black, 2, GraphPainter.Style.Solid);
 
-        }
-     */
+    }
+    */
 
     public class GraphPainter
     {
-        public enum Style {  Solid, Dot }
         public class Data
         {
             public List<double> x = new List<double>();
@@ -90,11 +90,11 @@ namespace CoffeeLogger
 
             public Color color;
             public int size;
-            public Style style;
+            public DashStyle style;
         }
 
-        Panel panel = null;                         // panel to paint
-        Font font = null;
+        public Panel panel = null;                  // panel to paint
+        public Font font = null;
         public double xmin, xmax, ymin, ymax;       // data limits to paint
         public List<Data> data = new List<Data>();  // the data itself
 
@@ -117,8 +117,11 @@ namespace CoffeeLogger
         }
 
         // NB: set "pusition" to value >= data.Count to add data instead of updating it
-        public void SetData(int position, List<double> x, List<double> y, Color c, int s, Style st)
+        public void SetData(int position, List<double> x, List<double> y, Color c, int s, DashStyle st)
         {
+            if (x.Count() == 0 || x.Count() != y.Count())
+                return;
+
             Data g = null;
             if (position < data.Count)
                 g = data[position];
@@ -149,9 +152,9 @@ namespace CoffeeLogger
             xmax = double.MinValue;
             ymax = double.MinValue;
 
-            foreach(Data g in data)
+            foreach (Data g in data)
             {
-                foreach(double x in g.x)
+                foreach (double x in g.x)
                 {
                     xmin = Math.Min(xmin, x);
                     xmax = Math.Max(xmax, x);
@@ -162,9 +165,9 @@ namespace CoffeeLogger
                     ymax = Math.Max(ymax, y);
                 }
             }
-            if(xmin == xmax)
+            if (xmin == xmax)
             {
-                if(xmin == 0.0)
+                if (xmin == 0.0)
                 {
                     xmin -= 0.1;
                     xmax += 0.1;
@@ -203,7 +206,7 @@ namespace CoffeeLogger
 
             foreach (Data g in data)
             {
-                for(int i = 0; i < g.x.Count; i++)
+                for (int i = 0; i < g.x.Count; i++)
                 {
                     if (g.x[i] > xmax || g.x[i] < xmin)
                         continue;
@@ -287,19 +290,24 @@ namespace CoffeeLogger
             g.Clear(Color.White);
             CalcScales();
 
-            if (g_size_x < 1 || g_size_y < 1 || data.Count == 0)
+            if (xmax <= xmin || ymax <= ymin)
                 return;
 
             PlotXAxis(g);
             PlotYAxis(g);
 
+            if (g_size_x < 1 || g_size_y < 1 || data.Count == 0)
+                return;
+
             foreach (Data d in data)
                 PlotSeries(g, d);
+
+            PlotXAxisLineOnly(g); // to cover 0 target lines
         }
 
         double GetNiceTickDistance(double range)
         {
-            double power10_guess = Math.Pow(10, (int) Math.Log10(range / 5));
+            double power10_guess = Math.Pow(10, (int)Math.Log10(range / 5));
 
             int num_ticks = (int)(range / power10_guess);
             if (num_ticks > 15)
@@ -314,10 +322,12 @@ namespace CoffeeLogger
         public void PlotXAxis(Graphics g)
         {
             Pen p = new Pen(Color.Black, 2);
-            g.DrawLine(p, border_x1,            border_y2 + g_size_y,
-                          border_x1 + g_size_x, border_y2 + g_size_y);
-            
-            if(x_title != "")
+            Pen p_grid = new Pen(Color.Silver, 1); p_grid.DashStyle = DashStyle.Dash;
+
+            g.DrawLine(p, border_x1, border_y2 + g_size_y,
+            border_x1 + g_size_x, border_y2 + g_size_y);
+
+            if (x_title != "")
             {
                 Brush b = new SolidBrush(Color.Black);
                 g.DrawString(x_title, font, b, (float)(border_x1 + g_size_x / 2.0), (float)(panel.Height - border_y1 / 2.0));
@@ -326,24 +336,37 @@ namespace CoffeeLogger
             // plot ticks
             double tick = GetNiceTickDistance(xmax - xmin);
             double first_tick = ((int)(xmin / tick)) * tick;
-            for(double t = first_tick; t <= xmax; t+= tick)
+            for (double t = first_tick; t <= xmax; t += tick)
             {
                 if (t < xmin)
                     continue;
 
                 g.DrawLine(p, ToGraphX(t), border_y2 + g_size_y,
-                              ToGraphX(t), border_y2 + g_size_y+5);
+                ToGraphX(t), border_y2 + g_size_y + 5);
 
                 Brush b = new SolidBrush(Color.Black);
                 SizeF sf = g.MeasureString(t.ToString(), font);
-                g.DrawString(t.ToString(), font, b, (float)(ToGraphX(t) - sf.Width/2), (float)(border_y2 + g_size_y + 7));
+                g.DrawString(t.ToString(), font, b, (float)(ToGraphX(t) - sf.Width / 2), (float)(border_y2 + g_size_y + 7));
+
+
+                g.DrawLine(p_grid, ToGraphX(t), border_y2,
+                ToGraphX(t), border_y2 + g_size_y);
             }
         }
+
+        public void PlotXAxisLineOnly(Graphics g)
+        {
+            Pen p = new Pen(Color.Black, 2);
+            g.DrawLine(p, border_x1, border_y2 + g_size_y,
+            border_x1 + g_size_x, border_y2 + g_size_y);
+        }
+
         public void PlotYAxis(Graphics g)
         {
             Pen p = new Pen(Color.Black, 2);
+            Pen p_grid = new Pen(Color.Silver, 1); p_grid.DashStyle = DashStyle.Dash;
             g.DrawLine(p, border_x1, border_y2,
-                          border_x1, border_y2 + g_size_y);
+            border_x1, border_y2 + g_size_y);
 
             if (y_title != "")
             {
@@ -360,39 +383,29 @@ namespace CoffeeLogger
                     continue;
 
                 g.DrawLine(p, border_x1 - 5, ToGraphY(t),
-                              border_x1    , ToGraphY(t));
+                border_x1, ToGraphY(t));
 
                 Brush b = new SolidBrush(Color.Black);
                 SizeF sf = g.MeasureString(t.ToString(), font);
-                g.DrawString(t.ToString(), font, b, (float)(border_x1 - 8 - sf.Width), (float)(ToGraphY(t) - sf.Height/2));
+                g.DrawString(t.ToString(), font, b, (float)(border_x1 - 8 - sf.Width), (float)(ToGraphY(t) - sf.Height / 2));
+
+                g.DrawLine(p_grid, border_x1, ToGraphY(t),
+                border_x1 + g_size_x, ToGraphY(t));
             }
         }
         public void PlotSeries(Graphics g, Data d)
         {
             Pen p = new Pen(d.color, d.size);
-
-            if (d.style == Style.Solid)
+            p.DashStyle = d.style;
+            List<Point> points = new List<Point>();
+            for (int i = 0; i < d.x.Count; i++)
             {
-                List<Point> points = new List<Point>();
-                for(int i = 0; i < d.x.Count; i++)
-                {
-                    if (d.x[i] < xmin || d.x[i] > xmax)
-                        continue;
-                    points.Add(new Point(ToGraphX(d.x[i]), ToGraphY(d.y[i])));
-                }
-
-                g.DrawLines(p, points.ToArray());
+                if (d.x[i] < xmin || d.x[i] > xmax)
+                    continue;
+                points.Add(new Point(ToGraphX(d.x[i]), ToGraphY(d.y[i])));
             }
-            else
-            {
-                for (int i = 0; i < d.x.Count; i++)
-                {
-                    if (d.x[i] < xmin || d.x[i] > xmax)
-                        continue;
 
-                    g.DrawEllipse(p, ToGraphX(d.x[i]) - d.size/2, ToGraphY(d.y[i]) - d.size/2, d.size, d.size);
-                }
-            }
+            g.DrawLines(p, points.ToArray());
         }
     }
 }

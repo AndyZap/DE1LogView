@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CoffeeLogger
+namespace DE1LogView
 {
     public partial class Form1 : Form
     {
@@ -48,16 +48,10 @@ namespace CoffeeLogger
                     else if (LoadLineContainsKey(s, "this.Width")) { this.Width = LoadInt(s, "this.Width"); }
                     else if (LoadLineContainsKey(s, "this.WindowState")) { this.WindowState = (FormWindowState)LoadInt(s, "this.WindowState"); }
 
-                    else if (LoadLineContainsKey(s, "InitialDirectory")) { openFileDialog1.InitialDirectory = LoadString(s, "InitialDirectory"); }
-                    else if (LoadLineContainsKey(s, "txtFltImportName")) { txtFltImportName.Text = LoadString(s, "txtFltImportName"); }
-                    else if (LoadLineContainsKey(s, "txtFltImportGrind")) { txtFltImportGrind.Text = LoadString(s, "txtFltImportGrind"); }
-
                     else if (LoadLineContainsKey(s, "splitContainer1")) { splitContainer1.SplitterDistance = LoadInt(s, "splitContainer1"); }
                     else if (LoadLineContainsKey(s, "splitContainer2")) { splitContainer2.SplitterDistance = LoadInt(s, "splitContainer2"); }
 
-                    else if (LoadLineContainsKey(s, "AcaiaLoggerFile")) { AcaiaLoggerFile = LoadString(s, "AcaiaLoggerFile"); }
-
-                    else if (LoadLineContainsKey(s, "chkNoPreinf")) { chkNoPreinf.Checked = LoadString(s, "chkNoPreinf") == "TRUE"; }
+                    else if (LoadLineContainsKey(s, "ShotsFolder")) { ShotsFolder = LoadString(s, "ShotsFolder"); }
                 }
             }
 
@@ -71,15 +65,9 @@ namespace CoffeeLogger
             sb.AppendLine("this.Width               " + (this.Width < 200 ? "200" : this.Width.ToString()));
             sb.AppendLine("this.WindowState         " + ((int)this.WindowState).ToString());
 
-            sb.AppendLine("InitialDirectory         " + openFileDialog1.InitialDirectory);
-
-            sb.AppendLine("txtFltImportName         " + txtFltImportName.Text);
-            sb.AppendLine("txtFltImportGrind        " + txtFltImportGrind.Text);
             sb.AppendLine("splitContainer1          " + splitContainer1.SplitterDistance.ToString());
             sb.AppendLine("splitContainer2          " + splitContainer2.SplitterDistance.ToString());
-            sb.AppendLine("AcaiaLoggerFile          " + AcaiaLoggerFile);
-
-            sb.AppendLine("chkNoPreinf              " + (chkNoPreinf.Checked ? "TRUE" : "FALSE"));
+            sb.AppendLine("ShotsFolder              " + ShotsFolder);
 
             string fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".dat";
             File.WriteAllText(fname, sb.ToString());
@@ -210,29 +198,29 @@ namespace CoffeeLogger
                 if (string.IsNullOrEmpty(line))
                     continue;
 
-                if (   line.StartsWith("Frame")
-                    || line.StartsWith("Bluetooth")
-                    || line.StartsWith("Length: ")
-                    || line.StartsWith("Attribute")
-                    || line.StartsWith("[Handle:")
-                    || line.StartsWith("[Service")
-                    || line.StartsWith("[Request")
-                    || line.StartsWith("[Response")
-                    || line.StartsWith("[UUID: Client Characteristic")
-                    || line.StartsWith("[UUID: GATT")
-                    || line.StartsWith("[UUID: Generic")
-                    || line.StartsWith("[UUID: Peripheral")
-                    || line.StartsWith("[UUID: Service")
-                    || line.StartsWith("Starting")
-                    || line.StartsWith("Ending")
-                    || line.StartsWith("UUID")
-                    || line.StartsWith("Request")
-                    || line.StartsWith("Handle")
-                    || line.StartsWith("Error")
-                    || line.StartsWith("Information")
-                    || line.StartsWith("Characteristic")
-                    
-                    )
+                if (line.StartsWith("Frame")
+                || line.StartsWith("Bluetooth")
+                || line.StartsWith("Length: ")
+                || line.StartsWith("Attribute")
+                || line.StartsWith("[Handle:")
+                || line.StartsWith("[Service")
+                || line.StartsWith("[Request")
+                || line.StartsWith("[Response")
+                || line.StartsWith("[UUID: Client Characteristic")
+                || line.StartsWith("[UUID: GATT")
+                || line.StartsWith("[UUID: Generic")
+                || line.StartsWith("[UUID: Peripheral")
+                || line.StartsWith("[UUID: Service")
+                || line.StartsWith("Starting")
+                || line.StartsWith("Ending")
+                || line.StartsWith("UUID")
+                || line.StartsWith("Request")
+                || line.StartsWith("Handle")
+                || line.StartsWith("Error")
+                || line.StartsWith("Information")
+                || line.StartsWith("Characteristic")
+
+                )
                     continue;
 
                 if (line.StartsWith("0000") || line.StartsWith("0010"))
@@ -247,7 +235,7 @@ namespace CoffeeLogger
 
                     read_header = true;
                 }
-                else if(read_header)
+                else if (read_header)
                 {
                     var words = line.Trim().Split(' ');
                     frame = words[0].PadLeft(10);
@@ -256,19 +244,19 @@ namespace CoffeeLogger
                 }
                 else if (line.StartsWith("Opcode:"))
                 {
-                    if      (line == "Opcode: Handle Value Notification (0x1b)")       opcode = " N_";
+                    if (line == "Opcode: Handle Value Notification (0x1b)") opcode = " N_";
 
-                    else if (line.StartsWith("Opcode: Read By Group Type Request"))    opcode = "";
-                    else if (line.StartsWith("Opcode: Read By Group Type Response"))   opcode = "";
-                    else if (line.StartsWith("Opcode: Read By Type Request"))          opcode = "";
-                    else if (line.StartsWith("Opcode: Read By Type Response"))         opcode = "";
-                    else if (line.StartsWith("Opcode: Error Response"))                opcode = "";
-                    else if (line.StartsWith("Opcode: Find Information Request"))      opcode = "";
-                    else if (line.StartsWith("Opcode: Find Information Response"))     opcode = "";
-                    else if (line.StartsWith("Opcode: Write Request (0x12)"))          opcode = " W_";
-                    else if (line.StartsWith("Opcode: Write Response (0x13)"))         opcode = "";
-                    else if (line.StartsWith("Opcode: Read Request (0x0a)"))           opcode = "";
-                    else if (line.StartsWith("Opcode: Read Response (0x0b)"))          opcode = " R_";
+                    else if (line.StartsWith("Opcode: Read By Group Type Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Group Type Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Type Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Type Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Error Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Find Information Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Find Information Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Write Request (0x12)")) opcode = " W_";
+                    else if (line.StartsWith("Opcode: Write Response (0x13)")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read Request (0x0a)")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read Response (0x0b)")) opcode = " R_";
 
 
                     else { MessageBox.Show("Do not know line: " + line + " " + counter.ToString()); break; }
@@ -280,14 +268,14 @@ namespace CoffeeLogger
                 else if (line.StartsWith("[Characteristic UUID: Unknown"))
                 {
                     charact = line.Replace("[Characteristic UUID: Unknown", "").Replace("[", "").Replace("]", "")
-                        .Replace(")", "").Replace("(", "").Replace("0x", "")
-                        .Trim().ToUpper();
+                    .Replace(")", "").Replace("(", "").Replace("0x", "")
+                    .Trim().ToUpper();
                 }
                 else if (line.StartsWith("[UUID: Unknown"))
                 {
                     charact = line.Replace("[UUID: Unknown", "").Replace("[", "").Replace("]", "")
-                        .Replace(")", "").Replace("(", "").Replace("0x", "")
-                        .Trim().ToUpper();
+                    .Replace(")", "").Replace("(", "").Replace("0x", "")
+                    .Trim().ToUpper();
                 }
                 else
                 {
