@@ -325,7 +325,7 @@ namespace DE1LogView
             var lines = File.ReadAllLines(fname);
             foreach (var s in lines)
             {
-                var line = s.Trim();
+                var line = s.Trim().Replace("  ", " ").Replace("  ", " ").Replace("  ", " "); // trim and remove double spaces
                 if (String.IsNullOrEmpty(line))
                     continue;
 
