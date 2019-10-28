@@ -14,14 +14,15 @@ namespace DE1LogView
 
         class DataStruct
         {
-            public int id = 0;
-            public string name = "";
             public string date_str = "";
             public DateTime date = DateTime.MinValue;
+            public bool enabled = true;
+            public int id = 0;
+            public string name = "";
             public double bean_weight = 0;
             public double coffee_weight = 0;
             public string grind = "";
-            public double time = 0;
+            public double shot_time = 0;
             public string notes = "";
             public string profile = "";
 
@@ -41,11 +42,13 @@ namespace DE1LogView
             public void WriteRecord(StringBuilder sb)
             {
                 sb.AppendLine("clock " + date_str);
+                sb.AppendLine("enabled " + (enabled ? "1" : "0"));
                 sb.AppendLine("record_id " + id.ToString());
                 sb.AppendLine("name " + name);
                 sb.AppendLine("bean_weight " + bean_weight.ToString());
                 sb.AppendLine("coffee_weight " + coffee_weight.ToString());
                 sb.AppendLine("grind " + grind);
+                sb.AppendLine("shot_time " + shot_time.ToString());
                 sb.AppendLine("notes " + notes);
                 sb.AppendLine("profile " + profile);
 
@@ -86,7 +89,7 @@ namespace DE1LogView
                 bean_weight = Convert.ToDouble(words[2]);
                 coffee_weight = Convert.ToDouble(words[3]);
                 grind = words[4];
-                time = Convert.ToDouble(words[5]);
+                shot_time = Convert.ToDouble(words[5]);
                 notes = words[6].Trim();
 
                 var vector_data = words[7].Split(';');
@@ -116,6 +119,9 @@ namespace DE1LogView
 
                 date = DateTime.Parse(date_str);
                 date_str = date.ToString("yyyy MM dd ddd HH:mm");
+
+                if (bean_weight < 0)
+                    enabled = false;
             }
             public void SetupIncreasingAndFlowArrays()
             {
@@ -407,10 +413,11 @@ namespace DE1LogView
 
 
             // setup the fields which are not saved in the file
-            d.time = d.elapsed[d.elapsed.Count - 1];
+            d.shot_time = d.elapsed[d.elapsed.Count - 1];
             d.id = Data.Count;
 
-
+            if (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0)
+                d.enabled = false;
 
             // finally add to the master list
             Data.Add(d.date_str, d);
@@ -450,6 +457,10 @@ namespace DE1LogView
                         d.date_str = line.Replace("clock ", "").Trim();
                         d.date = DateTime.Parse(d.date_str);
                     }
+                    else if (line.StartsWith("enabled "))
+                    {
+                        d.enabled = 1 == (int)ReadDouble(line, "enabled ");
+                    }
                     else if (line.StartsWith("record_id "))
                     {
                         d.id = (int)ReadDouble(line, "record_id ");
@@ -469,6 +480,10 @@ namespace DE1LogView
                     else if (line.StartsWith("grind "))
                     {
                         d.grind = ReadString(line, "grind ");
+                    }
+                    else if (line.StartsWith("shot_time "))
+                    {
+                        d.shot_time = ReadDouble(line, "shot_time ");
                     }
                     else if (line.StartsWith("notes "))
                     {

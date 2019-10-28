@@ -284,7 +284,7 @@ namespace DE1LogView
                 }
             }
             File.WriteAllText(fname.Replace(".txt", "_out.txt"), sb.ToString());
-            MessageBox.Show("OK");
+            MessageBox.Show("Converted " + fname);
         }
     }
 }

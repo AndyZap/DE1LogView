@@ -11,18 +11,17 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.3";
+        string Revision = "DE1 Log View v1.4";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
         // to draw GBR bars in listData_DrawItem
         readonly int _BP1 = 20;
         readonly int _BP2 = 30;
-        readonly double _REF_BEAN = 18.0;
 
         // these are used to color-code values, in listData_DrawItem only
         readonly double _MIN_R = 1.5;
-        readonly double _RANGE_R = 1.2;
+        readonly double _RANGE_R = 1.9;
 
         GraphPainter GraphTop = null;
         GraphPainter GraphBot = null;
@@ -114,8 +113,16 @@ namespace DE1LogView
 
         private void PlotDataRec(GraphPainter gp, DataStruct ds)
         {
-            labelTopL.Text = ds.name + "  " + ds.profile;
-            labelTopR.Text = ds.coffee_weight.ToString() + "g";
+            if (gp == GraphBot)
+            {
+                labelBotL.Text = ds.name + "  " + ds.profile;
+                labelBotR.Text = ds.coffee_weight.ToString() + "g";
+            }
+            else
+            {
+                labelTopL.Text = ds.name + "  " + ds.profile;
+                labelTopR.Text = ds.coffee_weight.ToString() + "g";
+            }
 
             gp.SetAxisTitles("", "");
 
@@ -133,7 +140,6 @@ namespace DE1LogView
 
             gp.panel.Refresh();
         }
-
 
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
@@ -192,11 +198,8 @@ namespace DE1LogView
 
             e.Graphics.DrawString(ddd, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labBrewType.Left; myrec.Width = labBrewType.Width;
-            //e.Graphics.DrawString(d.getBrewType().ToString().Substring(0, 1), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
-            e.Graphics.DrawString((d.bean_weight - _REF_BEAN).ToString("0.0").PadLeft(4), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.bean_weight.ToString("0.0").PadLeft(4), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labCoffeeWeight.Left; myrec.Width = labCoffeeWeight.Width;
             e.Graphics.DrawString(d.coffee_weight.ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -216,7 +219,7 @@ namespace DE1LogView
             e.Graphics.DrawString(PrintGBR ? (wp[1] * 100).ToString("0") : d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labTime.Left; myrec.Width = labTime.Width;
-            e.Graphics.DrawString(PrintGBR ? (wp[2] * 100).ToString("0") : d.time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(PrintGBR ? (wp[2] * 100).ToString("0") : d.shot_time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
 
 
@@ -227,7 +230,7 @@ namespace DE1LogView
             if (listData.GetSelected(e.Index))
                 e.Graphics.FillRectangle(Brushes.Blue, myrec);
             else
-                e.Graphics.FillRectangle(GetBrushColor(d.saved_plot_index), myrec);
+                e.Graphics.FillRectangle(key == SelectedPlots ? Brushes.Red : Brushes.White, myrec);
 
             // plot weight points - LAST! - as we change myrec size
 
@@ -250,36 +253,6 @@ namespace DE1LogView
             myrec.Y = original_y + (original_height - myrec.Height);
             e.Graphics.FillRectangle(Brushes.Red, myrec);
         }
-
-        private bool CanAddLine()
-        {
-            return SelectedPlots.Count < 7;
-        }
-        private Brush GetBrushColor(int index)
-        {
-            if (index == -1) return Brushes.White;
-            else if (index == 0) return Brushes.Red;
-            else if (index == 1) return Brushes.Green;
-            else if (index == 2) return Brushes.Fuchsia;
-            else if (index == 3) return Brushes.Black;
-            else if (index == 4) return Brushes.Lime;
-            else if (index == 5) return Brushes.Chocolate;
-            else if (index == 6) return Brushes.Gold;
-            else return Brushes.White;
-        }
-        private Color GetPenColor(int index)
-        {
-            if (index == -1) return Color.White;
-            else if (index == 0) return Color.Red;
-            else if (index == 1) return Color.Green;
-            else if (index == 2) return Color.Fuchsia;
-            else if (index == 3) return Color.Black;
-            else if (index == 4) return Color.Lime;
-            else if (index == 5) return Color.Chocolate;
-            else if (index == 6) return Color.Gold;
-            else return Color.White;
-        }
-
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
             if (GraphTop != null)
@@ -307,7 +280,7 @@ namespace DE1LogView
                 if (!String.IsNullOrEmpty(flt_name) && Data[key].name.Contains(flt_name) == false)
                     continue;
 
-                if (Data[key].bean_weight < 0)
+                if (!Data[key].enabled)
                     continue;
 
                 sorted_keys.Add(key);
@@ -349,14 +322,12 @@ namespace DE1LogView
             - panel4.Height - panel5.Height - 5;
         }
 
-        List<string> SelectedPlots = new List<string>();
+        string SelectedPlots = "";
 
         private void btnAddPlot_Click(object sender, EventArgs e)
         {
-            if (listData.SelectedIndex == -1)
-                return;
-
-            AddPlot(listData.SelectedIndex);
+            if (listData.SelectedIndex != -1)
+                AddPlot(listData.SelectedIndex);
         }
 
         private void AddPlot(int index)
@@ -366,31 +337,12 @@ namespace DE1LogView
             if (!Data.ContainsKey(key))
                 return;
 
-            foreach (string s in SelectedPlots)  // already selected
-            {
-                if (s == key)
-                    return;
-            }
-
-            if (!CanAddLine())
-            {
-                MessageBox.Show("Cannot add more plots");
+            if (SelectedPlots == key)
                 return;
-            }
 
-            Data[key].saved_plot_index = SelectedPlots.Count;
-            SelectedPlots.Add(key);
+            SelectedPlots = key;
 
-            listData.Focus();
-            listData_SelectedIndexChanged(null, EventArgs.Empty);
-        }
-
-        private void btnDelPlots_Click(object sender, EventArgs e)
-        {
-            foreach (var key in Data.Keys)
-                Data[key].saved_plot_index = -1;
-
-            SelectedPlots.Clear();
+            PlotDataRec(GraphBot, Data[key]);
 
             listData.Focus();
             listData_SelectedIndexChanged(null, EventArgs.Empty);
@@ -455,7 +407,7 @@ namespace DE1LogView
             sb.Append(t + ": ");
             sb.Append(d.bean_weight.ToString() + " -> ");
             sb.Append(d.coffee_weight.ToString("0.0") + " in ");
-            sb.Append(d.time.ToString() + " sec, ratio ");
+            sb.Append(d.shot_time.ToString() + " sec, ratio ");
             sb.Append((d.coffee_weight / d.bean_weight).ToString("0.00") + " grind ");
             sb.Append(d.grind + " press ");
 
@@ -506,7 +458,7 @@ namespace DE1LogView
             if (!Data.ContainsKey(key))
                 return;
 
-            Data[key].bean_weight *= -1;
+            Data[key].enabled = false;
 
             FilterData();
         }
@@ -515,6 +467,12 @@ namespace DE1LogView
         {
             listData.Focus();
             listData_SelectedIndexChanged(null, EventArgs.Empty);
+        }
+
+        private void BtnConvertWireshark_Click(object sender, EventArgs e)
+        {
+            var fname = @"D:\platform-tools\__data\7_de1_1\ws_output5.txt";
+            ConvertWireshark(fname);
         }
     }
 }
