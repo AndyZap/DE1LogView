@@ -9,6 +9,8 @@ namespace DE1LogView
     public partial class Form1 : Form
     {
         string ShotsFolder = "";
+        string ProfilesFolder = "";
+        string DataFolder = "";
 
         Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
 
@@ -606,11 +608,8 @@ namespace DE1LogView
             foreach (var key in sorted_keys)
                 Data[key].WriteRecord(sb);
 
-            string data_fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".csv";
+            string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
             File.WriteAllText(data_fname, sb.ToString());
-
-            //data_fname = "D:\\" + ApplicationNameNoExt + ".csv";
-            //File.WriteAllText(data_fname, sb.ToString());
         }
 
         // OLD format ------------------

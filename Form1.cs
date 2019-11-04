@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.4";
+        string Revision = "DE1 Log View v1.5";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -53,8 +53,8 @@ namespace DE1LogView
             LoadSettings();
 
 
-            string data_fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".csv";
-            string old_data_fname = ApplicationDirectory + "\\CoffeeLogger.csv";
+            string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
+            string old_data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\CoffeeLogger.csv";
             if ((File.Exists(data_fname) == false) && (File.Exists(old_data_fname) == true))
                 ReadOldFileFormat(old_data_fname);
             else if (File.Exists(data_fname))
@@ -233,6 +233,7 @@ namespace DE1LogView
                 e.Graphics.FillRectangle(key == SelectedPlots ? Brushes.Red : Brushes.White, myrec);
 
             // plot weight points - LAST! - as we change myrec size
+            /*
 
             myrec.X = labGBR.Left - 5; myrec.Width = labGBR.Width / 3;
 
@@ -252,6 +253,7 @@ namespace DE1LogView
             myrec.Height = (int)(original_height * wp[2]);
             myrec.Y = original_y + (original_height - myrec.Height);
             e.Graphics.FillRectangle(Brushes.Red, myrec);
+            */
         }
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -358,7 +360,10 @@ namespace DE1LogView
                 if (e.KeyValue == 80)  // Ctrl P
                     CopyPressure();
             }
-
+            else if(e.KeyValue == 112) // F1
+            {
+                PrintProfileInfo();
+            }
             if (e.KeyCode == Keys.Menu)
             {
                 labRatio.Text = "G";
