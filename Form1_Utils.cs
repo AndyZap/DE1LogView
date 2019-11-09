@@ -48,6 +48,11 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "this.Width")) { this.Width = LoadInt(s, "this.Width"); }
                     else if (LoadLineContainsKey(s, "this.WindowState")) { this.WindowState = (FormWindowState)LoadInt(s, "this.WindowState"); }
 
+                    else if(LoadLineContainsKey(s,  "FormBigPlot.Top")) { FormBigPlot.Top = LoadInt(s, "FormBigPlot.Top"); }
+                    else if (LoadLineContainsKey(s, "FormBigPlot.Left")) { FormBigPlot.Left = LoadInt(s, "FormBigPlot.Left"); }
+                    else if (LoadLineContainsKey(s, "FormBigPlot.Height")) { FormBigPlot.Height = LoadInt(s, "FormBigPlot.Height"); }
+                    else if (LoadLineContainsKey(s, "FormBigPlot.Width")) { FormBigPlot.Width = LoadInt(s, "FormBigPlot.Width"); }
+
                     else if (LoadLineContainsKey(s, "splitContainer1")) { splitContainer1.SplitterDistance = LoadInt(s, "splitContainer1"); }
                     else if (LoadLineContainsKey(s, "splitContainer2")) { splitContainer2.SplitterDistance = LoadInt(s, "splitContainer2"); }
 
@@ -66,6 +71,11 @@ namespace DE1LogView
             sb.AppendLine("this.Height              " + (this.Height < 200 ? "200" : this.Height.ToString()));
             sb.AppendLine("this.Width               " + (this.Width < 200 ? "200" : this.Width.ToString()));
             sb.AppendLine("this.WindowState         " + ((int)this.WindowState).ToString());
+
+            sb.AppendLine("FormBigPlot.Top                 " + (FormBigPlot.Top < 0 ? "0" : FormBigPlot.Top.ToString()));
+            sb.AppendLine("FormBigPlot.Left                " + (FormBigPlot.Left < 0 ? "0" : FormBigPlot.Left.ToString()));
+            sb.AppendLine("FormBigPlot.Height              " + (FormBigPlot.Height < 200 ? "200" : FormBigPlot.Height.ToString()));
+            sb.AppendLine("FormBigPlot.Width               " + (FormBigPlot.Width < 200 ? "200" : FormBigPlot.Width.ToString()));
 
             sb.AppendLine("splitContainer1          " + splitContainer1.SplitterDistance.ToString());
             sb.AppendLine("splitContainer2          " + splitContainer2.SplitterDistance.ToString());

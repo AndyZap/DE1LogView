@@ -12,9 +12,9 @@ namespace DE1LogView
         string ProfilesFolder = "";
         string DataFolder = "";
 
-        Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
+        public Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
 
-        class DataStruct
+        public class DataStruct
         {
             public string date_str = "";
             public DateTime date = DateTime.MinValue;

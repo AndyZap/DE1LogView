@@ -26,6 +26,8 @@ namespace DE1LogView
         GraphPainter GraphTop = null;
         GraphPainter GraphBot = null;
 
+        FormBigPlot FormBigPlot = new FormBigPlot();
+
         List<int> WeightPoints = new List<int>();
 
         public Form1()
@@ -43,6 +45,8 @@ namespace DE1LogView
         private void Form1_Load(object sender, EventArgs e)
         {
             this.Text = Revision;
+
+            FormBigPlot.parent = this;
 
             GraphTop = new GraphPainter(splitContainer2.Panel1, this.Font);
             GraphBot = new GraphPainter(splitContainer2.Panel2, this.Font);
@@ -111,7 +115,7 @@ namespace DE1LogView
             */
         }
 
-        private void PlotDataRec(GraphPainter gp, DataStruct ds)
+        public void PlotDataRec(GraphPainter gp, DataStruct ds)
         {
             if (gp == GraphBot)
             {
@@ -324,7 +328,7 @@ namespace DE1LogView
             - panel4.Height - panel5.Height - 5;
         }
 
-        string SelectedPlots = "";
+        public string SelectedPlots = "";
 
         private void btnAddPlot_Click(object sender, EventArgs e)
         {
@@ -360,7 +364,14 @@ namespace DE1LogView
                 if (e.KeyValue == 80)  // Ctrl P
                     CopyPressure();
             }
-            else if(e.KeyValue == 112) // F1
+            else if (e.KeyValue == 112) // F1
+            {
+                if (FormBigPlot == null)
+                    FormBigPlot = new FormBigPlot();
+
+                FormBigPlot.Show();
+            }
+            else if(e.KeyValue == 123) // F12
             {
                 PrintProfileInfo();
             }
