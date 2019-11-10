@@ -88,8 +88,6 @@ namespace DE1LogView
         }
 
         // Heatmap -------------------------------------------------
-
-        List<HeatmapEntry> HeatMapP = new List<HeatmapEntry>();
         List<HeatmapEntry> HeatMapR = new List<HeatmapEntry>();
 
         class HeatmapEntry
@@ -846,6 +844,20 @@ namespace DE1LogView
 
                 frame.bytes = EncodeDe1ShotFrame(frame);
         }
+        private string GetProfileInfo(string fname)
+        {
+            var lines = File.ReadAllLines(fname);
+            De1ShotHeaderClass header_my = new De1ShotHeaderClass();
+            List<De1ShotFrameClass> frames_my = new List<De1ShotFrameClass>();
+            if (!ShotTclParser(lines, header_my, frames_my))
+                return (Path.GetFileNameWithoutExtension(fname) + ": ShotTclParser failed");
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var fr in frames_my)
+                sb.AppendLine(fr.ToString());
+
+            return sb.ToString();
+        }
         private void PrintProfileInfo()
         {
             if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
@@ -865,20 +877,7 @@ namespace DE1LogView
                 return;
             }
 
-            var lines = File.ReadAllLines(fname);
-            De1ShotHeaderClass header_my = new De1ShotHeaderClass();
-            List<De1ShotFrameClass> frames_my = new List<De1ShotFrameClass>();
-            if (!ShotTclParser(lines, header_my, frames_my))
-            {
-                MessageBox.Show(profile_name + ": ShotTclParser failed");
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            foreach (var fr in frames_my)
-                sb.AppendLine(fr.ToString());
-
-            MessageBox.Show(sb.ToString());
+            MessageBox.Show(GetProfileInfo(fname));
         }
     }
 }

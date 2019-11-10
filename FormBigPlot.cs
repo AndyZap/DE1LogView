@@ -41,7 +41,7 @@ namespace DE1LogView
 
         private void FormBigPlot_Shown(object sender, EventArgs e)
         {
-            parent.PlotDataRec(Graph, parent.Data[parent.SelectedPlots]);
+            //parent.PlotDataRec(Graph, parent.Data[parent.SelectedPlots]);
         }
     }
 }

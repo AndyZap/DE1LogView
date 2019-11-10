@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.5";
+        string Revision = "DE1 Log View v1.6";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -38,7 +38,6 @@ namespace DE1LogView
             WeightPoints.Add(_BP1);
             WeightPoints.Add(_BP2);
 
-            HeatMapP = getHeatmap(1);
             HeatMapR = getHeatmap(0);
         }
 
@@ -198,8 +197,6 @@ namespace DE1LogView
                     ddd += " " + d.date.ToString("HH:mm");
             }
 
-            var wp = d.getWeightPoints(WeightPoints);
-
             e.Graphics.DrawString(ddd, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
@@ -211,21 +208,19 @@ namespace DE1LogView
             myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
 
             var ratio = (d.coffee_weight / d.bean_weight);
-            if (!PrintGBR)
-            {
                 var c = getHeatmapColor((ratio - _MIN_R) / _RANGE_R, HeatMapR);
                 e.Graphics.FillRectangle(c, myrec);
-            }
 
-            e.Graphics.DrawString(PrintGBR ? (wp[0] * 100).ToString("0") : ratio.ToString("0.00"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(ratio.ToString("0.00"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
-            e.Graphics.DrawString(PrintGBR ? (wp[1] * 100).ToString("0") : d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labTime.Left; myrec.Width = labTime.Width;
-            e.Graphics.DrawString(PrintGBR ? (wp[2] * 100).ToString("0") : d.shot_time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.shot_time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-
+            myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
+            e.Graphics.DrawString(d.profile, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.Y -= 5; // adjust back
 
@@ -235,29 +230,6 @@ namespace DE1LogView
                 e.Graphics.FillRectangle(Brushes.Blue, myrec);
             else
                 e.Graphics.FillRectangle(key == SelectedPlots ? Brushes.Red : Brushes.White, myrec);
-
-            // plot weight points - LAST! - as we change myrec size
-            /*
-
-            myrec.X = labGBR.Left - 5; myrec.Width = labGBR.Width / 3;
-
-            var original_height = myrec.Height;
-            var original_y = myrec.Y;
-
-            myrec.Height = (int)(original_height * wp[0]);
-            myrec.Y = original_y + (original_height - myrec.Height);
-            e.Graphics.FillRectangle(Brushes.SeaGreen, myrec);
-
-            myrec.X += myrec.Width;
-            myrec.Height = (int)(original_height * wp[1]);
-            myrec.Y = original_y + (original_height - myrec.Height);
-            e.Graphics.FillRectangle(Brushes.Blue, myrec);
-
-            myrec.X += myrec.Width;
-            myrec.Height = (int)(original_height * wp[2]);
-            myrec.Y = original_y + (original_height - myrec.Height);
-            e.Graphics.FillRectangle(Brushes.Red, myrec);
-            */
         }
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -354,13 +326,14 @@ namespace DE1LogView
             listData_SelectedIndexChanged(null, EventArgs.Empty);
         }
 
-        bool PrintGBR = false;
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control)
             {
                 if (e.KeyValue == 67)  // Ctrl C
                     CopyLine();
+                if (e.KeyValue == 68)  // Ctrl D
+                    DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 80)  // Ctrl P
                     CopyPressure();
             }
@@ -371,36 +344,13 @@ namespace DE1LogView
 
                 FormBigPlot.Show();
             }
-            else if(e.KeyValue == 123) // F12
+            else if (e.KeyValue == 123) // F12
             {
                 PrintProfileInfo();
-            }
-            if (e.KeyCode == Keys.Menu)
-            {
-                labRatio.Text = "G";
-                labGrind.Text = "B";
-                labTime.Text = "R";
-
-                if (!PrintGBR)
-                {
-                    PrintGBR = true;
-                    listData.Refresh();
-                }
-
-                e.Handled = true;
             }
         }
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Menu)
-            {
-                labRatio.Text = "Ratio";
-                labGrind.Text = "Grind";
-                labTime.Text = "Time";
-                PrintGBR = false;
-                listData.Refresh();
-                e.Handled = true;
-            }
         }
 
         private void CopyLine()
@@ -464,7 +414,35 @@ namespace DE1LogView
             }
         }
 
-        private void btnDisableRec_Click(object sender, EventArgs e)
+        private void radioFlow_CheckedChanged(object sender, EventArgs e)
+        {
+            listData.Focus();
+            listData_SelectedIndexChanged(null, EventArgs.Empty);
+        }
+
+        private void btnSaveData_Click(object sender, EventArgs e) // TODO
+        {
+            List<string> sorted_keys = new List<string>();
+            foreach (var key in Data.Keys)
+                sorted_keys.Add(key);
+
+            sorted_keys.Sort();
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var key in sorted_keys)
+                Data[key].WriteRecord(sb);
+
+            string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
+            File.WriteAllText(data_fname, sb.ToString());
+        }
+
+        private void BtnMenu_Click(object sender, EventArgs e)
+        {
+            contextMenuStrip1.Show(btnMenu, new Point(0, btnMenu.Size.Height), ToolStripDropDownDirection.BelowLeft);
+        }
+
+        private void DisableRecordToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listData.SelectedIndex == -1)
                 return;
@@ -479,16 +457,161 @@ namespace DE1LogView
             FilterData();
         }
 
-        private void radioFlow_CheckedChanged(object sender, EventArgs e)
-        {
-            listData.Focus();
-            listData_SelectedIndexChanged(null, EventArgs.Empty);
-        }
-
-        private void BtnConvertWireshark_Click(object sender, EventArgs e)
+        private void WiresharkToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var fname = @"D:\platform-tools\__data\7_de1_1\ws_output5.txt";
             ConvertWireshark(fname);
+        }
+
+        private void DiffProfilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // profile name from the main selection
+            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
+                return;
+
+            string key = (string)listData.Items[listData.SelectedIndex];
+
+            if (!Data.ContainsKey(key))
+                return;
+
+            var profile_name = Data[key].profile;
+
+            string fname = ProfilesFolder + "\\" + profile_name + ".tcl";
+            if (!File.Exists(fname))
+            {
+                MessageBox.Show("Profile file does not exist: " + fname);
+                return;
+            }
+
+            string temp_fname1 = ApplicationDirectory + "\\tmp1.txt";
+            File.WriteAllText(temp_fname1, GetProfileInfo(fname));
+
+            // Check if SelectedPlots exists and different from the main selection
+            if(SelectedPlots != key && Data.ContainsKey(SelectedPlots))
+            {
+                var profile_name2 = Data[SelectedPlots].profile;
+
+                string fname2 = ProfilesFolder + "\\" + profile_name2 + ".tcl";
+                if (!File.Exists(fname2))
+                {
+                    MessageBox.Show("Profile file does not exist: " + fname2);
+                    return;
+                }
+
+                string temp_fname2 = ApplicationDirectory + "\\tmp2.txt";
+                File.WriteAllText(temp_fname2, GetProfileInfo(fname2));
+
+                string _DiffTool = @"D:\Program Files\Beyond Compare 4\BCompare.exe";
+                if (File.Exists(_DiffTool))
+                {
+                    try
+                    {
+
+                        System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                        proc.StartInfo.FileName = _DiffTool;
+                        proc.StartInfo.Arguments = temp_fname1 + " " + temp_fname2;
+                        proc.StartInfo.WorkingDirectory = ApplicationDirectory;
+                        proc.Start();
+                    }
+                    catch (System.Exception)
+                    {
+                        MessageBox.Show("Error running diff", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                        proc.StartInfo.FileName = temp_fname1;
+                        proc.StartInfo.UseShellExecute = true;
+                        proc.Start();
+
+                        System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
+                        proc2.StartInfo.FileName = temp_fname2;
+                        proc2.StartInfo.UseShellExecute = true;
+                        proc2.Start();
+                    }
+                    catch (System.Exception)
+                    {
+                        MessageBox.Show("Error opening file " + temp_fname1, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                    proc.StartInfo.FileName = temp_fname1;
+                    proc.StartInfo.UseShellExecute = true;
+                    proc.Start();
+                }
+                catch (System.Exception)
+                {
+                    MessageBox.Show("Error opening file " + temp_fname1, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                }
+            }
+        }
+
+        string GetProfileName(string fname)
+        {
+            var lines = File.ReadAllLines(fname);
+            foreach (var line in lines)
+            {
+                if (!line.Trim().StartsWith("profile_title {"))
+                    continue;
+
+                return line.Trim().Replace("profile_title {", "").Replace("}", "").Trim();
+            }
+            return Path.GetFileNameWithoutExtension(fname);
+        }
+
+        private void FixProfileFileNamesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fnames = Directory.GetFiles(ProfilesFolder, "*.tcl", SearchOption.TopDirectoryOnly);
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Files fixed:");
+            foreach (var fname in fnames)
+            {
+                var new_fname = GetProfileName(fname) + ".tcl";
+                var old_fname = Path.GetFileNameWithoutExtension(fname) + ".tcl";
+
+                if (new_fname != old_fname)
+                {
+                    sb.AppendLine(old_fname + " -> " + new_fname);
+
+                    var txt = File.ReadAllText(fname);
+                    File.Delete(fname);
+                    File.WriteAllText(Path.GetDirectoryName(fname) + "\\" + new_fname, txt);
+                }
+            }
+
+            MessageBox.Show(sb.ToString());
+        }
+
+        private void openProfilesFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = ProfilesFolder;
+                proc.StartInfo.UseShellExecute = true;
+                proc.Start();
+            }
+            catch (System.Exception)
+            {
+                MessageBox.Show("Error opening Profiles Folder", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+            }
+        }
+
+        private void writeTextInfoForAllProfilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fnames = Directory.GetFiles(ProfilesFolder, "*.tcl", SearchOption.TopDirectoryOnly);
+
+            foreach (var fname in fnames)
+                File.WriteAllText(fname.Replace(".tcl", ".txt"), GetProfileInfo(fname));
         }
     }
 }

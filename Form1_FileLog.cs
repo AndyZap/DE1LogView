@@ -595,25 +595,126 @@ namespace DE1LogView
 
             FilterData();
         }
-        private void btnSaveData_Click(object sender, EventArgs e) // TODO
+
+        // Beanlist file --------------------------------------
+
+        class BeanEntryClass
         {
-            List<string> sorted_keys = new List<string>();
-            foreach (var key in Data.Keys)
-                sorted_keys.Add(key);
+            public string ShortName = "";
+            public string FullName = "";
+            public string Country = "";
+            public string CountryCode = "";
+            public string From = "";
+            public DateTime Roasted = DateTime.MinValue;
+            public DateTime Frozen = DateTime.MinValue;
+            public DateTime Defrosted = DateTime.MinValue;
+            public string Process = "";
+            public string Varietals = "";
+            public string Notes = "";
 
-            sorted_keys.Sort();
+            public BeanEntryClass(string s)
+            {
+                var words = s.Split(',');
 
-            StringBuilder sb = new StringBuilder();
+                ShortName = words[0].Trim().ToLower();
+                FullName = words[1].Trim();
+                Country = words[2].Trim();
+                CountryCode = words[3].Trim();
+                From = words[4].Trim();
 
-            foreach (var key in sorted_keys)
-                Data[key].WriteRecord(sb);
+                var dt = words[5].Trim();
+                Roasted = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
 
-            string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
-            File.WriteAllText(data_fname, sb.ToString());
+                dt = words[6].Trim();
+                Frozen = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
+
+                dt = words[7].Trim();
+                Defrosted = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
+
+                Process = words[8].Trim();
+                Varietals = words[9].Trim();
+                Notes = words[10].Trim();
+            }
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(ShortName + ",");
+                sb.Append(FullName + ",");
+                sb.Append(Country + ",");
+                sb.Append(CountryCode + ",");
+                sb.Append(From + ",");
+                sb.Append(Roasted == DateTime.MinValue ? "," : Roasted.ToString("dd/MM/yyyy") + ",");
+                sb.Append(Frozen == DateTime.MinValue ? "," : Frozen.ToString("dd/MM/yyyy") + ",");
+                sb.Append(Defrosted == DateTime.MinValue ? "," : Defrosted.ToString("dd/MM/yyyy") + ",");
+                sb.Append(Process + ",");
+                sb.Append(Varietals + ",");
+                sb.Append(Notes);
+
+                return sb.ToString();
+            }
+
+            public int DatesSinceRoast(DateTime dt)  // returns int.MinValue on error. "+" is was not frozen, "-" otherwise
+            {
+                if (Roasted == DateTime.MinValue)
+                    return int.MinValue;
+
+                if (Defrosted == DateTime.MinValue && Frozen == DateTime.MinValue)
+                {
+                    var diff = (int)(dt - Roasted).TotalDays;
+                    if (diff < 0)
+                        return int.MinValue;
+
+                    return diff;
+                }
+
+                if (Defrosted == DateTime.MinValue || Frozen == DateTime.MinValue)  // not consistent data
+                    return int.MinValue;
+
+                var diff_total = (int)(dt - Roasted).TotalDays;
+                if (diff_total < 0)
+                    return int.MinValue;
+
+                var diff_gap = (int)(Defrosted - Frozen).TotalDays;
+                if (diff_gap < 0)
+                    return int.MinValue;
+
+                return (diff_total - diff_gap) * -1; // *-1 to indicate defrosted
+            }
         }
 
-        // OLD format ------------------
-        private void ReadOldFileFormat(string fname)
+            /*static bool LoadBeanList(string fname)
+{
+var lines = File.ReadAllLines(fname);
+
+Dictionary<string, BeanEntryClass> blist = new Dictionary<string, BeanEntryClass>();
+foreach (var line in lines)
+{
+if (line.StartsWith("Short name,Full name,"))
+continue;
+
+var bn = new BeanEntryClass(line);
+
+blist[bn.ShortName] = bn;
+}
+
+StringBuilder sb = new StringBuilder();
+sb.AppendLine("Short name,Full name,Country,Country code,From,Roasted,Frozen,Defrosted,Process,Varietals,Notes");
+foreach (var key in blist.Keys)
+sb.AppendLine(blist[key].ToString());
+File.WriteAllText(fname, sb.ToString());
+
+var bbb = blist["rock"];
+var da = bbb.DatesSinceRoast(DateTime.Now);
+
+return true;
+}
+             */
+
+
+
+            // OLD format ------------------
+            private void ReadOldFileFormat(string fname)
         {
             var lines = File.ReadAllLines(fname);
             foreach (var s in lines)
