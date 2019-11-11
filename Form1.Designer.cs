@@ -37,14 +37,12 @@
             this.labelBotR = new System.Windows.Forms.Label();
             this.labelBotL = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.radioFlow = new System.Windows.Forms.RadioButton();
-            this.radioWeight = new System.Windows.Forms.RadioButton();
             this.txtCopy = new System.Windows.Forms.TextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.btnSaveNotes = new System.Windows.Forms.Button();
             this.txtFilterName = new System.Windows.Forms.TextBox();
             this.panel5 = new System.Windows.Forms.Panel();
-            this.labNotes = new System.Windows.Forms.Label();
+            this.txtNotes = new System.Windows.Forms.TextBox();
             this.listData = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.labProfile = new System.Windows.Forms.Label();
@@ -71,6 +69,8 @@
             this.fixProfileFileNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeTextInfoForAllProfilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openProfilesFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.bigDiffPlotCtrlDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -109,7 +109,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Resize += new System.EventHandler(this.splitContainer1_Panel2_Resize);
             this.splitContainer1.Size = new System.Drawing.Size(1109, 739);
-            this.splitContainer1.SplitterDistance = 118;
+            this.splitContainer1.SplitterDistance = 103;
             this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -132,7 +132,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.labelBotR);
             this.splitContainer2.Panel2.Controls.Add(this.labelBotL);
             this.splitContainer2.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer2_Panel2_Paint);
-            this.splitContainer2.Size = new System.Drawing.Size(118, 739);
+            this.splitContainer2.Size = new System.Drawing.Size(103, 739);
             this.splitContainer2.SplitterDistance = 374;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -140,7 +140,7 @@
             // 
             this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopR.Location = new System.Drawing.Point(41, 0);
+            this.labelTopR.Location = new System.Drawing.Point(26, 0);
             this.labelTopR.Name = "labelTopR";
             this.labelTopR.Size = new System.Drawing.Size(74, 18);
             this.labelTopR.TabIndex = 1;
@@ -154,7 +154,7 @@
             this.labelTopL.BackColor = System.Drawing.SystemColors.Window;
             this.labelTopL.Location = new System.Drawing.Point(0, 0);
             this.labelTopL.Name = "labelTopL";
-            this.labelTopL.Size = new System.Drawing.Size(45, 18);
+            this.labelTopL.Size = new System.Drawing.Size(30, 18);
             this.labelTopL.TabIndex = 0;
             this.labelTopL.Text = "label1";
             // 
@@ -162,7 +162,7 @@
             // 
             this.labelBotR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelBotR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelBotR.Location = new System.Drawing.Point(42, 0);
+            this.labelBotR.Location = new System.Drawing.Point(27, 0);
             this.labelBotR.Name = "labelBotR";
             this.labelBotR.Size = new System.Drawing.Size(74, 18);
             this.labelBotR.TabIndex = 3;
@@ -176,51 +176,24 @@
             this.labelBotL.BackColor = System.Drawing.SystemColors.Window;
             this.labelBotL.Location = new System.Drawing.Point(1, 0);
             this.labelBotL.Name = "labelBotL";
-            this.labelBotL.Size = new System.Drawing.Size(45, 18);
+            this.labelBotL.Size = new System.Drawing.Size(30, 18);
             this.labelBotL.TabIndex = 2;
             this.labelBotL.Text = "label1";
             // 
             // panel4
             // 
-            this.panel4.Controls.Add(this.radioFlow);
-            this.panel4.Controls.Add(this.radioWeight);
             this.panel4.Controls.Add(this.txtCopy);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel4.Location = new System.Drawing.Point(0, 695);
             this.panel4.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(984, 44);
+            this.panel4.Size = new System.Drawing.Size(999, 44);
             this.panel4.TabIndex = 6;
-            // 
-            // radioFlow
-            // 
-            this.radioFlow.AutoSize = true;
-            this.radioFlow.Checked = true;
-            this.radioFlow.Location = new System.Drawing.Point(469, 12);
-            this.radioFlow.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.radioFlow.Name = "radioFlow";
-            this.radioFlow.Size = new System.Drawing.Size(56, 22);
-            this.radioFlow.TabIndex = 40;
-            this.radioFlow.TabStop = true;
-            this.radioFlow.Text = "Flow";
-            this.radioFlow.UseVisualStyleBackColor = true;
-            this.radioFlow.CheckedChanged += new System.EventHandler(this.radioFlow_CheckedChanged);
-            // 
-            // radioWeight
-            // 
-            this.radioWeight.AutoSize = true;
-            this.radioWeight.Location = new System.Drawing.Point(387, 12);
-            this.radioWeight.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.radioWeight.Name = "radioWeight";
-            this.radioWeight.Size = new System.Drawing.Size(70, 22);
-            this.radioWeight.TabIndex = 39;
-            this.radioWeight.Text = "Weight";
-            this.radioWeight.UseVisualStyleBackColor = true;
             // 
             // txtCopy
             // 
             this.txtCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtCopy.Location = new System.Drawing.Point(942, 11);
+            this.txtCopy.Location = new System.Drawing.Point(957, 11);
             this.txtCopy.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.txtCopy.Name = "txtCopy";
             this.txtCopy.Size = new System.Drawing.Size(43, 26);
@@ -235,20 +208,21 @@
             this.panel3.Location = new System.Drawing.Point(0, 605);
             this.panel3.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(984, 44);
+            this.panel3.Size = new System.Drawing.Size(999, 44);
             this.panel3.TabIndex = 5;
             // 
             // btnSaveNotes
             // 
             this.btnSaveNotes.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnSaveNotes.Location = new System.Drawing.Point(896, 0);
+            this.btnSaveNotes.Location = new System.Drawing.Point(911, 0);
             this.btnSaveNotes.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.btnSaveNotes.Name = "btnSaveNotes";
             this.btnSaveNotes.Size = new System.Drawing.Size(88, 44);
             this.btnSaveNotes.TabIndex = 39;
             this.btnSaveNotes.TabStop = false;
-            this.btnSaveNotes.Text = "TODO";
+            this.btnSaveNotes.Text = "Save notes";
             this.btnSaveNotes.UseVisualStyleBackColor = true;
+            this.btnSaveNotes.Click += new System.EventHandler(this.btnSaveNotes_Click);
             // 
             // txtFilterName
             // 
@@ -262,24 +236,22 @@
             // 
             // panel5
             // 
-            this.panel5.Controls.Add(this.labNotes);
+            this.panel5.Controls.Add(this.txtNotes);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel5.Location = new System.Drawing.Point(0, 565);
             this.panel5.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(984, 40);
+            this.panel5.Size = new System.Drawing.Size(999, 40);
             this.panel5.TabIndex = 4;
             // 
-            // labNotes
+            // txtNotes
             // 
-            this.labNotes.BackColor = System.Drawing.SystemColors.Window;
-            this.labNotes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labNotes.Location = new System.Drawing.Point(0, 0);
-            this.labNotes.Name = "labNotes";
-            this.labNotes.Size = new System.Drawing.Size(984, 40);
-            this.labNotes.TabIndex = 0;
-            this.labNotes.Text = "Notes:";
-            this.labNotes.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.txtNotes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtNotes.Location = new System.Drawing.Point(0, 0);
+            this.txtNotes.Multiline = true;
+            this.txtNotes.Name = "txtNotes";
+            this.txtNotes.Size = new System.Drawing.Size(999, 40);
+            this.txtNotes.TabIndex = 0;
             // 
             // listData
             // 
@@ -294,7 +266,7 @@
             this.listData.Location = new System.Drawing.Point(0, 87);
             this.listData.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.listData.Name = "listData";
-            this.listData.Size = new System.Drawing.Size(984, 478);
+            this.listData.Size = new System.Drawing.Size(999, 478);
             this.listData.TabIndex = 3;
             this.listData.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listData_DrawItem);
             this.listData.SelectedIndexChanged += new System.EventHandler(this.listData_SelectedIndexChanged);
@@ -316,7 +288,7 @@
             this.panel2.Location = new System.Drawing.Point(0, 53);
             this.panel2.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(984, 34);
+            this.panel2.Size = new System.Drawing.Size(999, 34);
             this.panel2.TabIndex = 2;
             // 
             // labProfile
@@ -438,13 +410,13 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(984, 53);
+            this.panel1.Size = new System.Drawing.Size(999, 53);
             this.panel1.TabIndex = 1;
             // 
             // btnMenu
             // 
             this.btnMenu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMenu.Location = new System.Drawing.Point(892, 0);
+            this.btnMenu.Location = new System.Drawing.Point(907, 0);
             this.btnMenu.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMenu.Name = "btnMenu";
             this.btnMenu.Size = new System.Drawing.Size(88, 50);
@@ -500,9 +472,11 @@
             this.diffProfilesToolStripMenuItem,
             this.fixProfileFileNamesToolStripMenuItem,
             this.writeTextInfoForAllProfilesToolStripMenuItem,
-            this.openProfilesFolderToolStripMenuItem});
+            this.openProfilesFolderToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.bigDiffPlotCtrlDToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 148);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 176);
             // 
             // disableRecordToolStripMenuItem
             // 
@@ -532,7 +506,7 @@
             // 
             this.diffProfilesToolStripMenuItem.Name = "diffProfilesToolStripMenuItem";
             this.diffProfilesToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.diffProfilesToolStripMenuItem.Text = "Diff profiles";
+            this.diffProfilesToolStripMenuItem.Text = "Diff profiles Ctrl-P";
             this.diffProfilesToolStripMenuItem.Click += new System.EventHandler(this.DiffProfilesToolStripMenuItem_Click);
             // 
             // fixProfileFileNamesToolStripMenuItem
@@ -556,6 +530,18 @@
             this.openProfilesFolderToolStripMenuItem.Text = "Open profiles folder";
             this.openProfilesFolderToolStripMenuItem.Click += new System.EventHandler(this.openProfilesFolderToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(221, 6);
+            // 
+            // bigDiffPlotCtrlDToolStripMenuItem
+            // 
+            this.bigDiffPlotCtrlDToolStripMenuItem.Name = "bigDiffPlotCtrlDToolStripMenuItem";
+            this.bigDiffPlotCtrlDToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.bigDiffPlotCtrlDToolStripMenuItem.Text = "Big Diff Plot  Ctrl-D";
+            this.bigDiffPlotCtrlDToolStripMenuItem.Click += new System.EventHandler(this.bigDiffPlotCtrlDToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -571,7 +557,6 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -585,6 +570,7 @@
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
@@ -609,15 +595,12 @@
         private System.Windows.Forms.Button btnSaveData;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.TextBox txtFilterName;
-        private System.Windows.Forms.Label labNotes;
         private System.Windows.Forms.Label labProfile;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Label labHasPlot;
         private System.Windows.Forms.Button btnAddPlot;
         private System.Windows.Forms.Button btnImportData;
         private System.Windows.Forms.TextBox txtCopy;
-        private System.Windows.Forms.RadioButton radioFlow;
-        private System.Windows.Forms.RadioButton radioWeight;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.Label labID;
         private System.Windows.Forms.Label labelTopL;
@@ -635,5 +618,8 @@
         private System.Windows.Forms.ToolStripMenuItem fixProfileFileNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem writeTextInfoForAllProfilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openProfilesFolderToolStripMenuItem;
+        private System.Windows.Forms.TextBox txtNotes;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem bigDiffPlotCtrlDToolStripMenuItem;
     }
 }

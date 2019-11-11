@@ -853,31 +853,13 @@ namespace DE1LogView
                 return (Path.GetFileNameWithoutExtension(fname) + ": ShotTclParser failed");
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Profile: " + Path.GetFileNameWithoutExtension(fname));
+            sb.AppendLine("");
+
             foreach (var fr in frames_my)
                 sb.AppendLine(fr.ToString());
 
             return sb.ToString();
-        }
-        private void PrintProfileInfo()
-        {
-            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
-                return;
-
-            string key = (string)listData.Items[listData.SelectedIndex];
-
-            if (!Data.ContainsKey(key))
-                return;
-
-            var profile_name = Data[key].profile;
-
-            string fname = ProfilesFolder + "\\" + profile_name + ".tcl";
-            if(!File.Exists(fname))
-            {
-                MessageBox.Show("Profile file does not exist: " + fname);
-                return;
-            }
-
-            MessageBox.Show(GetProfileInfo(fname));
         }
     }
 }

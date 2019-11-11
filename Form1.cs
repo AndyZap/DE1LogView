@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.6";
+        string Revision = "DE1 Log View v1.7";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -79,39 +79,16 @@ namespace DE1LogView
             string key = (string)listData.Items[listData.SelectedIndex];
 
             if (!Data.ContainsKey(key))
-                return;
-
-            labNotes.Text = String.IsNullOrEmpty(Data[key].notes) ? "" : Data[key].notes;
-
-            PlotDataRec(GraphTop, Data[key]);
-
-            // plot pressure
-            /*
-            GraphBot.data.Clear();
-
-            y = Data[key].pressure;
-            x.Clear();
-            for (int i = 0; i < y.Count; i++)
-            x.Add(i);
-
-            GraphBot.SetData(0, x, y, Color.Blue, 4, GraphPainter.Style.Solid);
-
-            for (int si = 0; si < SelectedPlots.Count; si++)
             {
-            var skey = SelectedPlots[si];
-
-            List<double> sy = Data[skey].pressure;
-            List<double> sx = new List<double>();
-            for (int i = 0; i < sy.Count; i++)
-            sx.Add(i);
-
-            GraphBot.SetData(si + 1, sx, sy, GetPenColor(si), 4, GraphPainter.Style.Solid);
+                FirstPlotKey = "";
+                return;
             }
 
-            GraphBot.SetAutoLimits();
+            FirstPlotKey = key;
 
-            splitContainer2.Panel2.Refresh();
-            */
+            txtNotes.Text = String.IsNullOrEmpty(Data[key].notes) ? "" : Data[key].notes;
+
+            PlotDataRec(GraphTop, Data[key]);
         }
 
         public void PlotDataRec(GraphPainter gp, DataStruct ds)
@@ -229,7 +206,7 @@ namespace DE1LogView
             if (listData.GetSelected(e.Index))
                 e.Graphics.FillRectangle(Brushes.Blue, myrec);
             else
-                e.Graphics.FillRectangle(key == SelectedPlots ? Brushes.Red : Brushes.White, myrec);
+                e.Graphics.FillRectangle(key == SecondPlotKey ? Brushes.Red : Brushes.White, myrec);
         }
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -300,7 +277,8 @@ namespace DE1LogView
             - panel4.Height - panel5.Height - 5;
         }
 
-        public string SelectedPlots = "";
+        public string FirstPlotKey = "";
+        public string SecondPlotKey = "";
 
         private void btnAddPlot_Click(object sender, EventArgs e)
         {
@@ -313,17 +291,20 @@ namespace DE1LogView
             string key = (string)listData.Items[index];
 
             if (!Data.ContainsKey(key))
+            {
+                SecondPlotKey = "";
+                return;
+            }
+
+            if (SecondPlotKey == key)
                 return;
 
-            if (SelectedPlots == key)
-                return;
-
-            SelectedPlots = key;
+            SecondPlotKey = key;
 
             PlotDataRec(GraphBot, Data[key]);
 
             listData.Focus();
-            listData_SelectedIndexChanged(null, EventArgs.Empty);
+            listData.Refresh();
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -332,25 +313,15 @@ namespace DE1LogView
             {
                 if (e.KeyValue == 67)  // Ctrl C
                     CopyLine();
-                if (e.KeyValue == 68)  // Ctrl D
+                if (e.KeyValue == 68)  // Ctrl D - big plot, incl diff plots
+                    bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
+                if (e.KeyValue == 80)  // Ctrl P - show/diff profiles
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
-                if (e.KeyValue == 80)  // Ctrl P
-                    CopyPressure();
             }
             else if (e.KeyValue == 112) // F1
-            {
-                if (FormBigPlot == null)
-                    FormBigPlot = new FormBigPlot();
-
-                FormBigPlot.Show();
-            }
+            { }
             else if (e.KeyValue == 123) // F12
-            {
-                PrintProfileInfo();
-            }
-        }
-        private void Form1_KeyUp(object sender, KeyEventArgs e)
-        {
+            { }
         }
 
         private void CopyLine()
@@ -382,28 +353,6 @@ namespace DE1LogView
             txtCopy.Copy();
         }
 
-        private void CopyPressure()
-        {
-            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
-                return;
-
-            string key = (string)listData.Items[listData.SelectedIndex];
-
-            if (!Data.ContainsKey(key))
-                return;
-
-            var d = Data[key];
-
-            StringBuilder sb = new StringBuilder();
-
-            foreach (var p in d.pressure)
-                sb.Append(p.ToString("0.0" + "\t"));
-
-            txtCopy.Text = sb.ToString();
-            txtCopy.SelectAll();
-            txtCopy.Copy();
-        }
-
         private void listData_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -412,12 +361,6 @@ namespace DE1LogView
                 if (index != -1)
                     AddPlot(index);
             }
-        }
-
-        private void radioFlow_CheckedChanged(object sender, EventArgs e)
-        {
-            listData.Focus();
-            listData_SelectedIndexChanged(null, EventArgs.Empty);
         }
 
         private void btnSaveData_Click(object sender, EventArgs e) // TODO
@@ -465,16 +408,10 @@ namespace DE1LogView
 
         private void DiffProfilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // profile name from the main selection
-            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
+            if (!Data.ContainsKey(FirstPlotKey))
                 return;
 
-            string key = (string)listData.Items[listData.SelectedIndex];
-
-            if (!Data.ContainsKey(key))
-                return;
-
-            var profile_name = Data[key].profile;
+            var profile_name = Data[FirstPlotKey].profile;
 
             string fname = ProfilesFolder + "\\" + profile_name + ".tcl";
             if (!File.Exists(fname))
@@ -487,9 +424,9 @@ namespace DE1LogView
             File.WriteAllText(temp_fname1, GetProfileInfo(fname));
 
             // Check if SelectedPlots exists and different from the main selection
-            if(SelectedPlots != key && Data.ContainsKey(SelectedPlots))
+            if(SecondPlotKey != FirstPlotKey && Data.ContainsKey(SecondPlotKey))
             {
-                var profile_name2 = Data[SelectedPlots].profile;
+                var profile_name2 = Data[SecondPlotKey].profile;
 
                 string fname2 = ProfilesFolder + "\\" + profile_name2 + ".tcl";
                 if (!File.Exists(fname2))
@@ -610,8 +547,52 @@ namespace DE1LogView
         {
             var fnames = Directory.GetFiles(ProfilesFolder, "*.tcl", SearchOption.TopDirectoryOnly);
 
+            var folder_name = ApplicationDirectory + "\\profile_info";
+            if (!Directory.Exists(folder_name))
+                Directory.CreateDirectory(folder_name);
+
+            var fnames_in_output_folder = Directory.GetFiles(folder_name, "*.txt", SearchOption.TopDirectoryOnly);
+            foreach (var f in fnames_in_output_folder)
+                File.Delete(f);
+
             foreach (var fname in fnames)
-                File.WriteAllText(fname.Replace(".tcl", ".txt"), GetProfileInfo(fname));
+            {
+                var output_fname = folder_name + "\\" + Path.GetFileNameWithoutExtension(fname) + ".txt";
+                File.WriteAllText(output_fname, GetProfileInfo(fname));
+            }
+
+            try
+            {
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = folder_name;
+                proc.StartInfo.UseShellExecute = true;
+                proc.Start();
+            }
+            catch (System.Exception)
+            {
+                MessageBox.Show("Error opening Folder " + folder_name, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+            }
+        }
+
+        private void btnSaveNotes_Click(object sender, EventArgs e)
+        {
+            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
+                return;
+
+            string key = (string)listData.Items[listData.SelectedIndex];
+
+            if (!Data.ContainsKey(key))
+                return;
+
+            Data[key].notes = txtNotes.Text.Replace(",", " ");
+        }
+
+        private void bigDiffPlotCtrlDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (FormBigPlot == null)
+                FormBigPlot = new FormBigPlot();
+
+            FormBigPlot.Show();
         }
     }
 }
