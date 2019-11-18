@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.7";
+        string Revision = "DE1 Log View v1.8";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -121,6 +121,22 @@ namespace DE1LogView
             gp.panel.Refresh();
         }
 
+        private void listData_MeasureItem(object sender, MeasureItemEventArgs e)
+        {
+            if (e.Index < 0 || e.Index >= listData.Items.Count)
+                return;
+
+            string key = (string)listData.Items[e.Index];
+
+            if (!Data.ContainsKey(key))
+                return;
+
+            DataStruct d = Data[key];
+
+            if (d.notes != "")
+                e.ItemHeight *= 2;
+        }
+
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0 || e.Index >= listData.Items.Count)
@@ -207,6 +223,14 @@ namespace DE1LogView
                 e.Graphics.FillRectangle(Brushes.Blue, myrec);
             else
                 e.Graphics.FillRectangle(key == SecondPlotKey ? Brushes.Red : Brushes.White, myrec);
+
+            if (d.notes != "")
+            {
+                // notes, on a separate line
+                myrec.X = labName.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
+                myrec.Y += e.Bounds.Height / 2;
+                e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            }
         }
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -363,7 +387,7 @@ namespace DE1LogView
             }
         }
 
-        private void btnSaveData_Click(object sender, EventArgs e) // TODO
+        private void btnSaveData_Click(object sender, EventArgs e)
         {
             List<string> sorted_keys = new List<string>();
             foreach (var key in Data.Keys)
@@ -585,6 +609,8 @@ namespace DE1LogView
                 return;
 
             Data[key].notes = txtNotes.Text.Replace(",", " ");
+
+            FilterData();
         }
 
         private void bigDiffPlotCtrlDToolStripMenuItem_Click(object sender, EventArgs e)
@@ -594,5 +620,41 @@ namespace DE1LogView
 
             FormBigPlot.Show();
         }
+        void btnImportData_Click(object sender, EventArgs e)  // this comes from button
+        {
+            if (!Directory.Exists(ShotsFolder))
+            {
+                MessageBox.Show("ERROR: ShotsFolder location is not set");
+                return;
+            }
+            var old_count = Data.Count;
+
+            var files = Directory.GetFiles(ShotsFolder, "*.shot", SearchOption.TopDirectoryOnly);
+            foreach (var f in files)
+            {
+                if (Path.GetFileNameWithoutExtension(f) == "0") // skip 0.shot, this is a config file for DE1Win10
+                    continue;
+
+                var key = ReadDateFromShotFile(f);
+                if (Data.ContainsKey(key))
+                    continue;
+
+                if (key == "")
+                {
+                    MessageBox.Show("ERROR: when reading date from shot file " + f);
+                    return;
+                }
+
+                if (!ImportShotFile(f))
+                {
+                    MessageBox.Show("ERROR: when reading shot file " + f);
+                    return;
+                }
+            }
+            FilterData();
+
+            MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files");
+        }
+
     }
 }

@@ -291,41 +291,7 @@ namespace DE1LogView
         {
             return Convert.ToDouble(ReadString(line, key));
         }
-        void btnImportData_Click(object sender, EventArgs e)  // this comes from button
-        {
-            if (!Directory.Exists(ShotsFolder))
-            {
-                MessageBox.Show("ERROR: ShotsFolder location is not set");
-                return;
-            }
-            var old_count = Data.Count;
 
-            var files = Directory.GetFiles(ShotsFolder, "*.shot", SearchOption.TopDirectoryOnly);
-            foreach (var f in files)
-            {
-                if (Path.GetFileNameWithoutExtension(f) == "0") // skip 0.shot, this is a config file for DE1Win10
-                    continue;
-
-                var key = ReadDateFromShotFile(f);
-                if (Data.ContainsKey(key))
-                    continue;
-
-                if (key == "")
-                {
-                    MessageBox.Show("ERROR: when reading date from shot file " + f);
-                    return;
-                }
-
-                if (!ImportShotFile(f))
-                {
-                    MessageBox.Show("ERROR: when reading shot file " + f);
-                    return;
-                }
-            }
-            FilterData();
-
-            MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files");
-        }
         bool ImportShotFile(string fname)
         {
             DataStruct d = new DataStruct();
