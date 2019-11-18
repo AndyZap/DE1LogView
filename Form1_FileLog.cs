@@ -13,6 +13,7 @@ namespace DE1LogView
         string DataFolder = "";
 
         public Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
+        Dictionary<string, BeanEntryClass> BeanList = new Dictionary<string, BeanEntryClass>();
 
         public class DataStruct
         {
@@ -648,39 +649,38 @@ namespace DE1LogView
                 return (diff_total - diff_gap) * -1; // *-1 to indicate defrosted
             }
         }
+        private void LoadBeanList(string fname)
+        {
+            BeanList.Clear();
 
-            /*static bool LoadBeanList(string fname)
-{
-var lines = File.ReadAllLines(fname);
+            if (!File.Exists(fname))
+                return;
 
-Dictionary<string, BeanEntryClass> blist = new Dictionary<string, BeanEntryClass>();
-foreach (var line in lines)
-{
-if (line.StartsWith("Short name,Full name,"))
-continue;
+            var lines = File.ReadAllLines(fname);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("Short name,Full name,"))
+                    continue;
 
-var bn = new BeanEntryClass(line);
+                var bn = new BeanEntryClass(line);
 
-blist[bn.ShortName] = bn;
-}
+                BeanList[bn.ShortName] = bn;
+            }
 
-StringBuilder sb = new StringBuilder();
-sb.AppendLine("Short name,Full name,Country,Country code,From,Roasted,Frozen,Defrosted,Process,Varietals,Notes");
-foreach (var key in blist.Keys)
-sb.AppendLine(blist[key].ToString());
-File.WriteAllText(fname, sb.ToString());
+            /*
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Short name,Full name,Country,Country code,From,Roasted,Frozen,Defrosted,Process,Varietals,Notes");
+            foreach (var key in blist.Keys)
+                sb.AppendLine(blist[key].ToString());
+            File.WriteAllText(fname, sb.ToString());
 
-var bbb = blist["rock"];
-var da = bbb.DatesSinceRoast(DateTime.Now);
-
-return true;
-}
-             */
+            var bbb = blist["rock"];
+            var da = bbb.DatesSinceRoast(DateTime.Now); */
+        }
 
 
-
-            // OLD format ------------------
-            private void ReadOldFileFormat(string fname)
+        // OLD format ------------------
+        private void ReadOldFileFormat(string fname)
         {
             var lines = File.ReadAllLines(fname);
             foreach (var s in lines)

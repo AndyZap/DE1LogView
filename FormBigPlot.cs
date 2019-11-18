@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace DE1LogView
 {
@@ -20,9 +12,20 @@ namespace DE1LogView
             InitializeComponent();
         }
 
-        private void FormBigPlot_Load(object sender, EventArgs e)
+        public void ShowLog(string text)
         {
-            Graph = new GraphPainter(panel1, this.Font);
+            richLog.Text = text;
+            richLog.Visible = true;
+        }
+        public void ShowGraph()
+        {
+            richLog.Visible = false;
+
+            if (Graph == null)
+                Graph = new GraphPainter(panel1, this.Font);
+
+            if (parent.SecondPlotKey != "")
+                parent.PlotDataRec(Graph, parent.Data[parent.SecondPlotKey]);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -33,15 +36,10 @@ namespace DE1LogView
 
         private void FormBigPlot_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyValue == 27) // F12
+            if (e.KeyValue == 27) // Esc
             {
                 Hide();
             }
-        }
-
-        private void FormBigPlot_Shown(object sender, EventArgs e)
-        {
-            //parent.PlotDataRec(Graph, parent.Data[parent.SelectedPlots]);
         }
     }
 }

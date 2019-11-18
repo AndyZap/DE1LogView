@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBigPlot));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.richLog = new System.Windows.Forms.RichTextBox();
             this.labelTopR = new System.Windows.Forms.Label();
             this.labelTopL = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
@@ -37,6 +38,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.richLog);
             this.panel1.Controls.Add(this.labelTopR);
             this.panel1.Controls.Add(this.labelTopL);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -45,6 +47,18 @@
             this.panel1.Size = new System.Drawing.Size(1067, 623);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+            // 
+            // richLog
+            // 
+            this.richLog.Dock = System.Windows.Forms.DockStyle.Right;
+            this.richLog.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richLog.Location = new System.Drawing.Point(234, 0);
+            this.richLog.Name = "richLog";
+            this.richLog.Size = new System.Drawing.Size(833, 623);
+            this.richLog.TabIndex = 4;
+            this.richLog.TabStop = false;
+            this.richLog.Text = "";
+            this.richLog.WordWrap = false;
             // 
             // labelTopR
             // 
@@ -70,7 +84,7 @@
             // 
             // FormBigPlot
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 45F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1067, 623);
             this.ControlBox = false;
@@ -87,8 +101,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.FormBigPlot_Load);
-            this.Shown += new System.EventHandler(this.FormBigPlot_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormBigPlot_KeyDown);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -100,5 +112,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label labelTopR;
         private System.Windows.Forms.Label labelTopL;
+        private System.Windows.Forms.RichTextBox richLog;
     }
 }

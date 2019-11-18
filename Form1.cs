@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.8";
+        string Revision = "DE1 Log View v1.9";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -29,6 +29,9 @@ namespace DE1LogView
         FormBigPlot FormBigPlot = new FormBigPlot();
 
         List<int> WeightPoints = new List<int>();
+
+        public string FirstPlotKey = "";
+        public string SecondPlotKey = "";
 
         public Form1()
         {
@@ -62,6 +65,10 @@ namespace DE1LogView
                 ReadOldFileFormat(old_data_fname);
             else if (File.Exists(data_fname))
                 ReadAllRecords(data_fname);
+
+
+            string bean_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\BeanList.csv";
+            LoadBeanList(bean_fname);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -174,6 +181,8 @@ namespace DE1LogView
             string ddd = "";
             if (ts.TotalDays < 1)
                 ddd = "T0 " + d.date.ToString("HH:mm");
+            else if (ts.TotalDays > 28)
+                ddd = d.date.ToString("dd/MM/yy");
             else
             {
                 var total = ts.TotalDays;
@@ -191,6 +200,15 @@ namespace DE1LogView
             }
 
             e.Graphics.DrawString(ddd, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            if (BeanList.ContainsKey(d.name))
+            {
+                var age = BeanList[d.name].DatesSinceRoast(d.date);
+                var age_str = age >= 0 ? (age.ToString() + "d") : ((-age).ToString() + "d*");
+
+                myrec.X = labDaysSinceRoast.Left; myrec.Width = labDaysSinceRoast.Width;
+                e.Graphics.DrawString(age_str, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            }
 
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
             e.Graphics.DrawString(d.bean_weight.ToString("0.0").PadLeft(4), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -210,7 +228,7 @@ namespace DE1LogView
             e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labTime.Left; myrec.Width = labTime.Width;
-            e.Graphics.DrawString(d.shot_time.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
             e.Graphics.DrawString(d.profile, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -228,7 +246,7 @@ namespace DE1LogView
             {
                 // notes, on a separate line
                 myrec.X = labName.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
-                myrec.Y += e.Bounds.Height / 2;
+                myrec.Y += 3 + e.Bounds.Height / 2;
                 e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
             }
         }
@@ -301,9 +319,6 @@ namespace DE1LogView
             - panel4.Height - panel5.Height - 5;
         }
 
-        public string FirstPlotKey = "";
-        public string SecondPlotKey = "";
-
         private void btnAddPlot_Click(object sender, EventArgs e)
         {
             if (listData.SelectedIndex != -1)
@@ -343,7 +358,13 @@ namespace DE1LogView
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 112) // F1
-            { }
+            {
+                bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
+            }
+            else if (e.KeyValue == 113) // F2
+            {
+                DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
+            }
             else if (e.KeyValue == 123) // F12
             { }
         }
@@ -445,7 +466,7 @@ namespace DE1LogView
             }
 
             string temp_fname1 = ApplicationDirectory + "\\tmp1.txt";
-            File.WriteAllText(temp_fname1, GetProfileInfo(fname));
+            string content_fname1 = GetProfileInfo(fname);
 
             // Check if SelectedPlots exists and different from the main selection
             if(SecondPlotKey != FirstPlotKey && Data.ContainsKey(SecondPlotKey))
@@ -460,16 +481,22 @@ namespace DE1LogView
                 }
 
                 string temp_fname2 = ApplicationDirectory + "\\tmp2.txt";
-                File.WriteAllText(temp_fname2, GetProfileInfo(fname2));
+                string content_fname2 = GetProfileInfo(fname2);
+                
 
-                string _DiffTool = @"D:\Program Files\Beyond Compare 4\BCompare.exe";
-                if (File.Exists(_DiffTool))
+                string diff_tool = @"D:\Program Files\Beyond Compare 4\BCompare.exe";
+                if (!File.Exists(diff_tool))
+                    diff_tool = @"C:\Program Files\Beyond Compare 4\BCompare.exe";
+
+                if (File.Exists(diff_tool))
                 {
                     try
                     {
+                        File.WriteAllText(temp_fname1, content_fname1);
+                        File.WriteAllText(temp_fname2, content_fname2);
 
                         System.Diagnostics.Process proc = new System.Diagnostics.Process();
-                        proc.StartInfo.FileName = _DiffTool;
+                        proc.StartInfo.FileName = diff_tool;
                         proc.StartInfo.Arguments = temp_fname1 + " " + temp_fname2;
                         proc.StartInfo.WorkingDirectory = ApplicationDirectory;
                         proc.Start();
@@ -481,37 +508,14 @@ namespace DE1LogView
                 }
                 else
                 {
-                    try
-                    {
-                        System.Diagnostics.Process proc = new System.Diagnostics.Process();
-                        proc.StartInfo.FileName = temp_fname1;
-                        proc.StartInfo.UseShellExecute = true;
-                        proc.Start();
-
-                        System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
-                        proc2.StartInfo.FileName = temp_fname2;
-                        proc2.StartInfo.UseShellExecute = true;
-                        proc2.Start();
-                    }
-                    catch (System.Exception)
-                    {
-                        MessageBox.Show("Error opening file " + temp_fname1, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    }
+                    FormBigPlot.ShowLog(content_fname1 + "\r\n\r\n" + content_fname2);
+                    FormBigPlot.Show();
                 }
             }
             else
             {
-                try
-                {
-                    System.Diagnostics.Process proc = new System.Diagnostics.Process();
-                    proc.StartInfo.FileName = temp_fname1;
-                    proc.StartInfo.UseShellExecute = true;
-                    proc.Start();
-                }
-                catch (System.Exception)
-                {
-                    MessageBox.Show("Error opening file " + temp_fname1, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                }
+                FormBigPlot.ShowLog(content_fname1);
+                FormBigPlot.Show();
             }
         }
 
@@ -612,11 +616,12 @@ namespace DE1LogView
 
             FilterData();
         }
-
         private void bigDiffPlotCtrlDToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (FormBigPlot == null)
                 FormBigPlot = new FormBigPlot();
+
+            FormBigPlot.ShowGraph();
 
             FormBigPlot.Show();
         }
@@ -655,6 +660,23 @@ namespace DE1LogView
 
             MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files");
         }
+        private void beanInfoCtrlBF3ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Data.ContainsKey(FirstPlotKey))
+                return;
 
+            var text = "";
+            var key = Data[FirstPlotKey].name;
+
+            if (BeanList.ContainsKey(key))
+            {
+                text = BeanList[key].Country;
+            }
+            else
+                text = "no bean info found";
+
+            FormBigPlot.ShowLog(text);
+            FormBigPlot.Show();
+        }
     }
 }
