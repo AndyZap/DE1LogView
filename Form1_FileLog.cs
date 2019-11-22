@@ -14,7 +14,7 @@ namespace DE1LogView
 
         public Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
         Dictionary<string, BeanEntryClass> BeanList = new Dictionary<string, BeanEntryClass>();
-
+        Dictionary<string, ProfileInfo> ProfileInfoList = new Dictionary<string, ProfileInfo>();
         public class DataStruct
         {
             public string date_str = "";
@@ -260,6 +260,88 @@ namespace DE1LogView
             public List<double> flow_nopi = new List<double>();
             public List<double> pressure_nopi = new List<double>();
             public int saved_plot_index = -1;  // -1 means this has not been saved in the data struct
+
+            public double getKpi(Dictionary<string, ProfileInfo> prof_dict)
+            {
+                if (!prof_dict.ContainsKey(profile))
+                    return 0.0;
+
+                var pi = prof_dict[profile];
+
+                double kpi = 0.0;
+
+                for (int i = 0; i < elapsed.Count; i++)
+                {
+                    if (elapsed[i] < pi.kpi_min_time)
+                        continue;
+
+                    if (pi.kpi_type == KpiTypeEnum.Pressure)
+                        kpi = Math.Max(kpi, pressure[i]);
+                    else if (pi.kpi_type == KpiTypeEnum.Flow)
+                        kpi = Math.Max(kpi, flow[i]);
+                }
+                return kpi;
+            }
+            public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
+            {
+                if (!prof_dict.ContainsKey(profile))
+                    return profile;
+
+                return prof_dict[profile].short_name;
+            }
+
+            public double getRatio()
+            {
+                return coffee_weight / bean_weight;
+            }
+
+            public string getAgeStr(Dictionary<string, BeanEntryClass> bean_list)
+            {
+                if (!bean_list.ContainsKey(name))
+                    return "";
+
+                var age = bean_list[name].DatesSinceRoast(date);
+                var age_str = age >= 0 ? (age.ToString() + "d") : ((-age).ToString() + "d*");
+
+                return age_str;
+            }
+
+            public string getNiceDateStr(DateTime dt)
+            {
+                var dt1 = new DateTime(dt.Year, dt.Month, dt.Day, date.Hour, date.Minute, date.Second);
+
+                TimeSpan ts = dt1 - date;
+                string nice_d = "";
+                if (ts.TotalDays < 1)
+                    nice_d = "T0 " + date.ToString("HH:mm");
+                else if (ts.TotalDays > 28)
+                    nice_d = date.ToString("dd/MM/yy");
+                else
+                    nice_d += ts.TotalDays.ToString() + "d " + date.ToString("HH:mm");
+
+                return nice_d;
+            }
+
+            public string getAsInfoText(Dictionary<string, ProfileInfo> prof_dict,
+            Dictionary<string, BeanEntryClass> bean_list,
+            DateTime dt)
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append(name.PadRight(10));
+                sb.Append(getShortProfileName(prof_dict).PadRight(20));
+                sb.Append(grind + " ");
+                sb.Append(bean_weight.ToString("0.0") + " ");
+                sb.Append(getKpi(prof_dict).ToString("0.0").PadLeft(5));
+                sb.Append(getAgeStr(bean_list).PadLeft(6));
+
+                sb.Append(getRatio().ToString("0.0") + " ");
+                sb.Append(shot_time.ToString("0").PadLeft(5));
+                sb.Append(id.ToString() + " ");
+                sb.Append(getNiceDateStr(DateTime.Now).PadLeft(8));
+
+                return sb.ToString();
+            }
         }
 
         static List<double> ReadList(string line, string key, double min_limit = 0.0)
@@ -565,7 +647,7 @@ namespace DE1LogView
 
         // Beanlist file --------------------------------------
 
-        class BeanEntryClass
+        public class BeanEntryClass
         {
             public string ShortName = "";
             public string FullName = "";
@@ -678,6 +760,41 @@ namespace DE1LogView
             var da = bbb.DatesSinceRoast(DateTime.Now); */
         }
 
+
+        // Profile info ------------------
+
+        public enum KpiTypeEnum { Pressure, Flow }
+        public class ProfileInfo
+        {
+            public string full_name = "";
+            public string short_name = "";
+            public KpiTypeEnum kpi_type = KpiTypeEnum.Flow;
+            public double kpi_min_time = 0;
+
+            public ProfileInfo(string s)
+            {
+                var words = s.Split(',');
+                full_name = words[0].Trim();
+                short_name = words[1].Trim();
+                kpi_type = words[2].Trim() == "Pressure" ? KpiTypeEnum.Pressure : KpiTypeEnum.Flow;
+                kpi_min_time = Convert.ToDouble(words[3].Trim());
+            }
+        }
+
+        void ReadProfileInfo(string fname)
+        {
+            ProfileInfoList.Clear();
+
+            var lines = File.ReadAllLines(fname);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("Full name,Short name,KPI"))
+                    continue;
+
+                ProfileInfo p = new ProfileInfo(line);
+                ProfileInfoList[p.full_name] = p;
+            }
+        }
 
         // OLD format ------------------
         private void ReadOldFileFormat(string fname)

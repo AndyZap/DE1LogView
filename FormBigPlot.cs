@@ -24,8 +24,8 @@ namespace DE1LogView
             if (Graph == null)
                 Graph = new GraphPainter(panel1, this.Font);
 
-            if (parent.SecondPlotKey != "")
-                parent.PlotDataRec(Graph, parent.Data[parent.SecondPlotKey]);
+            if (parent.RefPlotKey != "")
+                parent.PlotDataRec(Graph, parent.Data[parent.RefPlotKey]);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)

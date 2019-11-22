@@ -45,22 +45,21 @@
             this.txtNotes = new System.Windows.Forms.TextBox();
             this.listData = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.labProfile = new System.Windows.Forms.Label();
-            this.labTime = new System.Windows.Forms.Label();
-            this.labGrind = new System.Windows.Forms.Label();
-            this.labRatio = new System.Windows.Forms.Label();
-            this.labCoffeeWeight = new System.Windows.Forms.Label();
-            this.labBeanWeight = new System.Windows.Forms.Label();
-            this.labDaysSinceRoast = new System.Windows.Forms.Label();
             this.labDate = new System.Windows.Forms.Label();
-            this.labName = new System.Windows.Forms.Label();
             this.labID = new System.Windows.Forms.Label();
+            this.labTime = new System.Windows.Forms.Label();
+            this.labRatio = new System.Windows.Forms.Label();
+            this.labDaysSinceRoast = new System.Windows.Forms.Label();
+            this.labKpi = new System.Windows.Forms.Label();
+            this.labBeanWeight = new System.Windows.Forms.Label();
+            this.labGrind = new System.Windows.Forms.Label();
+            this.labProfile = new System.Windows.Forms.Label();
+            this.labName = new System.Windows.Forms.Label();
             this.labHasPlot = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnMenu = new System.Windows.Forms.Button();
             this.btnImportData = new System.Windows.Forms.Button();
-            this.btnAddPlot = new System.Windows.Forms.Button();
-            this.btnSaveData = new System.Windows.Forms.Button();
+            this.btnRefPlot = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.disableRecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
@@ -74,6 +73,8 @@
             this.bigDiffPlotCtrlDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
             this.beanInfoCtrlBF3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveDataCtrlSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -112,7 +113,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Resize += new System.EventHandler(this.splitContainer1_Panel2_Resize);
             this.splitContainer1.Size = new System.Drawing.Size(1109, 739);
-            this.splitContainer1.SplitterDistance = 94;
+            this.splitContainer1.SplitterDistance = 88;
             this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -128,14 +129,18 @@
             // 
             this.splitContainer2.Panel1.Controls.Add(this.labelTopR);
             this.splitContainer2.Panel1.Controls.Add(this.labelTopL);
+            this.splitContainer2.Panel1.Cursor = System.Windows.Forms.Cursors.Cross;
             this.splitContainer2.Panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer2_Panel1_Paint);
+            this.splitContainer2.Panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.splitContainer2_Panel1_MouseMove);
             // 
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.labelBotR);
             this.splitContainer2.Panel2.Controls.Add(this.labelBotL);
+            this.splitContainer2.Panel2.Cursor = System.Windows.Forms.Cursors.Cross;
             this.splitContainer2.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer2_Panel2_Paint);
-            this.splitContainer2.Size = new System.Drawing.Size(94, 739);
+            this.splitContainer2.Panel2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.splitContainer2_Panel2_MouseMove);
+            this.splitContainer2.Size = new System.Drawing.Size(88, 739);
             this.splitContainer2.SplitterDistance = 374;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -143,7 +148,7 @@
             // 
             this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopR.Location = new System.Drawing.Point(17, 0);
+            this.labelTopR.Location = new System.Drawing.Point(11, 0);
             this.labelTopR.Name = "labelTopR";
             this.labelTopR.Size = new System.Drawing.Size(74, 18);
             this.labelTopR.TabIndex = 1;
@@ -157,7 +162,7 @@
             this.labelTopL.BackColor = System.Drawing.SystemColors.Window;
             this.labelTopL.Location = new System.Drawing.Point(0, 0);
             this.labelTopL.Name = "labelTopL";
-            this.labelTopL.Size = new System.Drawing.Size(21, 18);
+            this.labelTopL.Size = new System.Drawing.Size(15, 18);
             this.labelTopL.TabIndex = 0;
             this.labelTopL.Text = "label1";
             // 
@@ -165,7 +170,7 @@
             // 
             this.labelBotR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelBotR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelBotR.Location = new System.Drawing.Point(18, 0);
+            this.labelBotR.Location = new System.Drawing.Point(12, 0);
             this.labelBotR.Name = "labelBotR";
             this.labelBotR.Size = new System.Drawing.Size(74, 18);
             this.labelBotR.TabIndex = 3;
@@ -179,7 +184,7 @@
             this.labelBotL.BackColor = System.Drawing.SystemColors.Window;
             this.labelBotL.Location = new System.Drawing.Point(1, 0);
             this.labelBotL.Name = "labelBotL";
-            this.labelBotL.Size = new System.Drawing.Size(21, 18);
+            this.labelBotL.Size = new System.Drawing.Size(15, 18);
             this.labelBotL.TabIndex = 2;
             this.labelBotL.Text = "label1";
             // 
@@ -190,13 +195,13 @@
             this.panel4.Location = new System.Drawing.Point(0, 695);
             this.panel4.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(1008, 44);
+            this.panel4.Size = new System.Drawing.Size(1014, 44);
             this.panel4.TabIndex = 6;
             // 
             // txtCopy
             // 
             this.txtCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtCopy.Location = new System.Drawing.Point(966, 11);
+            this.txtCopy.Location = new System.Drawing.Point(972, 11);
             this.txtCopy.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.txtCopy.Name = "txtCopy";
             this.txtCopy.Size = new System.Drawing.Size(43, 26);
@@ -211,13 +216,13 @@
             this.panel3.Location = new System.Drawing.Point(0, 625);
             this.panel3.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(1008, 44);
+            this.panel3.Size = new System.Drawing.Size(1014, 44);
             this.panel3.TabIndex = 5;
             // 
             // btnSaveNotes
             // 
             this.btnSaveNotes.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnSaveNotes.Location = new System.Drawing.Point(920, 0);
+            this.btnSaveNotes.Location = new System.Drawing.Point(926, 0);
             this.btnSaveNotes.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.btnSaveNotes.Name = "btnSaveNotes";
             this.btnSaveNotes.Size = new System.Drawing.Size(88, 44);
@@ -244,7 +249,7 @@
             this.panel5.Location = new System.Drawing.Point(0, 565);
             this.panel5.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(1008, 60);
+            this.panel5.Size = new System.Drawing.Size(1014, 60);
             this.panel5.TabIndex = 4;
             // 
             // txtNotes
@@ -253,7 +258,7 @@
             this.txtNotes.Location = new System.Drawing.Point(0, 0);
             this.txtNotes.Multiline = true;
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(1008, 60);
+            this.txtNotes.Size = new System.Drawing.Size(1014, 60);
             this.txtNotes.TabIndex = 0;
             // 
             // listData
@@ -269,7 +274,7 @@
             this.listData.Location = new System.Drawing.Point(0, 87);
             this.listData.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.listData.Name = "listData";
-            this.listData.Size = new System.Drawing.Size(1008, 478);
+            this.listData.Size = new System.Drawing.Size(1014, 478);
             this.listData.TabIndex = 3;
             this.listData.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listData_DrawItem);
             this.listData.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.listData_MeasureItem);
@@ -278,105 +283,28 @@
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.labProfile);
-            this.panel2.Controls.Add(this.labTime);
-            this.panel2.Controls.Add(this.labGrind);
-            this.panel2.Controls.Add(this.labRatio);
-            this.panel2.Controls.Add(this.labCoffeeWeight);
-            this.panel2.Controls.Add(this.labBeanWeight);
-            this.panel2.Controls.Add(this.labDaysSinceRoast);
             this.panel2.Controls.Add(this.labDate);
-            this.panel2.Controls.Add(this.labName);
             this.panel2.Controls.Add(this.labID);
+            this.panel2.Controls.Add(this.labTime);
+            this.panel2.Controls.Add(this.labRatio);
+            this.panel2.Controls.Add(this.labDaysSinceRoast);
+            this.panel2.Controls.Add(this.labKpi);
+            this.panel2.Controls.Add(this.labBeanWeight);
+            this.panel2.Controls.Add(this.labGrind);
+            this.panel2.Controls.Add(this.labProfile);
+            this.panel2.Controls.Add(this.labName);
             this.panel2.Controls.Add(this.labHasPlot);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 53);
             this.panel2.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1008, 34);
+            this.panel2.Size = new System.Drawing.Size(1014, 34);
             this.panel2.TabIndex = 2;
-            // 
-            // labProfile
-            // 
-            this.labProfile.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labProfile.Location = new System.Drawing.Point(502, 0);
-            this.labProfile.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labProfile.Name = "labProfile";
-            this.labProfile.Size = new System.Drawing.Size(127, 34);
-            this.labProfile.TabIndex = 7;
-            this.labProfile.Text = "Profile";
-            this.labProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labTime
-            // 
-            this.labTime.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labTime.Location = new System.Drawing.Point(460, 0);
-            this.labTime.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labTime.Name = "labTime";
-            this.labTime.Size = new System.Drawing.Size(42, 34);
-            this.labTime.TabIndex = 5;
-            this.labTime.Text = "Time";
-            this.labTime.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labGrind
-            // 
-            this.labGrind.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labGrind.Location = new System.Drawing.Point(410, 0);
-            this.labGrind.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labGrind.Name = "labGrind";
-            this.labGrind.Size = new System.Drawing.Size(50, 34);
-            this.labGrind.TabIndex = 4;
-            this.labGrind.Text = "Grind";
-            this.labGrind.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labRatio
-            // 
-            this.labRatio.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labRatio.Location = new System.Drawing.Point(354, 0);
-            this.labRatio.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labRatio.Name = "labRatio";
-            this.labRatio.Size = new System.Drawing.Size(56, 34);
-            this.labRatio.TabIndex = 6;
-            this.labRatio.Text = "Ratio";
-            this.labRatio.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labCoffeeWeight
-            // 
-            this.labCoffeeWeight.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labCoffeeWeight.Location = new System.Drawing.Point(292, 0);
-            this.labCoffeeWeight.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labCoffeeWeight.Name = "labCoffeeWeight";
-            this.labCoffeeWeight.Size = new System.Drawing.Size(62, 34);
-            this.labCoffeeWeight.TabIndex = 3;
-            this.labCoffeeWeight.Text = "Coffee";
-            this.labCoffeeWeight.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labBeanWeight
-            // 
-            this.labBeanWeight.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labBeanWeight.Location = new System.Drawing.Point(247, 0);
-            this.labBeanWeight.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labBeanWeight.Name = "labBeanWeight";
-            this.labBeanWeight.Size = new System.Drawing.Size(45, 34);
-            this.labBeanWeight.TabIndex = 1;
-            this.labBeanWeight.Text = "Bean";
-            this.labBeanWeight.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labDaysSinceRoast
-            // 
-            this.labDaysSinceRoast.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDaysSinceRoast.Location = new System.Drawing.Point(202, 0);
-            this.labDaysSinceRoast.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labDaysSinceRoast.Name = "labDaysSinceRoast";
-            this.labDaysSinceRoast.Size = new System.Drawing.Size(45, 34);
-            this.labDaysSinceRoast.TabIndex = 12;
-            this.labDaysSinceRoast.Text = "Roast";
-            this.labDaysSinceRoast.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labDate
             // 
             this.labDate.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDate.Location = new System.Drawing.Point(129, 0);
+            this.labDate.Location = new System.Drawing.Point(556, 0);
             this.labDate.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labDate.Name = "labDate";
             this.labDate.Size = new System.Drawing.Size(73, 34);
@@ -384,27 +312,104 @@
             this.labDate.Text = "Date";
             this.labDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labName
-            // 
-            this.labName.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labName.Location = new System.Drawing.Point(58, 0);
-            this.labName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labName.Name = "labName";
-            this.labName.Size = new System.Drawing.Size(71, 34);
-            this.labName.TabIndex = 2;
-            this.labName.Text = "Name";
-            this.labName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // labID
             // 
             this.labID.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labID.Location = new System.Drawing.Point(13, 0);
+            this.labID.Location = new System.Drawing.Point(511, 0);
             this.labID.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labID.Name = "labID";
             this.labID.Size = new System.Drawing.Size(45, 34);
             this.labID.TabIndex = 11;
             this.labID.Text = "#";
             this.labID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labTime
+            // 
+            this.labTime.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labTime.Location = new System.Drawing.Point(469, 0);
+            this.labTime.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labTime.Name = "labTime";
+            this.labTime.Size = new System.Drawing.Size(42, 34);
+            this.labTime.TabIndex = 5;
+            this.labTime.Text = "Time";
+            this.labTime.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labRatio
+            // 
+            this.labRatio.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labRatio.Location = new System.Drawing.Point(413, 0);
+            this.labRatio.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labRatio.Name = "labRatio";
+            this.labRatio.Size = new System.Drawing.Size(56, 34);
+            this.labRatio.TabIndex = 6;
+            this.labRatio.Text = "Ratio";
+            this.labRatio.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labDaysSinceRoast
+            // 
+            this.labDaysSinceRoast.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labDaysSinceRoast.Location = new System.Drawing.Point(368, 0);
+            this.labDaysSinceRoast.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labDaysSinceRoast.Name = "labDaysSinceRoast";
+            this.labDaysSinceRoast.Size = new System.Drawing.Size(45, 34);
+            this.labDaysSinceRoast.TabIndex = 12;
+            this.labDaysSinceRoast.Text = "Roast";
+            this.labDaysSinceRoast.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labKpi
+            // 
+            this.labKpi.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labKpi.Location = new System.Drawing.Point(306, 0);
+            this.labKpi.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labKpi.Name = "labKpi";
+            this.labKpi.Size = new System.Drawing.Size(62, 34);
+            this.labKpi.TabIndex = 3;
+            this.labKpi.Text = "Coffee";
+            this.labKpi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labBeanWeight
+            // 
+            this.labBeanWeight.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labBeanWeight.Location = new System.Drawing.Point(261, 0);
+            this.labBeanWeight.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labBeanWeight.Name = "labBeanWeight";
+            this.labBeanWeight.Size = new System.Drawing.Size(45, 34);
+            this.labBeanWeight.TabIndex = 1;
+            this.labBeanWeight.Text = "Bean";
+            this.labBeanWeight.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labGrind
+            // 
+            this.labGrind.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labGrind.Location = new System.Drawing.Point(211, 0);
+            this.labGrind.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labGrind.Name = "labGrind";
+            this.labGrind.Size = new System.Drawing.Size(50, 34);
+            this.labGrind.TabIndex = 4;
+            this.labGrind.Text = "Grind";
+            this.labGrind.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labProfile
+            // 
+            this.labProfile.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labProfile.Location = new System.Drawing.Point(84, 0);
+            this.labProfile.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labProfile.Name = "labProfile";
+            this.labProfile.Size = new System.Drawing.Size(127, 34);
+            this.labProfile.TabIndex = 7;
+            this.labProfile.Text = "Profile";
+            this.labProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // labName
+            // 
+            this.labName.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labName.Location = new System.Drawing.Point(13, 0);
+            this.labName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labName.Name = "labName";
+            this.labName.Size = new System.Drawing.Size(71, 34);
+            this.labName.TabIndex = 2;
+            this.labName.Text = "Name";
+            this.labName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labHasPlot
             // 
@@ -420,19 +425,18 @@
             // 
             this.panel1.Controls.Add(this.btnMenu);
             this.panel1.Controls.Add(this.btnImportData);
-            this.panel1.Controls.Add(this.btnAddPlot);
-            this.panel1.Controls.Add(this.btnSaveData);
+            this.panel1.Controls.Add(this.btnRefPlot);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1008, 53);
+            this.panel1.Size = new System.Drawing.Size(1014, 53);
             this.panel1.TabIndex = 1;
             // 
             // btnMenu
             // 
             this.btnMenu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMenu.Location = new System.Drawing.Point(916, 0);
+            this.btnMenu.Location = new System.Drawing.Point(922, 0);
             this.btnMenu.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMenu.Name = "btnMenu";
             this.btnMenu.Size = new System.Drawing.Size(88, 50);
@@ -454,29 +458,17 @@
             this.btnImportData.UseVisualStyleBackColor = true;
             this.btnImportData.Click += new System.EventHandler(this.btnImportData_Click);
             // 
-            // btnAddPlot
+            // btnRefPlot
             // 
-            this.btnAddPlot.Location = new System.Drawing.Point(103, 0);
-            this.btnAddPlot.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
-            this.btnAddPlot.Name = "btnAddPlot";
-            this.btnAddPlot.Size = new System.Drawing.Size(91, 50);
-            this.btnAddPlot.TabIndex = 11;
-            this.btnAddPlot.TabStop = false;
-            this.btnAddPlot.Text = "Add plot";
-            this.btnAddPlot.UseVisualStyleBackColor = true;
-            this.btnAddPlot.Click += new System.EventHandler(this.btnAddPlot_Click);
-            // 
-            // btnSaveData
-            // 
-            this.btnSaveData.Location = new System.Drawing.Point(203, 0);
-            this.btnSaveData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnSaveData.Name = "btnSaveData";
-            this.btnSaveData.Size = new System.Drawing.Size(88, 50);
-            this.btnSaveData.TabIndex = 10;
-            this.btnSaveData.TabStop = false;
-            this.btnSaveData.Text = "Save data";
-            this.btnSaveData.UseVisualStyleBackColor = true;
-            this.btnSaveData.Click += new System.EventHandler(this.btnSaveData_Click);
+            this.btnRefPlot.Location = new System.Drawing.Point(103, 0);
+            this.btnRefPlot.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
+            this.btnRefPlot.Name = "btnRefPlot";
+            this.btnRefPlot.Size = new System.Drawing.Size(91, 50);
+            this.btnRefPlot.TabIndex = 11;
+            this.btnRefPlot.TabStop = false;
+            this.btnRefPlot.Text = "Ref plot";
+            this.btnRefPlot.UseVisualStyleBackColor = true;
+            this.btnRefPlot.Click += new System.EventHandler(this.btnRefPlot_Click);
             // 
             // contextMenuStrip1
             // 
@@ -492,9 +484,11 @@
             this.toolStripMenuItem3,
             this.bigDiffPlotCtrlDToolStripMenuItem,
             this.toolStripMenuItem4,
-            this.beanInfoCtrlBF3ToolStripMenuItem});
+            this.beanInfoCtrlBF3ToolStripMenuItem,
+            this.toolStripMenuItem5,
+            this.saveDataCtrlSToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 226);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 232);
             // 
             // disableRecordToolStripMenuItem
             // 
@@ -572,6 +566,18 @@
             this.beanInfoCtrlBF3ToolStripMenuItem.Text = "Bean info Ctrl-B / F3";
             this.beanInfoCtrlBF3ToolStripMenuItem.Click += new System.EventHandler(this.beanInfoCtrlBF3ToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(221, 6);
+            // 
+            // saveDataCtrlSToolStripMenuItem
+            // 
+            this.saveDataCtrlSToolStripMenuItem.Name = "saveDataCtrlSToolStripMenuItem";
+            this.saveDataCtrlSToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.saveDataCtrlSToolStripMenuItem.Text = "Save data Ctrl-S";
+            this.saveDataCtrlSToolStripMenuItem.Click += new System.EventHandler(this.saveDataCtrlSToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -616,19 +622,18 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label labTime;
         private System.Windows.Forms.Label labGrind;
-        private System.Windows.Forms.Label labCoffeeWeight;
+        private System.Windows.Forms.Label labKpi;
         private System.Windows.Forms.Label labBeanWeight;
         private System.Windows.Forms.Label labDate;
         private System.Windows.Forms.Label labName;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label labRatio;
-        private System.Windows.Forms.Button btnSaveData;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.TextBox txtFilterName;
         private System.Windows.Forms.Label labProfile;
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Label labHasPlot;
-        private System.Windows.Forms.Button btnAddPlot;
+        private System.Windows.Forms.Button btnRefPlot;
         private System.Windows.Forms.Button btnImportData;
         private System.Windows.Forms.TextBox txtCopy;
         private System.Windows.Forms.SplitContainer splitContainer2;
@@ -654,5 +659,7 @@
         private System.Windows.Forms.Label labDaysSinceRoast;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem beanInfoCtrlBF3ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem saveDataCtrlSToolStripMenuItem;
     }
 }

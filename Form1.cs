@@ -11,37 +11,21 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.9";
+        string Revision = "DE1 Log View v1.10";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
-
-        // to draw GBR bars in listData_DrawItem
-        readonly int _BP1 = 20;
-        readonly int _BP2 = 30;
-
-        // these are used to color-code values, in listData_DrawItem only
-        readonly double _MIN_R = 1.5;
-        readonly double _RANGE_R = 1.9;
 
         GraphPainter GraphTop = null;
         GraphPainter GraphBot = null;
 
         FormBigPlot FormBigPlot = new FormBigPlot();
 
-        List<int> WeightPoints = new List<int>();
-
-        public string FirstPlotKey = "";
-        public string SecondPlotKey = "";
+        public string MainPlotKey = "";
+        public string RefPlotKey = "";
 
         public Form1()
         {
             InitializeComponent();
-
-            // TODO: make this configurable
-            WeightPoints.Add(_BP1);
-            WeightPoints.Add(_BP2);
-
-            HeatMapR = getHeatmap(0);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -58,6 +42,11 @@ namespace DE1LogView
 
             LoadSettings();
 
+            string bean_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\BeanList.csv";
+            LoadBeanList(bean_fname);
+
+            string profile_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\ProfileInfo.csv";
+            ReadProfileInfo(profile_fname);
 
             string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
             string old_data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\CoffeeLogger.csv";
@@ -65,15 +54,12 @@ namespace DE1LogView
                 ReadOldFileFormat(old_data_fname);
             else if (File.Exists(data_fname))
                 ReadAllRecords(data_fname);
-
-
-            string bean_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\BeanList.csv";
-            LoadBeanList(bean_fname);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
+            btnSaveData_Click(null, EventArgs.Empty);
         }
 
         private void listData_SelectedIndexChanged(object sender, EventArgs e)
@@ -87,11 +73,11 @@ namespace DE1LogView
 
             if (!Data.ContainsKey(key))
             {
-                FirstPlotKey = "";
+                MainPlotKey = "";
                 return;
             }
 
-            FirstPlotKey = key;
+            MainPlotKey = key;
 
             txtNotes.Text = String.IsNullOrEmpty(Data[key].notes) ? "" : Data[key].notes;
 
@@ -143,7 +129,6 @@ namespace DE1LogView
             if (d.notes != "")
                 e.ItemHeight *= 2;
         }
-
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0 || e.Index >= listData.Items.Count)
@@ -164,92 +149,55 @@ namespace DE1LogView
 
             Rectangle myrec = e.Bounds;
 
-            myrec.Y += 5;  // move the text a bit down
+            // plot color bar.  blue is the current one, RefPlotKey is red
+            myrec.X = labHasPlot.Left + 2; myrec.Width = labHasPlot.Width - 5;
+            if (listData.GetSelected(e.Index))
+                e.Graphics.FillRectangle(Brushes.Blue, myrec);
+            else
+                e.Graphics.FillRectangle(key == RefPlotKey ? Brushes.Red : Brushes.White, myrec);
+
+            // Text. Move the text a bit down
+            myrec.Y += 5;
 
             myrec.X = labName.Left; myrec.Width = labName.Width;
             e.Graphics.DrawString(d.name, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
+            e.Graphics.DrawString(d.getShortProfileName(ProfileInfoList), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
+            e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
+            e.Graphics.DrawString(d.bean_weight.ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labKpi.Left; myrec.Width = labKpi.Width;
+            e.Graphics.DrawString(d.getKpi(ProfileInfoList).ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labDaysSinceRoast.Left; myrec.Width = labDaysSinceRoast.Width;
+            e.Graphics.DrawString(d.getAgeStr(BeanList), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
+            e.Graphics.DrawString(d.getRatio().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labTime.Left; myrec.Width = labTime.Width;
+            e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labID.Left; myrec.Width = labID.Width;
             e.Graphics.DrawString(d.id.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labDate.Left; myrec.Width = labDate.Width;
+            e.Graphics.DrawString(d.getNiceDateStr(DateTime.Now), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            var dn = DateTime.Now;
-            var dn1 = new DateTime(dn.Year, dn.Month, dn.Day, d.date.Hour, d.date.Minute, d.date.Second);
 
-            TimeSpan ts = dn1 - d.date;
-            string ddd = "";
-            if (ts.TotalDays < 1)
-                ddd = "T0 " + d.date.ToString("HH:mm");
-            else if (ts.TotalDays > 28)
-                ddd = d.date.ToString("dd/MM/yy");
-            else
+            if (d.notes != "") // notes, on a separate line
             {
-                var total = ts.TotalDays;
-
-                int years = (int)(total / 365.0);
-                total -= years * 365;
-
-                int months = (int)(total / 30.0);
-                total -= months * 30;
-
-                ddd = (years == 0 ? "" : years.ToString() + "y") + (months == 0 ? "" : months.ToString() + "m") + total.ToString("0") + "d";
-
-                if (years == 0 && months == 0)
-                    ddd += " " + d.date.ToString("HH:mm");
-            }
-
-            e.Graphics.DrawString(ddd, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            if (BeanList.ContainsKey(d.name))
-            {
-                var age = BeanList[d.name].DatesSinceRoast(d.date);
-                var age_str = age >= 0 ? (age.ToString() + "d") : ((-age).ToString() + "d*");
-
-                myrec.X = labDaysSinceRoast.Left; myrec.Width = labDaysSinceRoast.Width;
-                e.Graphics.DrawString(age_str, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-            }
-
-            myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
-            e.Graphics.DrawString(d.bean_weight.ToString("0.0").PadLeft(4), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labCoffeeWeight.Left; myrec.Width = labCoffeeWeight.Width;
-            e.Graphics.DrawString(d.coffee_weight.ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
-
-            var ratio = (d.coffee_weight / d.bean_weight);
-                var c = getHeatmapColor((ratio - _MIN_R) / _RANGE_R, HeatMapR);
-                e.Graphics.FillRectangle(c, myrec);
-
-            e.Graphics.DrawString(ratio.ToString("0.00"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
-            e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labTime.Left; myrec.Width = labTime.Width;
-            e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
-            e.Graphics.DrawString(d.profile, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.Y -= 5; // adjust back
-
-            // plot color.  0th plot is the current one, plotted as Blue
-            myrec.X = labHasPlot.Left + 2; myrec.Width = labHasPlot.Width - 5;
-            if (listData.GetSelected(e.Index))
-                e.Graphics.FillRectangle(Brushes.Blue, myrec);
-            else
-                e.Graphics.FillRectangle(key == SecondPlotKey ? Brushes.Red : Brushes.White, myrec);
-
-            if (d.notes != "")
-            {
-                // notes, on a separate line
-                myrec.X = labName.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
-                myrec.Y += 3 + e.Bounds.Height / 2;
+                myrec.X = labGrind.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
+                myrec.Y += e.Bounds.Height / 2;
                 e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
             }
         }
+
         private void splitContainer2_Panel1_Paint(object sender, PaintEventArgs e)
         {
             if (GraphTop != null)
@@ -266,11 +214,40 @@ namespace DE1LogView
             FilterData();
         }
 
+
+        List<string> SmartOutputSort(List<string> input)
+        {
+            List<DataStruct> list = new List<DataStruct>();
+            foreach (var i in input)
+                list.Add(Data[i]);
+
+            list.Sort(delegate (DataStruct a1, DataStruct a2)
+            {
+                if (a1.name != a2.name) { return a2.name.CompareTo(a1.name); }
+                else if (a1.profile != a2.profile) { return a2.profile.CompareTo(a1.profile); }
+                else if (a1.grind != a2.grind) { return a2.grind.CompareTo(a1.grind); }
+                else if (a1.bean_weight != a2.bean_weight) { return a2.bean_weight.CompareTo(a1.bean_weight); }
+                else
+                {
+                    if (Math.Abs(a1.getRatio() - a2.getRatio()) < 0.2) return 0;
+                    else return a1.getRatio().CompareTo(a2.getRatio());
+                }
+            });
+
+            List<string> output_list = new List<string>();
+            foreach (var x in list)
+                output_list.Add(x.date_str);
+
+            return output_list;
+        }
+
         private void FilterData()
         {
             List<string> sorted_keys = new List<string>();
 
             var flt_name = txtFilterName.Text.Trim().ToLower();
+
+            int max_days = 40;  // TODO: num days input
 
             foreach (var key in Data.Keys)
             {
@@ -280,11 +257,14 @@ namespace DE1LogView
                 if (!Data[key].enabled)
                     continue;
 
+                if ((DateTime.Now - Data[key].date).TotalDays > max_days)
+                    continue;
+
                 sorted_keys.Add(key);
             }
 
-            sorted_keys.Sort();
-
+            //sorted_keys.Sort();  // TODO: usual way
+            sorted_keys = SmartOutputSort(sorted_keys);
 
             string saved_key = "";
             if (listData.SelectedIndex != -1)
@@ -306,7 +286,6 @@ namespace DE1LogView
 
             listData.Refresh();
         }
-
         private void txtFilterName_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyValue == 27)
@@ -319,26 +298,26 @@ namespace DE1LogView
             - panel4.Height - panel5.Height - 5;
         }
 
-        private void btnAddPlot_Click(object sender, EventArgs e)
+        private void btnRefPlot_Click(object sender, EventArgs e)
         {
             if (listData.SelectedIndex != -1)
-                AddPlot(listData.SelectedIndex);
+                RefPlot(listData.SelectedIndex);
         }
 
-        private void AddPlot(int index)
+        private void RefPlot(int index)
         {
             string key = (string)listData.Items[index];
 
             if (!Data.ContainsKey(key))
             {
-                SecondPlotKey = "";
+                RefPlotKey = "";
                 return;
             }
 
-            if (SecondPlotKey == key)
+            if (RefPlotKey == key)
                 return;
 
-            SecondPlotKey = key;
+            RefPlotKey = key;
 
             PlotDataRec(GraphBot, Data[key]);
 
@@ -356,6 +335,8 @@ namespace DE1LogView
                     bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 80)  // Ctrl P - show/diff profiles
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
+                if (e.KeyValue == 83)  // Ctrl S - Save
+                    btnSaveData_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 112) // F1
             {
@@ -365,35 +346,20 @@ namespace DE1LogView
             {
                 DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
             }
+            else if (e.KeyValue == 116) // F5
+            {
+                PrintReport();
+            }
             else if (e.KeyValue == 123) // F12
             { }
         }
 
         private void CopyLine()
         {
-            if (listData.SelectedIndex < 0 || listData.SelectedIndex >= listData.Items.Count)
+            if (!Data.ContainsKey(MainPlotKey))
                 return;
 
-            string key = (string)listData.Items[listData.SelectedIndex];
-
-            if (!Data.ContainsKey(key))
-                return;
-
-            var d = Data[key];
-
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("#" + d.id.ToString() + " " + d.date.ToString("MMM:y").Replace(":", "'") + " ");
-
-            string t = "";
-            sb.Append(t + ": ");
-            sb.Append(d.bean_weight.ToString() + " -> ");
-            sb.Append(d.coffee_weight.ToString("0.0") + " in ");
-            sb.Append(d.shot_time.ToString() + " sec, ratio ");
-            sb.Append((d.coffee_weight / d.bean_weight).ToString("0.00") + " grind ");
-            sb.Append(d.grind + " press ");
-
-            txtCopy.Text = sb.ToString();
+            txtCopy.Text = Data[MainPlotKey].getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
             txtCopy.SelectAll();
             txtCopy.Copy();
         }
@@ -404,7 +370,7 @@ namespace DE1LogView
             {
                 int index = listData.IndexFromPoint(e.Location);
                 if (index != -1)
-                    AddPlot(index);
+                    RefPlot(index);
             }
         }
 
@@ -453,10 +419,10 @@ namespace DE1LogView
 
         private void DiffProfilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!Data.ContainsKey(FirstPlotKey))
+            if (!Data.ContainsKey(MainPlotKey))
                 return;
 
-            var profile_name = Data[FirstPlotKey].profile;
+            var profile_name = Data[MainPlotKey].profile;
 
             string fname = ProfilesFolder + "\\" + profile_name + ".tcl";
             if (!File.Exists(fname))
@@ -469,9 +435,9 @@ namespace DE1LogView
             string content_fname1 = GetProfileInfo(fname);
 
             // Check if SelectedPlots exists and different from the main selection
-            if(SecondPlotKey != FirstPlotKey && Data.ContainsKey(SecondPlotKey))
+            if(RefPlotKey != MainPlotKey && Data.ContainsKey(RefPlotKey))
             {
-                var profile_name2 = Data[SecondPlotKey].profile;
+                var profile_name2 = Data[RefPlotKey].profile;
 
                 string fname2 = ProfilesFolder + "\\" + profile_name2 + ".tcl";
                 if (!File.Exists(fname2))
@@ -662,11 +628,11 @@ namespace DE1LogView
         }
         private void beanInfoCtrlBF3ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!Data.ContainsKey(FirstPlotKey))
+            if (!Data.ContainsKey(MainPlotKey))
                 return;
 
             var text = "";
-            var key = Data[FirstPlotKey].name;
+            var key = Data[MainPlotKey].name;
 
             if (BeanList.ContainsKey(key))
             {
@@ -677,6 +643,36 @@ namespace DE1LogView
 
             FormBigPlot.ShowLog(text);
             FormBigPlot.Show();
+        }
+
+        private void splitContainer2_Panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            var x = GraphTop.ToDataX(e.X);
+            var y = GraphTop.ToDataY(e.Y);
+
+            labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0");
+        }
+
+        private void splitContainer2_Panel2_MouseMove(object sender, MouseEventArgs e)
+        {
+            var x = GraphBot.ToDataX(e.X);
+            var y = GraphBot.ToDataY(e.Y);
+
+            labelBotR.Text = x.ToString("0.0") + ", " + y.ToString("0.0");
+        }
+        private void PrintReport()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (string item in listData.Items)
+                sb.AppendLine(Data[item].getAsInfoText(ProfileInfoList, BeanList, DateTime.Now));
+
+            FormBigPlot.ShowLog(sb.ToString());
+            FormBigPlot.Show();
+        }
+        private void saveDataCtrlSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            btnSaveData_Click(null, EventArgs.Empty);
         }
     }
 }
