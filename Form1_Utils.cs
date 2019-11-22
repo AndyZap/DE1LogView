@@ -56,12 +56,26 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "splitContainer1")) { splitContainer1.SplitterDistance = LoadInt(s, "splitContainer1"); }
                     else if (LoadLineContainsKey(s, "splitContainer2")) { splitContainer2.SplitterDistance = LoadInt(s, "splitContainer2"); }
 
+                    else if (LoadLineContainsKey(s, "txtFilterName")) { txtFilterName.Text = LoadString(s, "txtFilterName"); }
+                    else if (LoadLineContainsKey(s, "txtFilterProfile")) { txtFilterProfile.Text = LoadString(s, "txtFilterProfile"); }
+                    else if (LoadLineContainsKey(s, "comboNumItemsToShow")) { comboNumItemsToShow.Text = LoadString(s, "comboNumItemsToShow"); }
+                    else if (LoadLineContainsKey(s, "comboSortStyle")) { comboSortStyle.Text = LoadString(s, "comboSortStyle"); }
+                    else if (LoadLineContainsKey(s, "checkShowNotes")) 
+                    { 
+                        var str = LoadString(s, "checkShowNotes");
+                        checkShowNotes.Checked = str == "true";
+                    }
+
                     else if (LoadLineContainsKey(s, "ShotsFolder")) { ShotsFolder = LoadString(s, "ShotsFolder"); }
                     else if (LoadLineContainsKey(s, "ProfilesFolder")) { ProfilesFolder = LoadString(s, "ProfilesFolder"); }
                     else if (LoadLineContainsKey(s, "DataFolder")) { DataFolder = LoadString(s, "DataFolder"); }
                 }
             }
 
+            if(comboNumItemsToShow.SelectedIndex == -1)
+                comboNumItemsToShow.SelectedIndex = 0;
+            if (comboSortStyle.SelectedIndex == -1)
+                comboSortStyle.SelectedIndex = 0;
         }
         private void SaveSettings()
         {
@@ -72,13 +86,20 @@ namespace DE1LogView
             sb.AppendLine("this.Width               " + (this.Width < 200 ? "200" : this.Width.ToString()));
             sb.AppendLine("this.WindowState         " + ((int)this.WindowState).ToString());
 
-            sb.AppendLine("FormBigPlot.Top                 " + (FormBigPlot.Top < 0 ? "0" : FormBigPlot.Top.ToString()));
-            sb.AppendLine("FormBigPlot.Left                " + (FormBigPlot.Left < 0 ? "0" : FormBigPlot.Left.ToString()));
-            sb.AppendLine("FormBigPlot.Height              " + (FormBigPlot.Height < 200 ? "200" : FormBigPlot.Height.ToString()));
-            sb.AppendLine("FormBigPlot.Width               " + (FormBigPlot.Width < 200 ? "200" : FormBigPlot.Width.ToString()));
+            sb.AppendLine("FormBigPlot.Top          " + (FormBigPlot.Top < 0 ? "0" : FormBigPlot.Top.ToString()));
+            sb.AppendLine("FormBigPlot.Left         " + (FormBigPlot.Left < 0 ? "0" : FormBigPlot.Left.ToString()));
+            sb.AppendLine("FormBigPlot.Height       " + (FormBigPlot.Height < 200 ? "200" : FormBigPlot.Height.ToString()));
+            sb.AppendLine("FormBigPlot.Width        " + (FormBigPlot.Width < 200 ? "200" : FormBigPlot.Width.ToString()));
 
             sb.AppendLine("splitContainer1          " + splitContainer1.SplitterDistance.ToString());
             sb.AppendLine("splitContainer2          " + splitContainer2.SplitterDistance.ToString());
+
+            sb.AppendLine("txtFilterName            " + txtFilterName.Text);
+            sb.AppendLine("txtFilterProfile         " + txtFilterProfile.Text);
+            sb.AppendLine("comboNumItemsToShow      " + comboNumItemsToShow.Text);
+            sb.AppendLine("comboSortStyle           " + comboSortStyle.Text);
+            sb.AppendLine("checkShowNotes           " + (checkShowNotes.Checked ? "true" : "false"));
+
             sb.AppendLine("ShotsFolder              " + ShotsFolder);
             sb.AppendLine("ProfilesFolder           " + ProfilesFolder);
             sb.AppendLine("DataFolder               " + DataFolder);

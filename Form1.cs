@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.10";
+        string Revision = "DE1 Log View v1.11";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -126,8 +126,11 @@ namespace DE1LogView
 
             DataStruct d = Data[key];
 
-            if (d.notes != "")
-                e.ItemHeight *= 2;
+            if (checkShowNotes.Checked)
+            {
+                if (d.notes != "")
+                    e.ItemHeight *= 2;
+            }
         }
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
@@ -189,12 +192,14 @@ namespace DE1LogView
             myrec.X = labDate.Left; myrec.Width = labDate.Width;
             e.Graphics.DrawString(d.getNiceDateStr(DateTime.Now), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-
-            if (d.notes != "") // notes, on a separate line
+            if (checkShowNotes.Checked)
             {
-                myrec.X = labGrind.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
-                myrec.Y += e.Bounds.Height / 2;
-                e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+                if (d.notes != "") // notes, on a separate line
+                {
+                    myrec.X = labGrind.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
+                    myrec.Y += e.Bounds.Height / 2;
+                    e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+                }
             }
         }
 
@@ -208,12 +213,6 @@ namespace DE1LogView
             if (GraphBot != null)
                 GraphBot.Plot(e.Graphics);
         }
-
-        private void txtFilterName_TextChanged(object sender, EventArgs e)
-        {
-            FilterData();
-        }
-
 
         List<string> SmartOutputSort(List<string> input)
         {
@@ -246,12 +245,20 @@ namespace DE1LogView
             List<string> sorted_keys = new List<string>();
 
             var flt_name = txtFilterName.Text.Trim().ToLower();
+            var flt_profile = txtFilterProfile.Text.Trim().ToLower();
 
-            int max_days = 40;  // TODO: num days input
+            int max_days = int.MaxValue;
+            if (comboNumItemsToShow.Text == "Show last 31 days")
+                max_days = 31;
+            else if (comboNumItemsToShow.Text == "Show last 90 days")
+                max_days = 90;
 
             foreach (var key in Data.Keys)
             {
-                if (!String.IsNullOrEmpty(flt_name) && Data[key].name.Contains(flt_name) == false)
+                if (!String.IsNullOrEmpty(flt_name) && Data[key].name.ToLower().Contains(flt_name) == false)
+                    continue;
+
+                if (!String.IsNullOrEmpty(flt_profile) && Data[key].profile.ToLower().Contains(flt_profile) == false)
                     continue;
 
                 if (!Data[key].enabled)
@@ -263,8 +270,10 @@ namespace DE1LogView
                 sorted_keys.Add(key);
             }
 
-            //sorted_keys.Sort();  // TODO: usual way
-            sorted_keys = SmartOutputSort(sorted_keys);
+            if(comboSortStyle.Text == "Sort by ID")
+                sorted_keys.Sort();
+            else
+                sorted_keys = SmartOutputSort(sorted_keys);
 
             string saved_key = "";
             if (listData.SelectedIndex != -1)
@@ -285,11 +294,6 @@ namespace DE1LogView
                 listData.SelectedIndex = 0;
 
             listData.Refresh();
-        }
-        private void txtFilterName_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyValue == 27)
-                txtFilterName.Text = "";
         }
 
         private void splitContainer1_Panel2_Resize(object sender, EventArgs e)
@@ -336,7 +340,10 @@ namespace DE1LogView
                 if (e.KeyValue == 80)  // Ctrl P - show/diff profiles
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 83)  // Ctrl S - Save
+                {
                     btnSaveData_Click(null, EventArgs.Empty);
+                    MessageBox.Show("OK");
+                }
             }
             else if (e.KeyValue == 112) // F1
             {
@@ -673,6 +680,47 @@ namespace DE1LogView
         private void saveDataCtrlSToolStripMenuItem_Click(object sender, EventArgs e)
         {
             btnSaveData_Click(null, EventArgs.Empty);
+        }
+
+        private void txtFilterName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyValue == 27)
+            {
+                if(txtFilterName.Text == "")
+                    txtFilterProfile.Text = "";
+                else
+                    txtFilterName.Text = "";
+            }
+        }
+        private void txtFilterProfile_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyValue == 27)
+            {
+                if (txtFilterName.Text == "")
+                    txtFilterName.Text = "";
+                else
+                    txtFilterProfile.Text = "";
+            }
+        }
+        private void txtFilterName_TextChanged(object sender, EventArgs e)
+        {
+            FilterData();
+        }
+        private void txtFilterProfile_TextChanged(object sender, EventArgs e)
+        {
+            FilterData();
+        }
+        private void comboNumItemsToShow_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FilterData();
+        }
+        private void comboSortStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FilterData();
+        }
+        private void checkShowNotes_CheckedChanged(object sender, EventArgs e)
+        {
+            FilterData();
         }
     }
 }
