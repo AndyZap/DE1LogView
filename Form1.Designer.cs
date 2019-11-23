@@ -117,7 +117,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Resize += new System.EventHandler(this.splitContainer1_Panel2_Resize);
             this.splitContainer1.Size = new System.Drawing.Size(1109, 739);
-            this.splitContainer1.SplitterDistance = 85;
+            this.splitContainer1.SplitterDistance = 193;
             this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -144,7 +144,7 @@
             this.splitContainer2.Panel2.Cursor = System.Windows.Forms.Cursors.Cross;
             this.splitContainer2.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer2_Panel2_Paint);
             this.splitContainer2.Panel2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.splitContainer2_Panel2_MouseMove);
-            this.splitContainer2.Size = new System.Drawing.Size(85, 739);
+            this.splitContainer2.Size = new System.Drawing.Size(193, 739);
             this.splitContainer2.SplitterDistance = 374;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -152,7 +152,7 @@
             // 
             this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopR.Location = new System.Drawing.Point(8, 0);
+            this.labelTopR.Location = new System.Drawing.Point(116, 0);
             this.labelTopR.Name = "labelTopR";
             this.labelTopR.Size = new System.Drawing.Size(74, 18);
             this.labelTopR.TabIndex = 1;
@@ -166,7 +166,7 @@
             this.labelTopL.BackColor = System.Drawing.SystemColors.Window;
             this.labelTopL.Location = new System.Drawing.Point(0, 0);
             this.labelTopL.Name = "labelTopL";
-            this.labelTopL.Size = new System.Drawing.Size(12, 18);
+            this.labelTopL.Size = new System.Drawing.Size(110, 18);
             this.labelTopL.TabIndex = 0;
             this.labelTopL.Text = "label1";
             // 
@@ -174,7 +174,7 @@
             // 
             this.labelBotR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelBotR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelBotR.Location = new System.Drawing.Point(9, 0);
+            this.labelBotR.Location = new System.Drawing.Point(117, 0);
             this.labelBotR.Name = "labelBotR";
             this.labelBotR.Size = new System.Drawing.Size(74, 18);
             this.labelBotR.TabIndex = 3;
@@ -188,7 +188,7 @@
             this.labelBotL.BackColor = System.Drawing.SystemColors.Window;
             this.labelBotL.Location = new System.Drawing.Point(1, 0);
             this.labelBotL.Name = "labelBotL";
-            this.labelBotL.Size = new System.Drawing.Size(12, 18);
+            this.labelBotL.Size = new System.Drawing.Size(109, 18);
             this.labelBotL.TabIndex = 2;
             this.labelBotL.Text = "label1";
             // 
@@ -199,13 +199,13 @@
             this.panel4.Location = new System.Drawing.Point(0, 695);
             this.panel4.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(1017, 44);
+            this.panel4.Size = new System.Drawing.Size(909, 44);
             this.panel4.TabIndex = 6;
             // 
             // txtCopy
             // 
             this.txtCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtCopy.Location = new System.Drawing.Point(975, 11);
+            this.txtCopy.Location = new System.Drawing.Point(867, 11);
             this.txtCopy.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.txtCopy.Name = "txtCopy";
             this.txtCopy.Size = new System.Drawing.Size(43, 26);
@@ -224,13 +224,13 @@
             this.panel3.Location = new System.Drawing.Point(0, 625);
             this.panel3.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(1017, 44);
+            this.panel3.Size = new System.Drawing.Size(909, 44);
             this.panel3.TabIndex = 5;
             // 
             // btnSaveNotes
             // 
             this.btnSaveNotes.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnSaveNotes.Location = new System.Drawing.Point(929, 0);
+            this.btnSaveNotes.Location = new System.Drawing.Point(821, 0);
             this.btnSaveNotes.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.btnSaveNotes.Name = "btnSaveNotes";
             this.btnSaveNotes.Size = new System.Drawing.Size(88, 44);
@@ -257,7 +257,7 @@
             this.panel5.Location = new System.Drawing.Point(0, 565);
             this.panel5.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(1017, 60);
+            this.panel5.Size = new System.Drawing.Size(909, 60);
             this.panel5.TabIndex = 4;
             // 
             // txtNotes
@@ -266,13 +266,14 @@
             this.txtNotes.Location = new System.Drawing.Point(0, 0);
             this.txtNotes.Multiline = true;
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(1017, 60);
+            this.txtNotes.Size = new System.Drawing.Size(909, 60);
             this.txtNotes.TabIndex = 0;
             // 
             // listData
             // 
             this.listData.Dock = System.Windows.Forms.DockStyle.Top;
             this.listData.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
+            this.listData.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listData.FormattingEnabled = true;
             this.listData.IntegralHeight = false;
             this.listData.ItemHeight = 24;
@@ -282,7 +283,7 @@
             this.listData.Location = new System.Drawing.Point(0, 87);
             this.listData.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.listData.Name = "listData";
-            this.listData.Size = new System.Drawing.Size(1017, 478);
+            this.listData.Size = new System.Drawing.Size(909, 478);
             this.listData.TabIndex = 3;
             this.listData.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listData_DrawItem);
             this.listData.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.listData_MeasureItem);
@@ -306,13 +307,13 @@
             this.panel2.Location = new System.Drawing.Point(0, 53);
             this.panel2.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1017, 34);
+            this.panel2.Size = new System.Drawing.Size(909, 34);
             this.panel2.TabIndex = 2;
             // 
             // labDate
             // 
             this.labDate.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDate.Location = new System.Drawing.Point(556, 0);
+            this.labDate.Location = new System.Drawing.Point(540, 0);
             this.labDate.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labDate.Name = "labDate";
             this.labDate.Size = new System.Drawing.Size(73, 34);
@@ -323,7 +324,7 @@
             // labID
             // 
             this.labID.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labID.Location = new System.Drawing.Point(511, 0);
+            this.labID.Location = new System.Drawing.Point(495, 0);
             this.labID.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labID.Name = "labID";
             this.labID.Size = new System.Drawing.Size(45, 34);
@@ -334,7 +335,7 @@
             // labTime
             // 
             this.labTime.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labTime.Location = new System.Drawing.Point(469, 0);
+            this.labTime.Location = new System.Drawing.Point(453, 0);
             this.labTime.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labTime.Name = "labTime";
             this.labTime.Size = new System.Drawing.Size(42, 34);
@@ -345,7 +346,7 @@
             // labRatio
             // 
             this.labRatio.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labRatio.Location = new System.Drawing.Point(413, 0);
+            this.labRatio.Location = new System.Drawing.Point(397, 0);
             this.labRatio.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labRatio.Name = "labRatio";
             this.labRatio.Size = new System.Drawing.Size(56, 34);
@@ -356,12 +357,12 @@
             // labDaysSinceRoast
             // 
             this.labDaysSinceRoast.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDaysSinceRoast.Location = new System.Drawing.Point(368, 0);
+            this.labDaysSinceRoast.Location = new System.Drawing.Point(352, 0);
             this.labDaysSinceRoast.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labDaysSinceRoast.Name = "labDaysSinceRoast";
             this.labDaysSinceRoast.Size = new System.Drawing.Size(45, 34);
             this.labDaysSinceRoast.TabIndex = 12;
-            this.labDaysSinceRoast.Text = "Roast";
+            this.labDaysSinceRoast.Text = "Age";
             this.labDaysSinceRoast.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labKpi
@@ -370,9 +371,9 @@
             this.labKpi.Location = new System.Drawing.Point(306, 0);
             this.labKpi.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labKpi.Name = "labKpi";
-            this.labKpi.Size = new System.Drawing.Size(62, 34);
+            this.labKpi.Size = new System.Drawing.Size(46, 34);
             this.labKpi.TabIndex = 3;
-            this.labKpi.Text = "Coffee";
+            this.labKpi.Text = "KPI";
             this.labKpi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labBeanWeight
@@ -438,13 +439,13 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1017, 53);
+            this.panel1.Size = new System.Drawing.Size(909, 53);
             this.panel1.TabIndex = 1;
             // 
             // btnMenu
             // 
             this.btnMenu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMenu.Location = new System.Drawing.Point(925, 0);
+            this.btnMenu.Location = new System.Drawing.Point(817, 0);
             this.btnMenu.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMenu.Name = "btnMenu";
             this.btnMenu.Size = new System.Drawing.Size(88, 50);

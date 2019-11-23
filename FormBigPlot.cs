@@ -12,14 +12,24 @@ namespace DE1LogView
             InitializeComponent();
         }
 
+        public void SetSplitter(int w)
+        {
+            splitBigPlot.SplitterDistance = w;
+        }
+        public int GetSplitter()
+        {
+            return splitBigPlot.SplitterDistance;
+        }
+
         public void ShowLog(string text)
         {
             richLog.Text = text;
-            richLog.Visible = true;
+            splitBigPlot.Dock = DockStyle.Fill;
+            splitBigPlot.Visible = true;
         }
         public void ShowGraph()
         {
-            richLog.Visible = false;
+            splitBigPlot.Visible = false;
 
             if (Graph == null)
                 Graph = new GraphPainter(panel1, this.Font);

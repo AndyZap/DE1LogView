@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.11";
+        string Revision = "DE1 Log View v1.12";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -88,13 +88,13 @@ namespace DE1LogView
         {
             if (gp == GraphBot)
             {
-                labelBotL.Text = ds.name + "  " + ds.profile;
-                labelBotR.Text = ds.coffee_weight.ToString() + "g";
+                labelBotL.Text = ds.getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
+                labelBotR.Text = "";
             }
             else
             {
-                labelTopL.Text = ds.name + "  " + ds.profile;
-                labelTopR.Text = ds.coffee_weight.ToString() + "g";
+                labelTopL.Text = ds.getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
+                labelTopR.Text = "";
             }
 
             gp.SetAxisTitles("", "");
@@ -108,6 +108,16 @@ namespace DE1LogView
             gp.SetData(3, ds.elapsed, ds.pressure, Color.LimeGreen, 3, DashStyle.Solid);
 
             gp.SetData(4, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid);
+
+            List<double> temperature_scaled = new List<double>();
+            List<double> temperature_target_scaled = new List<double>();
+            foreach (var t in ds.temperature_basket)
+                temperature_scaled.Add(t / 10.0);
+            foreach (var t in ds.temperature_goal)
+                temperature_target_scaled.Add(t / 10.0);
+
+            gp.SetData(5, ds.elapsed, temperature_target_scaled, Color.Red, 2, DashStyle.Dash);
+            gp.SetData(6, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid);
 
             gp.SetAutoLimits();
 
@@ -132,6 +142,22 @@ namespace DE1LogView
                     e.ItemHeight *= 2;
             }
         }
+
+        private string TrimStringToDraw(string s, Graphics g, Font font, int width)
+        {
+            string out_str = s;
+
+            var x = g.MeasureString(out_str, font).ToSize().Width;
+
+            while(x >= width)
+            {
+                out_str = out_str.Remove(out_str.Length - 1);
+                x = g.MeasureString(out_str, font).ToSize().Width;
+            }
+
+            return out_str;
+        }
+
         private void listData_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0 || e.Index >= listData.Items.Count)
@@ -145,8 +171,11 @@ namespace DE1LogView
             DataStruct d = Data[key];
 
             Brush myBrush = Brushes.Black;
-            if (listData.GetSelected(e.Index))
-                e.Graphics.FillRectangle(Brushes.LightGray, e.Bounds);
+            if (e.Index % 2 == 0)
+            {
+                var brush = new SolidBrush(Color.FromArgb(255, 240, 240, 240));
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            }
             else
                 e.Graphics.FillRectangle(Brushes.White, e.Bounds);
 
@@ -160,7 +189,7 @@ namespace DE1LogView
                 e.Graphics.FillRectangle(key == RefPlotKey ? Brushes.Red : Brushes.White, myrec);
 
             // Text. Move the text a bit down
-            myrec.Y += 5;
+            myrec.Y += 2;
 
             myrec.X = labName.Left; myrec.Width = labName.Width;
             e.Graphics.DrawString(d.name, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -198,7 +227,10 @@ namespace DE1LogView
                 {
                     myrec.X = labGrind.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
                     myrec.Y += e.Bounds.Height / 2;
-                    e.Graphics.DrawString(d.notes, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+                    var notes_str = TrimStringToDraw(d.notes, e.Graphics, e.Font, myrec.Width);
+
+                    e.Graphics.DrawString(notes_str, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
                 }
             }
         }
@@ -455,34 +487,41 @@ namespace DE1LogView
 
                 string temp_fname2 = ApplicationDirectory + "\\tmp2.txt";
                 string content_fname2 = GetProfileInfo(fname2);
-                
 
-                string diff_tool = @"D:\Program Files\Beyond Compare 4\BCompare.exe";
-                if (!File.Exists(diff_tool))
-                    diff_tool = @"C:\Program Files\Beyond Compare 4\BCompare.exe";
-
-                if (File.Exists(diff_tool))
+                if (content_fname2 == content_fname1)
                 {
-                    try
-                    {
-                        File.WriteAllText(temp_fname1, content_fname1);
-                        File.WriteAllText(temp_fname2, content_fname2);
-
-                        System.Diagnostics.Process proc = new System.Diagnostics.Process();
-                        proc.StartInfo.FileName = diff_tool;
-                        proc.StartInfo.Arguments = temp_fname1 + " " + temp_fname2;
-                        proc.StartInfo.WorkingDirectory = ApplicationDirectory;
-                        proc.Start();
-                    }
-                    catch (System.Exception)
-                    {
-                        MessageBox.Show("Error running diff", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    }
+                    FormBigPlot.ShowLog(content_fname1);
+                    FormBigPlot.Show();
                 }
                 else
                 {
-                    FormBigPlot.ShowLog(content_fname1 + "\r\n\r\n" + content_fname2);
-                    FormBigPlot.Show();
+                    string diff_tool = @"D:\Program Files\Beyond Compare 4\BCompare.exe";
+                    if (!File.Exists(diff_tool))
+                        diff_tool = @"C:\Program Files\Beyond Compare 4\BCompare.exe";
+
+                    if (File.Exists(diff_tool))
+                    {
+                        try
+                        {
+                            File.WriteAllText(temp_fname1, content_fname1);
+                            File.WriteAllText(temp_fname2, content_fname2);
+
+                            System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                            proc.StartInfo.FileName = diff_tool;
+                            proc.StartInfo.Arguments = temp_fname1 + " " + temp_fname2;
+                            proc.StartInfo.WorkingDirectory = ApplicationDirectory;
+                            proc.Start();
+                        }
+                        catch (System.Exception)
+                        {
+                            MessageBox.Show("Error running diff", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                        }
+                    }
+                    else
+                    {
+                        FormBigPlot.ShowLog(content_fname1 + "\r\n\r\n" + content_fname2);
+                        FormBigPlot.Show();
+                    }
                 }
             }
             else

@@ -30,15 +30,19 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBigPlot));
             this.panel1 = new System.Windows.Forms.Panel();
-            this.richLog = new System.Windows.Forms.RichTextBox();
             this.labelTopR = new System.Windows.Forms.Label();
             this.labelTopL = new System.Windows.Forms.Label();
+            this.splitBigPlot = new System.Windows.Forms.SplitContainer();
+            this.richLog = new System.Windows.Forms.RichTextBox();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitBigPlot)).BeginInit();
+            this.splitBigPlot.Panel2.SuspendLayout();
+            this.splitBigPlot.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.richLog);
+            this.panel1.Controls.Add(this.splitBigPlot);
             this.panel1.Controls.Add(this.labelTopR);
             this.panel1.Controls.Add(this.labelTopL);
             this.panel1.Cursor = System.Windows.Forms.Cursors.Cross;
@@ -48,18 +52,6 @@
             this.panel1.Size = new System.Drawing.Size(1067, 623);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
-            // 
-            // richLog
-            // 
-            this.richLog.Dock = System.Windows.Forms.DockStyle.Right;
-            this.richLog.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richLog.Location = new System.Drawing.Point(234, 0);
-            this.richLog.Name = "richLog";
-            this.richLog.Size = new System.Drawing.Size(833, 623);
-            this.richLog.TabIndex = 4;
-            this.richLog.TabStop = false;
-            this.richLog.Text = "";
-            this.richLog.WordWrap = false;
             // 
             // labelTopR
             // 
@@ -83,6 +75,34 @@
             this.labelTopL.TabIndex = 2;
             this.labelTopL.Text = "label1";
             // 
+            // splitBigPlot
+            // 
+            this.splitBigPlot.Cursor = System.Windows.Forms.Cursors.Default;
+            this.splitBigPlot.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.splitBigPlot.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitBigPlot.Location = new System.Drawing.Point(0, 359);
+            this.splitBigPlot.Name = "splitBigPlot";
+            // 
+            // splitBigPlot.Panel2
+            // 
+            this.splitBigPlot.Panel2.Controls.Add(this.richLog);
+            this.splitBigPlot.Size = new System.Drawing.Size(1067, 264);
+            this.splitBigPlot.SplitterDistance = 507;
+            this.splitBigPlot.SplitterWidth = 8;
+            this.splitBigPlot.TabIndex = 5;
+            // 
+            // richLog
+            // 
+            this.richLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richLog.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richLog.Location = new System.Drawing.Point(0, 0);
+            this.richLog.Name = "richLog";
+            this.richLog.Size = new System.Drawing.Size(552, 264);
+            this.richLog.TabIndex = 5;
+            this.richLog.TabStop = false;
+            this.richLog.Text = "";
+            this.richLog.WordWrap = false;
+            // 
             // FormBigPlot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -104,6 +124,9 @@
             this.TopMost = true;
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormBigPlot_KeyDown);
             this.panel1.ResumeLayout(false);
+            this.splitBigPlot.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitBigPlot)).EndInit();
+            this.splitBigPlot.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -113,6 +136,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label labelTopR;
         private System.Windows.Forms.Label labelTopL;
+        private System.Windows.Forms.SplitContainer splitBigPlot;
         private System.Windows.Forms.RichTextBox richLog;
     }
 }

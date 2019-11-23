@@ -48,20 +48,21 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "this.Width")) { this.Width = LoadInt(s, "this.Width"); }
                     else if (LoadLineContainsKey(s, "this.WindowState")) { this.WindowState = (FormWindowState)LoadInt(s, "this.WindowState"); }
 
-                    else if(LoadLineContainsKey(s,  "FormBigPlot.Top")) { FormBigPlot.Top = LoadInt(s, "FormBigPlot.Top"); }
+                    else if (LoadLineContainsKey(s, "FormBigPlot.Top")) { FormBigPlot.Top = LoadInt(s, "FormBigPlot.Top"); }
                     else if (LoadLineContainsKey(s, "FormBigPlot.Left")) { FormBigPlot.Left = LoadInt(s, "FormBigPlot.Left"); }
                     else if (LoadLineContainsKey(s, "FormBigPlot.Height")) { FormBigPlot.Height = LoadInt(s, "FormBigPlot.Height"); }
                     else if (LoadLineContainsKey(s, "FormBigPlot.Width")) { FormBigPlot.Width = LoadInt(s, "FormBigPlot.Width"); }
 
                     else if (LoadLineContainsKey(s, "splitContainer1")) { splitContainer1.SplitterDistance = LoadInt(s, "splitContainer1"); }
                     else if (LoadLineContainsKey(s, "splitContainer2")) { splitContainer2.SplitterDistance = LoadInt(s, "splitContainer2"); }
+                    else if (LoadLineContainsKey(s, "FormBigPlot.splitBigPlot")) { FormBigPlot.SetSplitter(LoadInt(s, "FormBigPlot.splitBigPlot")); }
 
                     else if (LoadLineContainsKey(s, "txtFilterName")) { txtFilterName.Text = LoadString(s, "txtFilterName"); }
                     else if (LoadLineContainsKey(s, "txtFilterProfile")) { txtFilterProfile.Text = LoadString(s, "txtFilterProfile"); }
                     else if (LoadLineContainsKey(s, "comboNumItemsToShow")) { comboNumItemsToShow.Text = LoadString(s, "comboNumItemsToShow"); }
                     else if (LoadLineContainsKey(s, "comboSortStyle")) { comboSortStyle.Text = LoadString(s, "comboSortStyle"); }
-                    else if (LoadLineContainsKey(s, "checkShowNotes")) 
-                    { 
+                    else if (LoadLineContainsKey(s, "checkShowNotes"))
+                    {
                         var str = LoadString(s, "checkShowNotes");
                         checkShowNotes.Checked = str == "true";
                     }
@@ -69,7 +70,7 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "ShotsFolder")) { ShotsFolder = LoadString(s, "ShotsFolder"); }
                     else if (LoadLineContainsKey(s, "ProfilesFolder")) { ProfilesFolder = LoadString(s, "ProfilesFolder"); }
                     else if (LoadLineContainsKey(s, "DataFolder")) { DataFolder = LoadString(s, "DataFolder"); }
-                }
+                    }
             }
 
             if(comboNumItemsToShow.SelectedIndex == -1)
@@ -93,6 +94,7 @@ namespace DE1LogView
 
             sb.AppendLine("splitContainer1          " + splitContainer1.SplitterDistance.ToString());
             sb.AppendLine("splitContainer2          " + splitContainer2.SplitterDistance.ToString());
+            sb.AppendLine("FormBigPlot.splitBigPlot " + FormBigPlot.GetSplitter().ToString());
 
             sb.AppendLine("txtFilterName            " + txtFilterName.Text);
             sb.AppendLine("txtFilterProfile         " + txtFilterProfile.Text);
