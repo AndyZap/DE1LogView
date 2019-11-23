@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.12";
+        string Revision = "DE1 Log View v1.14";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -88,13 +88,17 @@ namespace DE1LogView
         {
             if (gp == GraphBot)
             {
-                labelBotL.Text = ds.getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
+                labelBotL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now);
                 labelBotR.Text = "";
             }
-            else
+            else if (gp == GraphTop)
             {
-                labelTopL.Text = ds.getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
+                labelTopL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now);
                 labelTopR.Text = "";
+            }
+            else if (gp == FormBigPlot.Graph)
+            {
+                FormBigPlot.SetLabelText(ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now));
             }
 
             gp.SetAxisTitles("", "");
@@ -735,7 +739,7 @@ namespace DE1LogView
         {
             if (e.KeyValue == 27)
             {
-                if (txtFilterName.Text == "")
+                if (txtFilterProfile.Text == "")
                     txtFilterName.Text = "";
                 else
                     txtFilterProfile.Text = "";

@@ -107,7 +107,7 @@ namespace DE1LogView
         public GraphPainter(Panel p, Font f)
         {
             panel = p;
-            font = f;
+            font = new Font(f.FontFamily, (float) (f.Size * 1.3), FontStyle.Regular);
         }
 
         public void SetAxisTitles(string xt, string yt)

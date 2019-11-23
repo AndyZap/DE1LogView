@@ -30,10 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBigPlot));
             this.panel1 = new System.Windows.Forms.Panel();
-            this.labelTopR = new System.Windows.Forms.Label();
-            this.labelTopL = new System.Windows.Forms.Label();
             this.splitBigPlot = new System.Windows.Forms.SplitContainer();
             this.richLog = new System.Windows.Forms.RichTextBox();
+            this.labelTopR = new System.Windows.Forms.Label();
+            this.labelTopL = new System.Windows.Forms.Label();
+            this.labelTopL1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitBigPlot)).BeginInit();
             this.splitBigPlot.Panel2.SuspendLayout();
@@ -42,6 +43,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.labelTopL1);
             this.panel1.Controls.Add(this.splitBigPlot);
             this.panel1.Controls.Add(this.labelTopR);
             this.panel1.Controls.Add(this.labelTopL);
@@ -52,28 +54,7 @@
             this.panel1.Size = new System.Drawing.Size(1067, 623);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
-            // 
-            // labelTopR
-            // 
-            this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopR.Location = new System.Drawing.Point(705, 0);
-            this.labelTopR.Name = "labelTopR";
-            this.labelTopR.Size = new System.Drawing.Size(359, 18);
-            this.labelTopR.TabIndex = 3;
-            this.labelTopR.Text = "label2";
-            this.labelTopR.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // labelTopL
-            // 
-            this.labelTopL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelTopL.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopL.Location = new System.Drawing.Point(3, 0);
-            this.labelTopL.Name = "labelTopL";
-            this.labelTopL.Size = new System.Drawing.Size(426, 18);
-            this.labelTopL.TabIndex = 2;
-            this.labelTopL.Text = "label1";
+            this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
             // 
             // splitBigPlot
             // 
@@ -102,6 +83,40 @@
             this.richLog.TabStop = false;
             this.richLog.Text = "";
             this.richLog.WordWrap = false;
+            // 
+            // labelTopR
+            // 
+            this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
+            this.labelTopR.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTopR.Location = new System.Drawing.Point(973, 0);
+            this.labelTopR.Name = "labelTopR";
+            this.labelTopR.Size = new System.Drawing.Size(91, 18);
+            this.labelTopR.TabIndex = 3;
+            this.labelTopR.Text = "label2";
+            this.labelTopR.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // labelTopL
+            // 
+            this.labelTopL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTopL.BackColor = System.Drawing.SystemColors.Window;
+            this.labelTopL.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTopL.Location = new System.Drawing.Point(3, 0);
+            this.labelTopL.Name = "labelTopL";
+            this.labelTopL.Size = new System.Drawing.Size(964, 18);
+            this.labelTopL.TabIndex = 2;
+            // 
+            // labelTopL1
+            // 
+            this.labelTopL1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTopL1.BackColor = System.Drawing.SystemColors.Window;
+            this.labelTopL1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTopL1.Location = new System.Drawing.Point(3, 24);
+            this.labelTopL1.Name = "labelTopL1";
+            this.labelTopL1.Size = new System.Drawing.Size(964, 18);
+            this.labelTopL1.TabIndex = 6;
             // 
             // FormBigPlot
             // 
@@ -138,5 +153,6 @@
         private System.Windows.Forms.Label labelTopL;
         private System.Windows.Forms.SplitContainer splitBigPlot;
         private System.Windows.Forms.RichTextBox richLog;
+        private System.Windows.Forms.Label labelTopL1;
     }
 }

@@ -13,8 +13,8 @@ namespace DE1LogView
         string DataFolder = "";
 
         public Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
-        Dictionary<string, BeanEntryClass> BeanList = new Dictionary<string, BeanEntryClass>();
-        Dictionary<string, ProfileInfo> ProfileInfoList = new Dictionary<string, ProfileInfo>();
+        public Dictionary<string, BeanEntryClass> BeanList = new Dictionary<string, BeanEntryClass>();
+        public Dictionary<string, ProfileInfo> ProfileInfoList = new Dictionary<string, ProfileInfo>();
         public class DataStruct
         {
             public string date_str = "";
@@ -323,8 +323,8 @@ namespace DE1LogView
             }
 
             public string getAsInfoText(Dictionary<string, ProfileInfo> prof_dict,
-            Dictionary<string, BeanEntryClass> bean_list,
-            DateTime dt)
+                                        Dictionary<string, BeanEntryClass> bean_list,
+                                        DateTime dt)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -339,6 +339,27 @@ namespace DE1LogView
                 sb.Append(shot_time.ToString("0").PadLeft(5));
                 sb.Append(id.ToString() + " ");
                 sb.Append(getNiceDateStr(DateTime.Now).PadLeft(8));
+
+                return sb.ToString();
+            }
+            public string getAsInfoTextForGraph(Dictionary<string, ProfileInfo> prof_dict,
+                                        Dictionary<string, BeanEntryClass> bean_list,
+                                        DateTime dt)
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append(name + "    ");
+                sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
+                sb.Append("G" + grind + "    ");
+                sb.Append("B" + bean_weight.ToString("0.0") + "    ");
+                sb.Append("Kpi" + getKpi(prof_dict).ToString("0.0") + "    ");
+                sb.Append(getAgeStr(bean_list) + "    ");
+
+                sb.Append("R" + getRatio().ToString("0.0") + "    ");
+                sb.Append(shot_time.ToString("0") + "sec    ");
+                sb.Append("#" + id.ToString() + "    ");
+                sb.Append(getNiceDateStr(DateTime.Now) + "    ");
+                sb.Append(notes);
 
                 return sb.ToString();
             }
