@@ -339,6 +339,7 @@ namespace DE1LogView
                 sb.Append(shot_time.ToString("0").PadLeft(5));
                 sb.Append(id.ToString() + " ");
                 sb.Append(getNiceDateStr(DateTime.Now).PadLeft(8));
+                sb.Append(notes);
 
                 return sb.ToString();
             }

@@ -29,6 +29,10 @@ namespace DE1LogView
 
         public void ShowLog(string text)
         {
+            labelTopL.Visible = false;
+            labelTopL1.Visible = false;
+            labelTopR.Visible = false;
+
             richLog.Text = text;
             splitBigPlot.Dock = DockStyle.Fill;
             splitBigPlot.Visible = true;
@@ -36,6 +40,9 @@ namespace DE1LogView
         public void ShowGraph()
         {
             splitBigPlot.Visible = false;
+            labelTopL.Visible = true;
+            labelTopL1.Visible = true;
+            labelTopR.Visible = true;
 
             if (parent.MainPlotKey != "" && (parent.RefPlotKey == "" || parent.MainPlotKey == parent.RefPlotKey))
                 parent.PlotDataRec(Graph, parent.Data[parent.MainPlotKey]);
