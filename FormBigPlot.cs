@@ -51,8 +51,8 @@ namespace DE1LogView
                 Form1.DataStruct ds1 = parent.Data[parent.MainPlotKey];
                 Form1.DataStruct ds2 = parent.Data[parent.RefPlotKey];
 
-                labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList, DateTime.Now);
-                labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList, DateTime.Now);
+                labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList);
+                labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
 
                 Graph.SetAxisTitles("", "");
                 Graph.data.Clear();

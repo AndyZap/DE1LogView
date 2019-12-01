@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.15";
+        string Revision = "DE1 Log View v1.16";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -88,17 +88,17 @@ namespace DE1LogView
         {
             if (gp == GraphBot)
             {
-                labelBotL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now);
+                labelBotL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList);
                 labelBotR.Text = "";
             }
             else if (gp == GraphTop)
             {
-                labelTopL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now);
+                labelTopL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList);
                 labelTopR.Text = "";
             }
             else if (gp == FormBigPlot.Graph)
             {
-                FormBigPlot.SetLabelText(ds.getAsInfoTextForGraph(ProfileInfoList, BeanList, DateTime.Now));
+                FormBigPlot.SetLabelText(ds.getAsInfoTextForGraph(ProfileInfoList, BeanList));
             }
 
             gp.SetAxisTitles("", "");
@@ -369,6 +369,8 @@ namespace DE1LogView
         {
             if (e.Control)
             {
+                if (e.KeyValue == 66)  // Ctrl B - bean info
+                    beanInfoCtrlBF3ToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 67)  // Ctrl C
                     CopyLine();
                 if (e.KeyValue == 68)  // Ctrl D - big plot, incl diff plots
@@ -389,6 +391,14 @@ namespace DE1LogView
             {
                 DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
             }
+            else if (e.KeyValue == 114) // F3
+            {
+                beanInfoCtrlBF3ToolStripMenuItem_Click(null, EventArgs.Empty);
+            }
+            else if (e.KeyValue == 115) // F4
+            {
+                showVideoF4ToolStripMenuItem_Click(null, EventArgs.Empty);
+            }
             else if (e.KeyValue == 116) // F5
             {
                 PrintReport();
@@ -402,7 +412,7 @@ namespace DE1LogView
             if (!Data.ContainsKey(MainPlotKey))
                 return;
 
-            txtCopy.Text = Data[MainPlotKey].getAsInfoText(ProfileInfoList, BeanList, DateTime.Now);
+            txtCopy.Text = Data[MainPlotKey].getAsInfoTextForGraph(ProfileInfoList, BeanList);
             txtCopy.SelectAll();
             txtCopy.Copy();
         }
@@ -714,8 +724,44 @@ namespace DE1LogView
         {
             StringBuilder sb = new StringBuilder();
 
+            // get the max size for the bean and profile names
+            int max_bean_len = 0;
+            int max_profile_len = 0;
             foreach (string item in listData.Items)
-                sb.AppendLine(Data[item].getAsInfoText(ProfileInfoList, BeanList, DateTime.Now));
+            {
+                var d = Data[item];
+                max_bean_len = Math.Max(d.name.Length, max_bean_len);
+                max_profile_len = Math.Max(d.getShortProfileName(ProfileInfoList).Length, max_profile_len);
+
+            }
+
+            List<string> keys = new List<string>();
+            if (comboSortStyle.Text == "Sort by ID")
+            {
+                for(int i = listData.Items.Count-1; i >= 0; i--)
+                {
+                    keys.Add((string) listData.Items[i]);
+                }
+            }
+            else
+            {
+                foreach (string item in listData.Items)
+                    keys.Add(item);
+            }
+
+            if (keys.Count != 0)
+            {
+                var last_name = Data[keys[0]].name;
+                foreach (var key in keys)
+                {
+                    if (last_name != Data[key].name)
+                        sb.AppendLine("");
+
+                    sb.AppendLine(Data[key].getAsInfoText(ProfileInfoList, BeanList, max_bean_len: max_bean_len, max_profile_len: max_profile_len));
+
+                    last_name = Data[key].name;
+                }
+            }
 
             FormBigPlot.ShowLog(sb.ToString());
             FormBigPlot.Show();
@@ -764,6 +810,50 @@ namespace DE1LogView
         private void checkShowNotes_CheckedChanged(object sender, EventArgs e)
         {
             FilterData();
+        }
+        private void showVideoF4ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Data.ContainsKey(MainPlotKey))
+                return;
+
+            var id = Data[MainPlotKey].id;
+
+            string fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + ".mp4";
+            if (!File.Exists(fname))
+                return;
+
+            try
+            {
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = fname;
+                proc.StartInfo.UseShellExecute = true;
+                proc.Start();
+            }
+            catch (System.Exception)
+            {
+                MessageBox.Show("Error opening video", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+            }
+        }
+
+        private void openVideoFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(!Directory.Exists(VideoFolder))
+            {
+                MessageBox.Show("Video folder is not set", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = VideoFolder;
+                proc.StartInfo.UseShellExecute = true;
+                proc.Start();
+            }
+            catch (System.Exception)
+            {
+                MessageBox.Show("Error opening video", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+            }
         }
     }
 }

@@ -70,7 +70,8 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "ShotsFolder")) { ShotsFolder = LoadString(s, "ShotsFolder"); }
                     else if (LoadLineContainsKey(s, "ProfilesFolder")) { ProfilesFolder = LoadString(s, "ProfilesFolder"); }
                     else if (LoadLineContainsKey(s, "DataFolder")) { DataFolder = LoadString(s, "DataFolder"); }
-                    }
+                    else if (LoadLineContainsKey(s, "VideoFolder")) { VideoFolder = LoadString(s, "VideoFolder"); }
+                }
             }
 
             if(comboNumItemsToShow.SelectedIndex == -1)
@@ -105,6 +106,7 @@ namespace DE1LogView
             sb.AppendLine("ShotsFolder              " + ShotsFolder);
             sb.AppendLine("ProfilesFolder           " + ProfilesFolder);
             sb.AppendLine("DataFolder               " + DataFolder);
+            sb.AppendLine("VideoFolder              " + VideoFolder);
 
             string fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".dat";
             File.WriteAllText(fname, sb.ToString());

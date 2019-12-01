@@ -11,6 +11,7 @@ namespace DE1LogView
         string ShotsFolder = "";
         string ProfilesFolder = "";
         string DataFolder = "";
+        string VideoFolder = "";
 
         public Dictionary<string, DataStruct> Data = new Dictionary<string, DataStruct>();
         public Dictionary<string, BeanEntryClass> BeanList = new Dictionary<string, BeanEntryClass>();
@@ -324,28 +325,29 @@ namespace DE1LogView
 
             public string getAsInfoText(Dictionary<string, ProfileInfo> prof_dict,
                                         Dictionary<string, BeanEntryClass> bean_list,
-                                        DateTime dt)
+                                        int max_bean_len, int max_profile_len)
             {
                 StringBuilder sb = new StringBuilder();
 
-                sb.Append(name.PadRight(10));
-                sb.Append(getShortProfileName(prof_dict).PadRight(20));
-                sb.Append(grind + " ");
+                sb.Append(name.PadRight(max_bean_len) + "   ");
+                sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
+                sb.Append(grind + "  ");
                 sb.Append(bean_weight.ToString("0.0") + " ");
                 sb.Append(getKpi(prof_dict).ToString("0.0").PadLeft(5));
-                sb.Append(getAgeStr(bean_list).PadLeft(6));
 
-                sb.Append(getRatio().ToString("0.0") + " ");
-                sb.Append(shot_time.ToString("0").PadLeft(5));
-                sb.Append(id.ToString() + " ");
-                sb.Append(getNiceDateStr(DateTime.Now).PadLeft(8));
-                sb.Append(notes);
+                var age = getAgeStr(bean_list);
+                sb.Append(age.PadLeft(age.Contains("*") ? 6: 5).PadRight(7));
+
+                sb.Append("R" + getRatio().ToString("0.0") + " ");
+                sb.Append("T" + shot_time.ToString("0").PadRight(5));
+                sb.Append("#" + id.ToString().PadRight(5) + " ");
+                sb.Append(getNiceDateStr(DateTime.Now).PadRight(10));
+                sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
 
                 return sb.ToString();
             }
             public string getAsInfoTextForGraph(Dictionary<string, ProfileInfo> prof_dict,
-                                        Dictionary<string, BeanEntryClass> bean_list,
-                                        DateTime dt)
+                                        Dictionary<string, BeanEntryClass> bean_list)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -484,6 +486,23 @@ namespace DE1LogView
             if (d.elapsed.Count == 0)
                 return false;
 
+            // trim data at the end of the shot if the weight does not change
+            int last = d.weight.Count - 1;
+            while (d.weight[last] == d.weight[last - 1])
+            {
+                d.elapsed.RemoveAt(last);
+                d.pressure.RemoveAt(last);
+                d.weight.RemoveAt(last);
+                d.flow.RemoveAt(last);
+                d.flow_weight.RemoveAt(last);
+                d.temperature_basket.RemoveAt(last);
+                d.temperature_mix.RemoveAt(last);
+                d.pressure_goal.RemoveAt(last);
+                d.flow_goal.RemoveAt(last);
+                d.temperature_goal.RemoveAt(last);
+
+                last = d.weight.Count - 1;
+            }
 
             // setup the fields which are not saved in the file
             d.shot_time = d.elapsed[d.elapsed.Count - 1];
