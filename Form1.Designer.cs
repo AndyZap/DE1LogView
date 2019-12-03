@@ -51,7 +51,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.labDate = new System.Windows.Forms.Label();
             this.labID = new System.Windows.Forms.Label();
-            this.labTime = new System.Windows.Forms.Label();
+            this.labAvFlow = new System.Windows.Forms.Label();
             this.labRatio = new System.Windows.Forms.Label();
             this.labDaysSinceRoast = new System.Windows.Forms.Label();
             this.labKpi = new System.Windows.Forms.Label();
@@ -345,7 +345,7 @@
             // 
             this.panel2.Controls.Add(this.labDate);
             this.panel2.Controls.Add(this.labID);
-            this.panel2.Controls.Add(this.labTime);
+            this.panel2.Controls.Add(this.labAvFlow);
             this.panel2.Controls.Add(this.labRatio);
             this.panel2.Controls.Add(this.labDaysSinceRoast);
             this.panel2.Controls.Add(this.labKpi);
@@ -383,16 +383,16 @@
             this.labID.Text = "#";
             this.labID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labTime
+            // labAvFlow
             // 
-            this.labTime.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labTime.Location = new System.Drawing.Point(453, 0);
-            this.labTime.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labTime.Name = "labTime";
-            this.labTime.Size = new System.Drawing.Size(42, 34);
-            this.labTime.TabIndex = 5;
-            this.labTime.Text = "Time";
-            this.labTime.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labAvFlow.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labAvFlow.Location = new System.Drawing.Point(453, 0);
+            this.labAvFlow.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labAvFlow.Name = "labAvFlow";
+            this.labAvFlow.Size = new System.Drawing.Size(52, 34);
+            this.labAvFlow.TabIndex = 5;
+            this.labAvFlow.Text = "AvFL";
+            this.labAvFlow.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labRatio
             // 
@@ -702,7 +702,7 @@
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.ListBox listData;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label labTime;
+        private System.Windows.Forms.Label labAvFlow;
         private System.Windows.Forms.Label labGrind;
         private System.Windows.Forms.Label labKpi;
         private System.Windows.Forms.Label labBeanWeight;

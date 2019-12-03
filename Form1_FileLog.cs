@@ -283,6 +283,33 @@ namespace DE1LogView
                 }
                 return kpi;
             }
+
+            public double getFirstDropTime()
+            {
+                for(int i = 0; i < weight.Count; i++)
+                {
+                    if (weight[i] > 0.1)
+                        return elapsed[i];
+                }
+
+                return 0.0;
+            }
+            public double getAverageWeightFlow()
+            {
+                var first_drop = getFirstDropTime();
+                double flow_time = shot_time - first_drop;
+
+                // remove 0 flow points
+                for (int i = 1; i < elapsed.Count; i++)
+                {
+                    if (elapsed[i] < first_drop)
+                        continue;
+                    if (flow[i] < 0.2)
+                        flow_time -= elapsed[i] - elapsed[i - 1];
+                }
+
+                return coffee_weight / flow_time;
+            }
             public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
             {
                 if (!prof_dict.ContainsKey(profile))
@@ -339,7 +366,7 @@ namespace DE1LogView
                 sb.Append(age.PadLeft(age.Contains("*") ? 6: 5).PadRight(7));
 
                 sb.Append("R" + getRatio().ToString("0.0") + " ");
-                sb.Append("T" + shot_time.ToString("0").PadRight(5));
+                sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
                 sb.Append("#" + id.ToString().PadRight(5) + " ");
                 sb.Append(getNiceDateStr(DateTime.Now).PadRight(10));
                 sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
@@ -359,7 +386,7 @@ namespace DE1LogView
                 sb.Append(getAgeStr(bean_list) + "    ");
 
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
-                sb.Append(shot_time.ToString("0") + "sec    ");
+                sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
                 sb.Append("#" + id.ToString() + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
                 sb.Append(notes);

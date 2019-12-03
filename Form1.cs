@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.16";
+        string Revision = "DE1 Log View v1.17";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -123,6 +123,11 @@ namespace DE1LogView
             gp.SetData(5, ds.elapsed, temperature_target_scaled, Color.Red, 2, DashStyle.Dash);
             gp.SetData(6, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid);
 
+            var first_drop = ds.getFirstDropTime();
+            List<double> x_drop = new List<double>(); x_drop.Add(first_drop); x_drop.Add(first_drop);
+            List<double> y_drop = new List<double>(); y_drop.Add(0); y_drop.Add(1);
+            gp.SetData(7, x_drop, y_drop, Color.Brown, 2, DashStyle.Solid);
+
             gp.SetAutoLimits();
 
             gp.panel.Refresh();
@@ -143,7 +148,7 @@ namespace DE1LogView
             if (checkShowNotes.Checked)
             {
                 if (d.notes != "")
-                    e.ItemHeight *= 2;
+                    e.ItemHeight = (int) (e.ItemHeight * 1.7);
             }
         }
 
@@ -216,8 +221,9 @@ namespace DE1LogView
             myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
             e.Graphics.DrawString(d.getRatio().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labTime.Left; myrec.Width = labTime.Width;
-            e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            myrec.X = labAvFlow.Left; myrec.Width = labAvFlow.Width;
+            //e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.getAverageWeightFlow().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labID.Left; myrec.Width = labID.Width;
             e.Graphics.DrawString(d.id.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -229,12 +235,15 @@ namespace DE1LogView
             {
                 if (d.notes != "") // notes, on a separate line
                 {
-                    myrec.X = labGrind.Left; myrec.Width = e.Bounds.Width - labName.Left - 10;
+                    myrec.X = labGrind.Left+5; myrec.Width = e.Bounds.Width - labName.Left - 10;
                     myrec.Y += e.Bounds.Height / 2;
 
                     var notes_str = TrimStringToDraw(d.notes, e.Graphics, e.Font, myrec.Width);
+                    if (notes_str.StartsWith("*"))
+                        myrec.X -= 20;
 
-                    e.Graphics.DrawString(notes_str, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+                    Font font1 = new Font(e.Font.FontFamily, (float)(e.Font.Size * 0.7), FontStyle.Regular);
+                    e.Graphics.DrawString(notes_str, font1, myBrush, myrec, StringFormat.GenericTypographic);
                 }
             }
         }
