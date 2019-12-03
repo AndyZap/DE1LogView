@@ -728,6 +728,7 @@ namespace DE1LogView
             public string Process = "";
             public string Varietals = "";
             public string Notes = "";
+            public string Cupping = "";
 
             public BeanEntryClass(string s)
             {
@@ -751,6 +752,8 @@ namespace DE1LogView
                 Process = words[8].Trim();
                 Varietals = words[9].Trim();
                 Notes = words[10].Trim();
+                if(words.Length >=12)
+                    Cupping = words[11].Trim();
             }
 
             public override string ToString()
@@ -766,7 +769,8 @@ namespace DE1LogView
                 sb.Append(Defrosted == DateTime.MinValue ? "," : Defrosted.ToString("dd/MM/yyyy") + ",");
                 sb.Append(Process + ",");
                 sb.Append(Varietals + ",");
-                sb.Append(Notes);
+                sb.Append(Notes + ",");
+                sb.Append(Cupping);
 
                 return sb.ToString();
             }

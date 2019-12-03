@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.17";
+        string Revision = "DE1 Log View v1.18";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -703,9 +703,26 @@ namespace DE1LogView
             var text = "";
             var key = Data[MainPlotKey].name;
 
+            
             if (BeanList.ContainsKey(key))
             {
-                text = BeanList[key].Country;
+                StringBuilder sb = new StringBuilder();
+
+                var b = BeanList[key];
+
+                sb.AppendLine("ShortName    " + b.ShortName);
+                sb.AppendLine("FullName     " + b.FullName);
+                sb.AppendLine("Country      " + b.Country);
+                sb.AppendLine("CountryCode  " + b.CountryCode);
+                sb.AppendLine("From         " + b.From);
+                sb.AppendLine("Roasted      " + (b.Roasted == DateTime.MinValue ? "" : b.Roasted.ToString("dd/MM/yyyy")));
+                sb.AppendLine("Frozen       " + (b.Frozen == DateTime.MinValue ? "" : b.Frozen.ToString("dd/MM/yyyy")));
+                sb.AppendLine("Defrosted    " + (b.Defrosted == DateTime.MinValue ? "" : b.Defrosted.ToString("dd/MM/yyyy")));
+                sb.AppendLine("Process      " + b.Process);
+                sb.AppendLine("Varietals    " + b.Varietals);
+                sb.AppendLine("Notes        " + b.Notes);
+                sb.AppendLine("Cupping      " + b.Cupping);
+                text = sb.ToString();
             }
             else
                 text = "no bean info found";
