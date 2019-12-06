@@ -304,7 +304,7 @@ namespace DE1LogView
                 {
                     if (elapsed[i] < first_drop)
                         continue;
-                    if (flow[i] < 0.2)
+                    if (flow.Count != 0 && flow[i] < 0.2)
                         flow_time -= elapsed[i] - elapsed[i - 1];
                 }
 
@@ -329,6 +329,10 @@ namespace DE1LogView
                     return "";
 
                 var age = bean_list[name].DatesSinceRoast(date);
+
+                if (age == 0)
+                    return "";
+
                 var age_str = age >= 0 ? (age.ToString() + "d") : ((-age).ToString() + "d*");
 
                 return age_str;
@@ -775,7 +779,7 @@ namespace DE1LogView
                 return sb.ToString();
             }
 
-            public int DatesSinceRoast(DateTime dt)  // returns int.MinValue on error. "+" is was not frozen, "-" otherwise
+            public int DatesSinceRoast(DateTime dt)  // returns 0 on error. "+" is was not frozen, "-" otherwise
             {
                 if (Roasted == DateTime.MinValue)
                     return int.MinValue;
@@ -784,21 +788,21 @@ namespace DE1LogView
                 {
                     var diff = (int)(dt - Roasted).TotalDays;
                     if (diff < 0)
-                        return int.MinValue;
+                        return 0;
 
                     return diff;
                 }
 
                 if (Defrosted == DateTime.MinValue || Frozen == DateTime.MinValue)  // not consistent data
-                    return int.MinValue;
+                    return 0;
 
                 var diff_total = (int)(dt - Roasted).TotalDays;
                 if (diff_total < 0)
-                    return int.MinValue;
+                    return 0;
 
                 var diff_gap = (int)(Defrosted - Frozen).TotalDays;
                 if (diff_gap < 0)
-                    return int.MinValue;
+                    return 0;
 
                 return (diff_total - diff_gap) * -1; // *-1 to indicate defrosted
             }
