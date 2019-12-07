@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.19";
+        string Revision = "DE1 Log View v1.20";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -123,10 +123,10 @@ namespace DE1LogView
             gp.SetData(5, ds.elapsed, temperature_target_scaled, Color.Red, 2, DashStyle.Dash);
             gp.SetData(6, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid);
 
-            var first_drop = ds.getFirstDropTime();
-            List<double> x_drop = new List<double>(); x_drop.Add(first_drop); x_drop.Add(first_drop);
-            List<double> y_drop = new List<double>(); y_drop.Add(0); y_drop.Add(1);
-            gp.SetData(7, x_drop, y_drop, Color.Brown, 2, DashStyle.Solid);
+            var pi = ds.getPreinfTime();
+            List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
+            List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
+            gp.SetData(7, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
 
             gp.SetAutoLimits();
 
@@ -222,11 +222,10 @@ namespace DE1LogView
             e.Graphics.DrawString(d.getRatio().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labAvFlow.Left; myrec.Width = labAvFlow.Width;
-            //e.Graphics.DrawString(d.shot_time.ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
             e.Graphics.DrawString(d.getAverageWeightFlow().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labID.Left; myrec.Width = labID.Width;
-            e.Graphics.DrawString(d.id.ToString(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            myrec.X = labPI.Left; myrec.Width = labPI.Width;
+            e.Graphics.DrawString(d.getPreinfTime().ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labDate.Left; myrec.Width = labDate.Width;
             e.Graphics.DrawString(d.getNiceDateStr(DateTime.Now), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -364,7 +363,14 @@ namespace DE1LogView
             }
 
             if (RefPlotKey == key)
+            {
+                RefPlotKey = "";
+                GraphBot.data.Clear();
+                splitContainer2.Panel2.Refresh();
+                labelBotL.Text = "";
+                listData.Refresh();
                 return;
+            }
 
             RefPlotKey = key;
 
@@ -386,6 +392,8 @@ namespace DE1LogView
                     bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 80)  // Ctrl P - show/diff profiles
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
+                if (e.KeyValue == 82)  // Ctrl R - report
+                    PrintReport();
                 if (e.KeyValue == 83)  // Ctrl S - Save
                 {
                     btnSaveData_Click(null, EventArgs.Empty);
@@ -398,7 +406,7 @@ namespace DE1LogView
             }
             else if (e.KeyValue == 113) // F2
             {
-                DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
+                PrintReport();
             }
             else if (e.KeyValue == 114) // F3
             {
@@ -406,11 +414,11 @@ namespace DE1LogView
             }
             else if (e.KeyValue == 115) // F4
             {
-                showVideoF4ToolStripMenuItem_Click(null, EventArgs.Empty);
+                DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 116) // F5
             {
-                PrintReport();
+                showVideoF4ToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 123) // F12
             { }
@@ -880,6 +888,11 @@ namespace DE1LogView
             {
                 MessageBox.Show("Error opening video", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
+        }
+
+        private void printReportCtrlPF2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PrintReport();
         }
     }
 }

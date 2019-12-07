@@ -284,7 +284,7 @@ namespace DE1LogView
                 return kpi;
             }
 
-            public double getFirstDropTime()
+            private double getFirstDropTime()
             {
                 for(int i = 0; i < weight.Count; i++)
                 {
@@ -294,22 +294,42 @@ namespace DE1LogView
 
                 return 0.0;
             }
-            public double getAverageWeightFlow()
+
+            private double flowTimeAdjustment(double f, double first_drop)
             {
-                var first_drop = getFirstDropTime();
-                double flow_time = shot_time - first_drop;
+                double flow_time = f;
 
                 // remove 0 flow points
                 for (int i = 1; i < elapsed.Count; i++)
                 {
                     if (elapsed[i] < first_drop)
                         continue;
-                    if (flow.Count != 0 && flow[i] < 0.2)
+                    if ((flow.Count != 0 && flow[i] < 0.2) || (flow_weight.Count != 0 && flow_weight[i] < 0.07))
                         flow_time -= elapsed[i] - elapsed[i - 1];
                 }
 
+                return flow_time;
+            }
+
+            public double getAverageWeightFlow()
+            {
+                var first_drop = getFirstDropTime();
+                double flow_time = shot_time - first_drop;
+
+                flow_time = flowTimeAdjustment(flow_time, first_drop);
+
                 return coffee_weight / flow_time;
             }
+            public double getPreinfTime()
+            {
+                var first_drop = getFirstDropTime();
+                double flow_time = shot_time - first_drop;
+
+                flow_time = flowTimeAdjustment(flow_time, first_drop);
+
+                return shot_time - flow_time;
+            }
+
             public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
             {
                 if (!prof_dict.ContainsKey(profile))
@@ -349,7 +369,7 @@ namespace DE1LogView
                 else if (ts.TotalDays > 28)
                     nice_d = date.ToString("dd/MM/yy");
                 else
-                    nice_d += ts.TotalDays.ToString() + "d " + date.ToString("HH:mm");
+                    nice_d += date.ToString("dd/MM") + " " + date.ToString("HH:mm");
 
                 return nice_d;
             }
@@ -371,8 +391,10 @@ namespace DE1LogView
 
                 sb.Append("R" + getRatio().ToString("0.0") + " ");
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
+                sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
+
                 sb.Append("#" + id.ToString().PadRight(5) + " ");
-                sb.Append(getNiceDateStr(DateTime.Now).PadRight(10));
+                sb.Append(getNiceDateStr(DateTime.Now).PadRight(12));
                 sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
 
                 return sb.ToString();
@@ -391,6 +413,7 @@ namespace DE1LogView
 
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
+                sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
                 sb.Append("#" + id.ToString() + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
                 sb.Append(notes);
@@ -827,7 +850,7 @@ namespace DE1LogView
 
             /*
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Short name,Full name,Country,Country code,From,Roasted,Frozen,Defrosted,Process,Varietals,Notes");
+            sb.AppendLine("Short name,Full name,Country,Country code,From,Roasted,Frozen,Defrosted,Process,Varietals,Notes,Cupping");
             foreach (var key in blist.Keys)
                 sb.AppendLine(blist[key].ToString());
             File.WriteAllText(fname, sb.ToString());

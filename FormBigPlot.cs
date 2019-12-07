@@ -76,14 +76,14 @@ namespace DE1LogView
                 Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
 
 
-                var first_drop = ds2.getFirstDropTime();
-                List<double> x_drop = new List<double>(); x_drop.Add(first_drop); x_drop.Add(first_drop);
-                List<double> y_drop = new List<double>(); y_drop.Add(0); y_drop.Add(1);
-                Graph.SetData(8, x_drop, y_drop, Color.Brown, 2, DashStyle.Dash);
+                var pi = ds2.getPreinfTime();
+                List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
+                List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
+                Graph.SetData(8, x_pi, y_pi, Color.Brown, 2, DashStyle.Dash);
 
-                first_drop = ds1.getFirstDropTime();
-                x_drop.Clear(); x_drop.Add(first_drop); x_drop.Add(first_drop);
-                Graph.SetData(9, x_drop, y_drop, Color.Brown, 2, DashStyle.Solid);
+                pi = ds1.getPreinfTime();
+                x_pi.Clear(); x_pi.Add(pi); x_pi.Add(pi);
+                Graph.SetData(9, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
 
                 Graph.SetAutoLimits();
 
