@@ -304,6 +304,10 @@ namespace DE1LogView
                 {
                     if (elapsed[i] < first_drop)
                         continue;
+
+                    if (elapsed[i] > shot_time - 8.0) // skip last 8 sec
+                        break;
+
                     if ((flow.Count != 0 && flow[i] < 0.2) || (flow_weight.Count != 0 && flow_weight[i] < 0.07))
                         flow_time -= elapsed[i] - elapsed[i - 1];
                 }

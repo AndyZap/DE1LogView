@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.20";
+        string Revision = "DE1 Log View v1.21";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -302,7 +302,7 @@ namespace DE1LogView
                 if (!String.IsNullOrEmpty(flt_name) && Data[key].name.ToLower().Contains(flt_name) == false)
                     continue;
 
-                if (!String.IsNullOrEmpty(flt_profile) && Data[key].profile.ToLower().Contains(flt_profile) == false)
+                if (!String.IsNullOrEmpty(flt_profile) && Data[key].getShortProfileName(ProfileInfoList).ToLower().Contains(flt_profile) == false)
                     continue;
 
                 if (!Data[key].enabled)
@@ -402,7 +402,7 @@ namespace DE1LogView
             }
             else if (e.KeyValue == 112) // F1
             {
-                bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
+                scatterPlotForAllShownToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 113) // F2
             {
@@ -664,7 +664,12 @@ namespace DE1LogView
             if (FormBigPlot == null)
                 FormBigPlot = new FormBigPlot();
 
-            FormBigPlot.ShowGraph();
+            List<string> all_keys = new List<string>();
+
+            foreach (string s in listData.Items)
+                all_keys.Add(s);
+
+            FormBigPlot.ShowGraph(all_keys);
 
             FormBigPlot.Show();
         }
@@ -893,6 +898,30 @@ namespace DE1LogView
         private void printReportCtrlPF2ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PrintReport();
+        }
+
+        private void scatterPlotForAllShownToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (FormBigPlot == null)
+                FormBigPlot = new FormBigPlot();
+
+            List<string> all_keys = new List<string>();
+
+            foreach (string s in listData.Items)
+                all_keys.Add(s);
+
+            FormBigPlot.ShowScatterGraph(all_keys);
+
+            FormBigPlot.Show();
+        }
+
+        public void SetSelected()
+        {
+            if(MainPlotKey == RefPlotKey && RefPlotKey != "")
+            {
+                listData.SelectedItem = MainPlotKey;
+                listData.Refresh();
+            }
         }
     }
 }

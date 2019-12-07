@@ -30,11 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBigPlot));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.labelTopL1 = new System.Windows.Forms.Label();
             this.splitBigPlot = new System.Windows.Forms.SplitContainer();
             this.richLog = new System.Windows.Forms.RichTextBox();
             this.labelTopR = new System.Windows.Forms.Label();
             this.labelTopL = new System.Windows.Forms.Label();
-            this.labelTopL1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitBigPlot)).BeginInit();
             this.splitBigPlot.Panel2.SuspendLayout();
@@ -54,7 +54,19 @@
             this.panel1.Size = new System.Drawing.Size(1067, 623);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+            this.panel1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseClick);
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
+            // 
+            // labelTopL1
+            // 
+            this.labelTopL1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTopL1.BackColor = System.Drawing.SystemColors.Window;
+            this.labelTopL1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTopL1.Location = new System.Drawing.Point(3, 24);
+            this.labelTopL1.Name = "labelTopL1";
+            this.labelTopL1.Size = new System.Drawing.Size(964, 18);
+            this.labelTopL1.TabIndex = 6;
             // 
             // splitBigPlot
             // 
@@ -107,17 +119,6 @@
             this.labelTopL.Size = new System.Drawing.Size(964, 18);
             this.labelTopL.TabIndex = 2;
             // 
-            // labelTopL1
-            // 
-            this.labelTopL1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelTopL1.BackColor = System.Drawing.SystemColors.Window;
-            this.labelTopL1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTopL1.Location = new System.Drawing.Point(3, 24);
-            this.labelTopL1.Name = "labelTopL1";
-            this.labelTopL1.Size = new System.Drawing.Size(964, 18);
-            this.labelTopL1.TabIndex = 6;
-            // 
             // FormBigPlot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -136,7 +137,6 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.TopMost = true;
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormBigPlot_KeyDown);
             this.panel1.ResumeLayout(false);
             this.splitBigPlot.Panel2.ResumeLayout(false);

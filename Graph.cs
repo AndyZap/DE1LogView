@@ -19,6 +19,8 @@ namespace DE1LogView
 {
     public class GraphPainter
     {
+        public enum SeriesTypeEnum { Lines, Dots, Triangles}
+
         public class Data
         {
             public List<double> x = new List<double>();
@@ -27,6 +29,7 @@ namespace DE1LogView
             public Color color;
             public int size;
             public DashStyle style;
+            public SeriesTypeEnum series_type = SeriesTypeEnum.Lines;
         }
 
         public Panel panel = null;                  // panel to paint
@@ -66,6 +69,8 @@ namespace DE1LogView
                 g = new Data();
                 data.Add(g);
             }
+
+            g.series_type = SeriesTypeEnum.Lines;
             g.x.Clear();
             g.y.Clear();
             foreach (double d in x)
@@ -76,6 +81,27 @@ namespace DE1LogView
             g.color = c;
             g.size = s;
             g.style = st;
+        }
+
+        public void SetDotsOrTriangles(int position, double x, double y, Color c, int s, SeriesTypeEnum series_t)
+        {
+            Data g = null;
+            if (position < data.Count)
+                g = data[position];
+            else
+            {
+                g = new Data();
+                data.Add(g);
+            }
+
+            g.series_type = series_t;
+            g.x.Clear();
+            g.y.Clear();
+            g.x.Add(x);
+            g.y.Add(y);
+
+            g.color = c;
+            g.size = s;
         }
 
         public void SetAutoLimits()
@@ -307,7 +333,8 @@ namespace DE1LogView
             if (y_title != "")
             {
                 Brush b = new SolidBrush(Color.Black);
-                g.DrawString(y_title, font, b, 2f, 2f);
+                Rectangle myrec = new Rectangle(5, border_y1 - 5, 200, 40);
+                g.DrawString(y_title, font, b, myrec);
             }
 
             // plot ticks
@@ -331,17 +358,39 @@ namespace DE1LogView
         }
         public void PlotSeries(Graphics g, Data d)
         {
-            Pen p = new Pen(d.color, d.size);
-            p.DashStyle = d.style;
-            List<Point> points = new List<Point>();
-            for (int i = 0; i < d.x.Count; i++)
+            if (d.series_type == SeriesTypeEnum.Lines)
             {
-                if (d.x[i] < xmin || d.x[i] > xmax)
-                    continue;
-                points.Add(new Point(ToGraphX(d.x[i]), ToGraphY(d.y[i])));
+                Pen p = new Pen(d.color, d.size);
+                p.DashStyle = d.style;
+                List<Point> points = new List<Point>();
+                for (int i = 0; i < d.x.Count; i++)
+                {
+                    if (d.x[i] < xmin || d.x[i] > xmax)
+                        continue;
+                    points.Add(new Point(ToGraphX(d.x[i]), ToGraphY(d.y[i])));
+                }
+
+                g.DrawLines(p, points.ToArray());
+            }
+            else if(d.series_type == SeriesTypeEnum.Dots)
+            {
+                Pen p = new Pen(d.color, 4);
+
+                if (d.x[0] >= xmin && d.x[0] <= xmax && d.y[0] >= ymin && d.y[0] <= ymax)
+                {
+                    g.DrawEllipse(p, ToGraphX(d.x[0]) - d.size / 2, ToGraphY(d.y[0]) - d.size / 2, d.size, d.size);
+                }
+            }
+            else if (d.series_type == SeriesTypeEnum.Triangles)
+            {
+                Pen p = new Pen(d.color, 4);
+
+                if (d.x[0] >= xmin && d.x[0] <= xmax && d.y[0] >= ymin && d.y[0] <= ymax)
+                {
+                    g.DrawPie(p, ToGraphX(d.x[0]) - d.size / 2, ToGraphY(d.y[0]) - d.size / 2, d.size, d.size, -110.0f, 70.0f);
+                }
             }
 
-            g.DrawLines(p, points.ToArray());
         }
     }
 }
