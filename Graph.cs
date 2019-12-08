@@ -387,7 +387,9 @@ namespace DE1LogView
 
                 if (d.x[0] >= xmin && d.x[0] <= xmax && d.y[0] >= ymin && d.y[0] <= ymax)
                 {
-                    g.DrawPie(p, ToGraphX(d.x[0]) - d.size / 2, ToGraphY(d.y[0]) - d.size / 2, d.size, d.size, -110.0f, 70.0f);
+                    int circle_radius = 4;
+                    g.DrawEllipse(p, ToGraphX(d.x[0]) - circle_radius, ToGraphY(d.y[0]) - circle_radius, circle_radius*2, circle_radius*2);
+                    g.DrawPie(p, ToGraphX(d.x[0]) - d.size / 2, ToGraphY(d.y[0]) - d.size / 2, d.size, d.size, -80.0f, 30.0f);
                 }
             }
 

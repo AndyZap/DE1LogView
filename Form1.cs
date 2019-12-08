@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.21";
+        string Revision = "DE1 Log View v1.22";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -857,7 +857,7 @@ namespace DE1LogView
 
             var id = Data[MainPlotKey].id;
 
-            string fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + ".mp4";
+            string fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + "-1.m4v";
             if (!File.Exists(fname))
                 return;
 
@@ -873,7 +873,6 @@ namespace DE1LogView
                 MessageBox.Show("Error opening video", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
         }
-
         private void openVideoFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if(!Directory.Exists(VideoFolder))
@@ -894,12 +893,10 @@ namespace DE1LogView
                 MessageBox.Show("Error opening video", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
         }
-
         private void printReportCtrlPF2ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PrintReport();
         }
-
         private void scatterPlotForAllShownToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (FormBigPlot == null)
@@ -914,10 +911,9 @@ namespace DE1LogView
 
             FormBigPlot.Show();
         }
-
         public void SetSelected()
         {
-            if(MainPlotKey == RefPlotKey && RefPlotKey != "")
+            if(MainPlotKey != "" && RefPlotKey == "")
             {
                 listData.SelectedItem = MainPlotKey;
                 listData.Refresh();

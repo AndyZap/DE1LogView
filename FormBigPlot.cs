@@ -124,7 +124,7 @@ namespace DE1LogView
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
-        
+
         public void ShowScatterGraph(List<string> all_keys, PlotTypeEnum plot_type = PlotTypeEnum.AvFlow)
         {
             splitBigPlot.Visible = false;
@@ -158,7 +158,10 @@ namespace DE1LogView
                 if (ds.notes.StartsWith("*"))
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
                 else
-                    Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Blue, 10, GraphPainter.SeriesTypeEnum.Dots);
+                {
+                    var color = parent.ProfileInfoList[ds.profile].color;
+                    Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, color, 10, GraphPainter.SeriesTypeEnum.Dots);
+                }
 
             }
             Graph.SetAutoLimits();
@@ -251,7 +254,7 @@ namespace DE1LogView
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
             parent.MainPlotKey = BestKey;
-            parent.RefPlotKey = BestKey;
+            parent.RefPlotKey = "";
             parent.SetSelected();
 
             ShowGraph(AllKeys);

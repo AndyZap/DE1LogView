@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -873,6 +874,7 @@ namespace DE1LogView
             public string short_name = "";
             public KpiTypeEnum kpi_type = KpiTypeEnum.Flow;
             public double kpi_min_time = 0;
+            public Color color = Color.Yellow;
 
             public ProfileInfo(string s)
             {
@@ -881,6 +883,18 @@ namespace DE1LogView
                 short_name = words[1].Trim();
                 kpi_type = words[2].Trim() == "Pressure" ? KpiTypeEnum.Pressure : KpiTypeEnum.Flow;
                 kpi_min_time = Convert.ToDouble(words[3].Trim());
+
+                var cl_str = words[4].Trim();
+                if(cl_str == "Blue") color = Color.Blue;
+                else if(cl_str == "Fuchsia") color = Color.Fuchsia;
+                else if(cl_str == "Lime") color = Color.Lime;
+                else if(cl_str == "Black") color = Color.Black;
+                else if(cl_str == "YellowGreen") color = Color.YellowGreen;
+                else if(cl_str == "Green") color = Color.Green;
+                else if(cl_str == "Fuchsia") color = Color.Fuchsia;
+                else if(cl_str == "Aqua") color = Color.Aqua;
+                else if(cl_str == "Silver") color = Color.Silver;
+                else color = Color.Silver;
             }
         }
 
