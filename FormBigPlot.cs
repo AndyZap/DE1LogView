@@ -159,7 +159,10 @@ namespace DE1LogView
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
                 else
                 {
-                    var color = parent.ProfileInfoList[ds.profile].color;
+                    var color = Color.Gray;
+                    if (parent.ProfileInfoList.ContainsKey(ds.profile))
+                        color = parent.ProfileInfoList[ds.profile].color;
+
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, color, 10, GraphPainter.SeriesTypeEnum.Dots);
                 }
 

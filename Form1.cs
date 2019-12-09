@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.22";
+        string Revision = "DE1 Log View v1.23";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -59,7 +59,7 @@ namespace DE1LogView
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
-            btnSaveData_Click(null, EventArgs.Empty);
+            // btnSaveData_Click(null, EventArgs.Empty); // do not save, to avoid overriding good file on app error
         }
 
         private void listData_SelectedIndexChanged(object sender, EventArgs e)
@@ -397,7 +397,6 @@ namespace DE1LogView
                 if (e.KeyValue == 83)  // Ctrl S - Save
                 {
                     btnSaveData_Click(null, EventArgs.Empty);
-                    MessageBox.Show("OK");
                 }
             }
             else if (e.KeyValue == 112) // F1
@@ -918,6 +917,36 @@ namespace DE1LogView
                 listData.SelectedItem = MainPlotKey;
                 listData.Refresh();
             }
+        }
+        private void listFrozenBeansToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("ShortName     ");
+            sb.Append("FullName                 ");
+            sb.Append("Country       ");
+            sb.Append("Code ");
+            sb.Append("From          ");
+            sb.Append("Frozen        ");
+            sb.AppendLine("");
+
+            foreach (var b in BeanList.Values)
+            {
+                if (b.Frozen != DateTime.MinValue && b.Defrosted == DateTime.MinValue)
+                {
+                    sb.Append(b.ShortName.PadRight(14));
+                    sb.Append(b.FullName.PadRight(25));
+                    sb.Append(b.Country.PadRight(14));
+                    sb.Append(b.CountryCode.PadRight(5));
+                    sb.Append(b.From.PadRight(14));
+                    sb.Append(b.Frozen.ToString("dd/MM/yyyy"));
+
+                    sb.AppendLine("");
+                }
+            }
+
+            FormBigPlot.ShowLog(sb.ToString());
+            FormBigPlot.Show();
         }
     }
 }

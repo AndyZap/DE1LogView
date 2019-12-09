@@ -85,6 +85,7 @@
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.printReportCtrlPF2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scatterPlotForAllShownToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listFrozenBeansToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -549,6 +550,7 @@
             this.scatterPlotForAllShownToolStripMenuItem,
             this.toolStripMenuItem4,
             this.beanInfoCtrlBF3ToolStripMenuItem,
+            this.listFrozenBeansToolStripMenuItem,
             this.toolStripMenuItem5,
             this.showVideoF4ToolStripMenuItem,
             this.openVideoFolderToolStripMenuItem,
@@ -557,7 +559,7 @@
             this.toolStripMenuItem7,
             this.printReportCtrlPF2ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 354);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(225, 376);
             // 
             // disableRecordToolStripMenuItem
             // 
@@ -685,6 +687,13 @@
             this.scatterPlotForAllShownToolStripMenuItem.Text = "Scatter plot for all shown F1";
             this.scatterPlotForAllShownToolStripMenuItem.Click += new System.EventHandler(this.scatterPlotForAllShownToolStripMenuItem_Click);
             // 
+            // listFrozenBeansToolStripMenuItem
+            // 
+            this.listFrozenBeansToolStripMenuItem.Name = "listFrozenBeansToolStripMenuItem";
+            this.listFrozenBeansToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.listFrozenBeansToolStripMenuItem.Text = "List frozen beans";
+            this.listFrozenBeansToolStripMenuItem.Click += new System.EventHandler(this.listFrozenBeansToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
@@ -778,5 +787,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
         private System.Windows.Forms.ToolStripMenuItem printReportCtrlPF2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scatterPlotForAllShownToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem listFrozenBeansToolStripMenuItem;
     }
 }

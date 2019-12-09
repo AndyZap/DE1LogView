@@ -265,21 +265,29 @@ namespace DE1LogView
 
             public double getKpi(Dictionary<string, ProfileInfo> prof_dict)
             {
-                if (!prof_dict.ContainsKey(profile))
+                if (pressure.Count == 0)
                     return 0.0;
 
-                var pi = prof_dict[profile];
+                double kpi_min_time = 15.0;
+                KpiTypeEnum kpi_type = KpiTypeEnum.Pressure;
+
+                if (prof_dict.ContainsKey(profile))
+                {
+                    var pi = prof_dict[profile];
+                    kpi_min_time = pi.kpi_min_time;
+                    kpi_type = pi.kpi_type;
+                }
 
                 double kpi = 0.0;
 
                 for (int i = 0; i < elapsed.Count; i++)
                 {
-                    if (elapsed[i] < pi.kpi_min_time)
+                    if (elapsed[i] < kpi_min_time)
                         continue;
 
-                    if (pi.kpi_type == KpiTypeEnum.Pressure)
+                    if (kpi_type == KpiTypeEnum.Pressure)
                         kpi = Math.Max(kpi, pressure[i]);
-                    else if (pi.kpi_type == KpiTypeEnum.Flow)
+                    else if (kpi_type == KpiTypeEnum.Flow)
                         kpi = Math.Max(kpi, flow[i]);
                 }
                 return kpi;
@@ -425,6 +433,16 @@ namespace DE1LogView
 
                 return sb.ToString();
             }
+
+            public static int getMaxId(Dictionary<string, DataStruct> data)
+            {
+                int max_id = -1;
+
+                foreach(var value in data.Values)
+                    max_id = Math.Max(value.id, max_id);
+
+                return max_id + 1;
+            }
         }
 
         static List<double> ReadList(string line, string key, double min_limit = 0.0)
@@ -565,7 +583,7 @@ namespace DE1LogView
 
             // setup the fields which are not saved in the file
             d.shot_time = d.elapsed[d.elapsed.Count - 1];
-            d.id = Data.Count;
+            d.id = DataStruct.getMaxId(Data);
 
             if (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0)
                 d.enabled = false;
@@ -848,6 +866,9 @@ namespace DE1LogView
                 if (line.StartsWith("Short name,Full name,"))
                     continue;
 
+                if (line.Trim() == "")
+                    continue;
+
                 var bn = new BeanEntryClass(line);
 
                 BeanList[bn.ShortName] = bn;
@@ -930,7 +951,7 @@ namespace DE1LogView
 
                 if (!Data.ContainsKey(d.date_str))
                 {
-                    d.id = Data.Count;
+                    d.id = DataStruct.getMaxId(Data);
                     Data.Add(d.date_str, d);
                 }
             }
