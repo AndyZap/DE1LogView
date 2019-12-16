@@ -417,6 +417,7 @@ namespace DE1LogView
             {
                 StringBuilder sb = new StringBuilder();
 
+                sb.Append("#" + id.ToString().PadRight(5));
                 sb.Append(name + "    ");
                 sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
                 sb.Append("G" + grind + "    ");
@@ -427,7 +428,6 @@ namespace DE1LogView
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
                 sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
-                sb.Append("#" + id.ToString() + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
                 sb.Append(notes);
 

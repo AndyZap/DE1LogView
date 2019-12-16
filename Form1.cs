@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.23";
+        string Revision = "DE1 Log View v1.24";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -148,7 +148,7 @@ namespace DE1LogView
             if (checkShowNotes.Checked)
             {
                 if (d.notes != "")
-                    e.ItemHeight = (int) (e.ItemHeight * 1.7);
+                    e.ItemHeight = (int)(e.ItemHeight * 1.7);
             }
         }
 
@@ -158,7 +158,7 @@ namespace DE1LogView
 
             var x = g.MeasureString(out_str, font).ToSize().Width;
 
-            while(x >= width)
+            while (x >= width)
             {
                 out_str = out_str.Remove(out_str.Length - 1);
                 x = g.MeasureString(out_str, font).ToSize().Width;
@@ -234,7 +234,7 @@ namespace DE1LogView
             {
                 if (d.notes != "") // notes, on a separate line
                 {
-                    myrec.X = labGrind.Left+5; myrec.Width = e.Bounds.Width - labName.Left - 10;
+                    myrec.X = labGrind.Left + 5; myrec.Width = e.Bounds.Width - labName.Left - 10;
                     myrec.Y += e.Bounds.Height / 2;
 
                     var notes_str = TrimStringToDraw(d.notes, e.Graphics, e.Font, myrec.Width);
@@ -314,7 +314,7 @@ namespace DE1LogView
                 sorted_keys.Add(key);
             }
 
-            if(comboSortStyle.Text == "Sort by ID")
+            if (comboSortStyle.Text == "Sort by ID")
                 sorted_keys.Sort();
             else
                 sorted_keys = SmartOutputSort(sorted_keys);
@@ -420,7 +420,9 @@ namespace DE1LogView
                 showVideoF4ToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 123) // F12
-            { }
+            {
+                linePlotForAllShownF12ToolStripMenuItem_Click(null, EventArgs.Empty);
+            }
         }
 
         private void CopyLine()
@@ -504,7 +506,7 @@ namespace DE1LogView
             string content_fname1 = GetProfileInfo(fname);
 
             // Check if SelectedPlots exists and different from the main selection
-            if(RefPlotKey != MainPlotKey && Data.ContainsKey(RefPlotKey))
+            if (RefPlotKey != MainPlotKey && Data.ContainsKey(RefPlotKey))
             {
                 var profile_name2 = Data[RefPlotKey].profile;
 
@@ -715,7 +717,7 @@ namespace DE1LogView
             var text = "";
             var key = Data[MainPlotKey].name;
 
-            
+
             if (BeanList.ContainsKey(key))
             {
                 StringBuilder sb = new StringBuilder();
@@ -776,9 +778,9 @@ namespace DE1LogView
             List<string> keys = new List<string>();
             if (comboSortStyle.Text == "Sort by ID")
             {
-                for(int i = listData.Items.Count-1; i >= 0; i--)
+                for (int i = listData.Items.Count - 1; i >= 0; i--)
                 {
-                    keys.Add((string) listData.Items[i]);
+                    keys.Add((string)listData.Items[i]);
                 }
             }
             else
@@ -813,7 +815,7 @@ namespace DE1LogView
         {
             if (e.KeyValue == 27)
             {
-                if(txtFilterName.Text == "")
+                if (txtFilterName.Text == "")
                     txtFilterProfile.Text = "";
                 else
                     txtFilterName.Text = "";
@@ -874,7 +876,7 @@ namespace DE1LogView
         }
         private void openVideoFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(!Directory.Exists(VideoFolder))
+            if (!Directory.Exists(VideoFolder))
             {
                 MessageBox.Show("Video folder is not set", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
                 return;
@@ -912,7 +914,7 @@ namespace DE1LogView
         }
         public void SetSelected()
         {
-            if(MainPlotKey != "" && RefPlotKey == "")
+            if (MainPlotKey != "" && RefPlotKey == "")
             {
                 listData.SelectedItem = MainPlotKey;
                 listData.Refresh();
@@ -948,5 +950,63 @@ namespace DE1LogView
             FormBigPlot.ShowLog(sb.ToString());
             FormBigPlot.Show();
         }
+
+        private void linePlotForAllShownF12ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (FormBigPlot == null)
+                FormBigPlot = new FormBigPlot();
+
+            List<string> all_keys = new List<string>();
+
+            foreach (string s in listData.Items)
+                all_keys.Add(s);
+
+            FormBigPlot.ShowLineGraphAll(all_keys);
+
+            FormBigPlot.Show();
+        }
+
+        /*
+        void SearchByNotes()
+        {
+            var words = txtNotes.Text.ToLower().Trim().Split(' ');
+            if (words.Length < 7)
+                return;
+
+            var name = words[0].Trim();
+            double bean_w = 0.0;
+            double coffee_w = 0.0;
+            string grind = "";
+
+            for (int i = 1; i < words.Length - 1; i++)
+            {
+                if (words[i] == "->")
+                {
+                    bean_w = Convert.ToDouble(words[i - 1]);
+                    coffee_w = Convert.ToDouble(words[i + 1]);
+                }
+
+                if (words[i] == "grind")
+                    grind = words[i + 1];
+            }
+
+            foreach(var key in Data.Keys)
+            {
+                var d = Data[key];
+
+                if(    d.bean_weight == bean_w  
+                    && d.coffee_weight == coffee_w
+                    && d.name == name
+                    && d.grind == grind)
+                {
+                    MainPlotKey = key;
+                    RefPlotKey = "";
+                    SetSelected();
+                    break;
+                }
+            }
+        }
+        */
+
     }
 }

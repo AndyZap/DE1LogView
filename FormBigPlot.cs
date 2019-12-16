@@ -119,8 +119,25 @@ namespace DE1LogView
 
             return output_list;
         }
+        List<string> IdSort(List<string> input)
+        {
+            List<Form1.DataStruct> list = new List<Form1.DataStruct>();
+            foreach (var i in input)
+                list.Add(parent.Data[i]);
 
-        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi}
+            list.Sort(delegate (Form1.DataStruct a1, Form1.DataStruct a2)
+            {
+                return a1.id.CompareTo(a2.id);
+            });
+
+            List<string> output_list = new List<string>();
+            foreach (var x in list)
+                output_list.Add(x.date_str);
+
+            return output_list;
+        }
+
+        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, AllLines}
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
@@ -177,6 +194,56 @@ namespace DE1LogView
             Graph.panel.Refresh();
         }
 
+        public void ShowLineGraphAll(List<string> all_keys)
+        {
+            splitBigPlot.Visible = false;
+            labelTopL.Visible = true;
+            labelTopL1.Visible = true;
+            labelTopR.Visible = true;
+            PlotType = PlotTypeEnum.AllLines;
+
+            AllKeys = IdSort(all_keys);
+
+            labelTopL.Text = "";
+            labelTopL1.Text = "";
+
+            Graph.SetAxisTitles("", "");
+            Graph.data.Clear();
+            int counter = 0;
+            foreach (var key in AllKeys)
+            {
+                Form1.DataStruct ds = parent.Data[key];
+
+                Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.pressure, Color.LimeGreen, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 1, DashStyle.Solid); counter++;
+
+                List<double> temperature_scaled = new List<double>();
+                foreach (var t in ds.temperature_basket)
+                    temperature_scaled.Add(t / 10.0);
+                Graph.SetData(counter, ds.elapsed, temperature_scaled, Color.Red, 1, DashStyle.Solid); counter++;
+            }
+
+            if(parent.Data.ContainsKey(parent.MainPlotKey))
+            {
+                Form1.DataStruct ds = parent.Data[parent.MainPlotKey];
+
+                labelTopL.Text = ds.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+
+                Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.pressure, Color.LimeGreen, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid); counter++;
+
+                List<double> temperature_scaled = new List<double>();
+                foreach (var t in ds.temperature_basket)
+                    temperature_scaled.Add(t / 10.0);
+                Graph.SetData(counter, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid); counter++;
+            }
+
+            Graph.SetAutoLimits();
+            Graph.panel.Refresh();
+        }
+
         public void SetLabelText (string s)
         {
             labelTopL.Text = s;
@@ -207,6 +274,59 @@ namespace DE1LogView
             {
                 ShowScatterGraph(AllKeys, PlotTypeEnum.Pi);
             }
+            else if (e.KeyValue == 123) // F12
+            {
+                ShowLineGraphAll(AllKeys);
+            }
+            else if (e.KeyValue == 38) // Up
+            {
+                if (PlotType == PlotTypeEnum.AllLines)
+                {
+                    int current_index = 0;
+                    for (int i = 0; i < AllKeys.Count; i++)
+                    {
+                        if (AllKeys[i] == parent.MainPlotKey)
+                        {
+                            current_index = i;
+                            break;
+                        }
+                    }
+
+                    current_index++;
+                    if (current_index >= AllKeys.Count)
+                        current_index = 0;
+
+                    parent.MainPlotKey = AllKeys[current_index];
+                    parent.RefPlotKey = "";
+                    parent.SetSelected();
+
+                    ShowLineGraphAll(AllKeys);
+                }
+            }
+            else if (e.KeyValue == 40) // Down
+            {
+                if (PlotType == PlotTypeEnum.AllLines)
+                {
+                    int current_index = 0;
+                    for (int i = 0; i < AllKeys.Count; i++)
+                    {
+                        if (AllKeys[i] == parent.MainPlotKey)
+                        {
+                            current_index = i;
+                            break;
+                        }
+                    }
+                    current_index--;
+                    if (current_index < 0)
+                        current_index = AllKeys.Count - 1;
+
+                    parent.MainPlotKey = AllKeys[current_index];
+                    parent.RefPlotKey = "";
+                    parent.SetSelected();
+
+                    ShowLineGraphAll(AllKeys);
+                }
+            }
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
@@ -216,7 +336,7 @@ namespace DE1LogView
 
             labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0");
             
-            if (PlotType == PlotTypeEnum.Lines)
+            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines)
                 return;
 
             // find the closest Data point to the mouse points. Search from the last painted
@@ -256,6 +376,9 @@ namespace DE1LogView
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
+            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines)
+                return;
+
             parent.MainPlotKey = BestKey;
             parent.RefPlotKey = "";
             parent.SetSelected();
