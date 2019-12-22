@@ -150,6 +150,8 @@ namespace DE1LogView
             labelTopR.Visible = true;
             PlotType = plot_type;
 
+            labelTopL1.Text = "";
+
             AllKeys = SmartPlotSort(all_keys);
             
             if (plot_type == PlotTypeEnum.AvFlow)
