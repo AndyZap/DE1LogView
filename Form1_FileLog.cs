@@ -30,6 +30,7 @@ namespace DE1LogView
             public double shot_time = 0;
             public string notes = "";
             public string profile = "";
+            public bool has_video = false;
 
             public List<double> elapsed = new List<double>();
             public List<double> pressure = new List<double>();
@@ -396,16 +397,13 @@ namespace DE1LogView
                 sb.Append(name.PadRight(max_bean_len) + "   ");
                 sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
                 sb.Append(grind + "  ");
-                sb.Append(bean_weight.ToString("0.0") + " ");
+                sb.Append("R" + getRatio().ToString("0.0") + " ");
+                sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
+                sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
                 sb.Append(getKpi(prof_dict).ToString("0.0").PadLeft(5));
-
                 var age = getAgeStr(bean_list);
                 sb.Append(age.PadLeft(age.Contains("*") ? 6: 5).PadRight(7));
-
-                sb.Append("R" + getRatio().ToString("0.0") + " ");
-                sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
-                sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
-
+                sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append("#" + id.ToString().PadRight(5) + " ");
                 sb.Append(getNiceDateStr(DateTime.Now).PadRight(12));
                 sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
@@ -421,13 +419,12 @@ namespace DE1LogView
                 sb.Append(name + "    ");
                 sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
                 sb.Append("G" + grind + "    ");
-                sb.Append("B" + bean_weight.ToString("0.0") + "    ");
+                sb.Append("R" + getRatio().ToString("0.0") + "    ");
+                sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
+                sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
                 sb.Append("Kpi" + getKpi(prof_dict).ToString("0.0") + "    ");
                 sb.Append(getAgeStr(bean_list) + "    ");
-
-                sb.Append("R" + getRatio().ToString("0.0") + "    ");
-                sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
-                sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
+                sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
                 sb.Append(notes);
 
@@ -714,7 +711,7 @@ namespace DE1LogView
 
             return d;
         }
-        private void ReadAllRecords(string fname)
+        private void ReadAllRecords(string fname, string video_folder = "")
         {
             List<string> record_lines = new List<string>();
 
@@ -738,6 +735,10 @@ namespace DE1LogView
                             return;
                         }
 
+                        // flag if the video exists
+                        string video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                        d.has_video = File.Exists(video_file);
+
                         Data.Add(d.date_str, d);
                     }
                     record_lines.Clear();
@@ -756,6 +757,9 @@ namespace DE1LogView
                     return;
                 }
 
+                // flag if the video exists
+                string video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                d.has_video = File.Exists(video_file);
 
                 Data.Add(d.date_str, d);
             }

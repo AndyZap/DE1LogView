@@ -137,7 +137,7 @@ namespace DE1LogView
             return output_list;
         }
 
-        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, AllLines}
+        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, AllLines}
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
@@ -160,6 +160,8 @@ namespace DE1LogView
                 Graph.SetAxisTitles("GRIND", "KPI");
             else if (plot_type == PlotTypeEnum.Pi)
                 Graph.SetAxisTitles("GRIND", "PreINF");
+            else if (plot_type == PlotTypeEnum.Ratio)
+                Graph.SetAxisTitles("GRIND", "Ratio");
 
             Graph.data.Clear();
             foreach (var key in AllKeys)
@@ -173,6 +175,8 @@ namespace DE1LogView
                     val = ds.getKpi(parent.ProfileInfoList);
                 else if (plot_type == PlotTypeEnum.Pi)
                     val = ds.getPreinfTime();
+                else if (plot_type == PlotTypeEnum.Ratio)
+                    val = ds.getRatio();
 
                 if (ds.notes.StartsWith("*"))
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
@@ -276,6 +280,10 @@ namespace DE1LogView
             {
                 ShowScatterGraph(AllKeys, PlotTypeEnum.Pi);
             }
+            else if (e.KeyValue == 115) // F4
+            {
+                ShowScatterGraph(AllKeys, PlotTypeEnum.Ratio);
+            }
             else if (e.KeyValue == 123) // F12
             {
                 ShowLineGraphAll(AllKeys);
@@ -356,6 +364,8 @@ namespace DE1LogView
                     val = ds.getKpi(parent.ProfileInfoList);
                 else if (PlotType == PlotTypeEnum.Pi)
                     val = ds.getPreinfTime();
+                else if (PlotType == PlotTypeEnum.Ratio)
+                    val = ds.getRatio();
 
                 double g = Convert.ToDouble(ds.grind);
 

@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.25";
+        string Revision = "DE1 Log View v1.26";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -50,10 +50,13 @@ namespace DE1LogView
 
             string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
             string old_data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\CoffeeLogger.csv";
+
+            string video_folder = Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory;
+
             if ((File.Exists(data_fname) == false) && (File.Exists(old_data_fname) == true))
                 ReadOldFileFormat(old_data_fname);
             else if (File.Exists(data_fname))
-                ReadAllRecords(data_fname);
+                ReadAllRecords(data_fname, video_folder);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -229,6 +232,9 @@ namespace DE1LogView
 
             myrec.X = labDate.Left; myrec.Width = labDate.Width;
             e.Graphics.DrawString(d.getNiceDateStr(DateTime.Now), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labVideo.Left; myrec.Width = labVideo.Width;
+            e.Graphics.DrawString(d.has_video ? "v": "", e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             if (checkShowNotes.Checked)
             {
