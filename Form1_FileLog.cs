@@ -564,16 +564,20 @@ namespace DE1LogView
             int last = d.weight.Count - 1;
             while (d.weight[last] == d.weight[last - 1])
             {
-                d.elapsed.RemoveAt(last);
-                d.pressure.RemoveAt(last);
                 d.weight.RemoveAt(last);
-                d.flow.RemoveAt(last);
-                d.flow_weight.RemoveAt(last);
-                d.temperature_basket.RemoveAt(last);
-                d.temperature_mix.RemoveAt(last);
-                d.pressure_goal.RemoveAt(last);
-                d.flow_goal.RemoveAt(last);
-                d.temperature_goal.RemoveAt(last);
+
+                while (d.elapsed.Count != d.weight.Count)
+                {
+                    d.elapsed.RemoveAt(last);
+                    d.pressure.RemoveAt(last);
+                    d.flow.RemoveAt(last);
+                    d.flow_weight.RemoveAt(last);
+                    d.temperature_basket.RemoveAt(last);
+                    d.temperature_mix.RemoveAt(last);
+                    d.pressure_goal.RemoveAt(last);
+                    d.flow_goal.RemoveAt(last);
+                    d.temperature_goal.RemoveAt(last);
+                }
 
                 last = d.weight.Count - 1;
             }
