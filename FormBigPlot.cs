@@ -137,7 +137,7 @@ namespace DE1LogView
             return output_list;
         }
 
-        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, AllLines}
+        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, AllLines, TotalVolumeAll}
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
@@ -250,6 +250,44 @@ namespace DE1LogView
             Graph.panel.Refresh();
         }
 
+        public void ShowTotalVolumeGraphAll(List<string> all_keys)
+        {
+            splitBigPlot.Visible = false;
+            labelTopL.Visible = true;
+            labelTopL1.Visible = true;
+            labelTopR.Visible = true;
+            PlotType = PlotTypeEnum.TotalVolumeAll;
+
+            AllKeys = IdSort(all_keys);
+
+            labelTopL.Text = "";
+            labelTopL1.Text = "";
+
+            Graph.SetAxisTitles("", "");
+            Graph.data.Clear();
+            int counter = 0;
+            foreach (var key in AllKeys)
+            {
+                Form1.DataStruct ds = parent.Data[key];
+                Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 1, DashStyle.Solid); counter++;
+            }
+
+            if (parent.Data.ContainsKey(parent.MainPlotKey))
+            {
+                Form1.DataStruct ds = parent.Data[parent.MainPlotKey];
+
+                labelTopL.Text = ds.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+
+                Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 3, DashStyle.Solid); counter++;
+            }
+
+            Graph.SetAutoLimits();
+            Graph.panel.Refresh();
+
+        }
+
         public void SetLabelText (string s)
         {
             labelTopL.Text = s;
@@ -283,6 +321,10 @@ namespace DE1LogView
             else if (e.KeyValue == 115) // F4
             {
                 ShowScatterGraph(AllKeys, PlotTypeEnum.Ratio);
+            }
+            else if (e.KeyValue == 122) // F11
+            {
+                ShowTotalVolumeGraphAll(AllKeys);
             }
             else if (e.KeyValue == 123) // F12
             {
@@ -346,7 +388,7 @@ namespace DE1LogView
 
             labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0");
             
-            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines)
+            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines || PlotType == PlotTypeEnum.TotalVolumeAll)
                 return;
 
             // find the closest Data point to the mouse points. Search from the last painted
@@ -388,7 +430,7 @@ namespace DE1LogView
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines)
+            if (PlotType == PlotTypeEnum.Lines || PlotType == PlotTypeEnum.AllLines  || PlotType == PlotTypeEnum.TotalVolumeAll)
                 return;
 
             parent.MainPlotKey = BestKey;

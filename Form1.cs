@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.27";
+        string Revision = "DE1 Log View v1.28";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -425,6 +425,10 @@ namespace DE1LogView
             {
                 showVideoF4ToolStripMenuItem_Click(null, EventArgs.Empty);
             }
+            else if (e.KeyValue == 122) // F11
+            {
+                totalVolumePlotForAllShownF11();
+            }
             else if (e.KeyValue == 123) // F12
             {
                 linePlotForAllShownF12ToolStripMenuItem_Click(null, EventArgs.Empty);
@@ -797,6 +801,11 @@ namespace DE1LogView
 
             if (keys.Count != 0)
             {
+                double sum = 0.0;
+                double sum2 = 0.0;
+                int num = 0;
+                List<double> all_values = new List<double>();
+
                 var last_name = Data[keys[0]].name;
                 foreach (var key in keys)
                 {
@@ -806,6 +815,32 @@ namespace DE1LogView
                     sb.AppendLine(Data[key].getAsInfoText(ProfileInfoList, BeanList, max_bean_len: max_bean_len, max_profile_len: max_profile_len));
 
                     last_name = Data[key].name;
+
+                    // calc retained volume stats
+                    var rv = Data[key].retained_volume;
+                    if (rv == 0.0)
+                        continue;
+
+                    sum += rv;
+                    sum2 += rv * rv;
+                    num++;
+                    all_values.Add(rv);
+                }
+
+                if (sum != 0.0)
+                {
+                    var std = Math.Sqrt(num * sum2 - sum * sum) / num;
+
+                    var percent_10 = 1 + (int)(num * 0.1);
+                    if (percent_10 * 2 >= num)
+                        percent_10 = 0;
+
+                    all_values.Sort();
+
+
+                    sb.AppendLine("");
+                    sb.AppendLine("Retained Volume Av=" + (sum / num).ToString("0.0") + " Std=" + std.ToString("0.0") + " Num=" + num.ToString()
+                         + " 10%=" + all_values[percent_10].ToString("0.0") + " 90%=" + all_values[all_values.Count-1-percent_10].ToString("0.0"));
                 }
             }
 
@@ -968,6 +1003,21 @@ namespace DE1LogView
                 all_keys.Add(s);
 
             FormBigPlot.ShowLineGraphAll(all_keys);
+
+            FormBigPlot.Show();
+        }
+
+        private void totalVolumePlotForAllShownF11()
+        {
+            if (FormBigPlot == null)
+                FormBigPlot = new FormBigPlot();
+
+            List<string> all_keys = new List<string>();
+
+            foreach (string s in listData.Items)
+                all_keys.Add(s);
+
+            FormBigPlot.ShowTotalVolumeGraphAll(all_keys);
 
             FormBigPlot.Show();
         }

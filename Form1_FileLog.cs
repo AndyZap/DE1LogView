@@ -30,7 +30,8 @@ namespace DE1LogView
             public double shot_time = 0;
             public string notes = "";
             public string profile = "";
-            public bool has_video = false;
+            public bool   has_video = false;
+            public double retained_volume = 0;
 
             public List<double> elapsed = new List<double>();
             public List<double> pressure = new List<double>();
@@ -406,6 +407,10 @@ namespace DE1LogView
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append("#" + id.ToString().PadRight(5) + " ");
                 sb.Append(getNiceDateStr(DateTime.Now).PadRight(12));
+
+                getTotalWaterVolume();
+                sb.Append("Rv" + retained_volume.ToString("0.0") + " ");
+
                 sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
 
                 return sb.ToString();
@@ -439,6 +444,28 @@ namespace DE1LogView
                     max_id = Math.Max(value.id, max_id);
 
                 return max_id + 1;
+            }
+
+            public List<double> getTotalWaterVolume()
+            {
+                List<double> total_list = new List<double>();
+
+                if (flow.Count == 0)
+                    return total_list;
+
+                double total = 0;
+                total_list.Add(total);
+                for (int i = 1; i < elapsed.Count; i++)
+                {
+                    total += flow[i]*(elapsed[i] - elapsed[i - 1]);  // method 1 (rectangular)
+                    //total += 0.5 * (flow[i] + flow[i-1]) * (elapsed[i] - elapsed[i - 1]);  // method 2 (trapeziodal)
+
+                    total_list.Add(total);
+                }
+
+                retained_volume = total_list[total_list.Count - 1] - weight[weight.Count - 1];
+
+                return total_list;
             }
         }
 
