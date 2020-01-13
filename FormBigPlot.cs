@@ -54,6 +54,8 @@ namespace DE1LogView
                 Form1.DataStruct ds1 = parent.Data[parent.MainPlotKey];
                 Form1.DataStruct ds2 = parent.Data[parent.RefPlotKey];
 
+                bool two_steam_plots = ds1.name.ToLower() == "steam" && ds1.name.ToLower() == "steam";
+
                 labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList);
                 labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
 
@@ -78,15 +80,17 @@ namespace DE1LogView
                 Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
                 Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
 
+                if (two_steam_plots == false)
+                {
+                    var pi = ds2.getPreinfTime();
+                    List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
+                    List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
+                    Graph.SetData(8, x_pi, y_pi, Color.Brown, 2, DashStyle.Dash);
 
-                var pi = ds2.getPreinfTime();
-                List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
-                List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
-                Graph.SetData(8, x_pi, y_pi, Color.Brown, 2, DashStyle.Dash);
-
-                pi = ds1.getPreinfTime();
-                x_pi.Clear(); x_pi.Add(pi); x_pi.Add(pi);
-                Graph.SetData(9, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
+                    pi = ds1.getPreinfTime();
+                    x_pi.Clear(); x_pi.Add(pi); x_pi.Add(pi);
+                    Graph.SetData(9, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
+                }
 
                 Graph.SetAutoLimits();
 
@@ -168,6 +172,9 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
+                if (ds.name.ToLower() == "steam")
+                    continue;
+
                 double val = 0.0;
                 if (plot_type == PlotTypeEnum.AvFlow)
                     val = ds.getAverageWeightFlow();
@@ -220,6 +227,9 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
+                if (ds.name.ToLower() == "steam")
+                    continue;
+
                 Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.pressure, Color.LimeGreen, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 1, DashStyle.Solid); counter++;
@@ -269,6 +279,10 @@ namespace DE1LogView
             foreach (var key in AllKeys)
             {
                 Form1.DataStruct ds = parent.Data[key];
+
+                if (ds.name.ToLower() == "steam")
+                    continue;
+
                 Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 1, DashStyle.Solid); counter++;
             }
@@ -398,6 +412,9 @@ namespace DE1LogView
             for (int i = AllKeys.Count-1; i >= 0; i--)
             {
                 Form1.DataStruct ds = parent.Data[AllKeys[i]];
+
+                if (ds.name.ToLower() == "steam")
+                    continue;
 
                 double val = 0.0;
                 if (PlotType == PlotTypeEnum.AvFlow)

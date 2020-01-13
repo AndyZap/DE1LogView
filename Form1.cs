@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.28";
+        string Revision = "DE1 Log View v1.29";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -790,13 +790,29 @@ namespace DE1LogView
             {
                 for (int i = listData.Items.Count - 1; i >= 0; i--)
                 {
-                    keys.Add((string)listData.Items[i]);
+                    var key = (string)listData.Items[i];
+
+                    var ds = Data[key];
+
+                    if (ds.name.ToLower() == "steam")
+                        continue;
+
+                    keys.Add(key);
                 }
             }
             else
             {
                 foreach (string item in listData.Items)
+                {
+                    var key = item;
+
+                    var ds = Data[key];
+
+                    if (ds.name.ToLower() == "steam")
+                        continue;
+
                     keys.Add(item);
+                }
             }
 
             if (keys.Count != 0)
@@ -991,7 +1007,6 @@ namespace DE1LogView
             FormBigPlot.ShowLog(sb.ToString());
             FormBigPlot.Show();
         }
-
         private void linePlotForAllShownF12ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (FormBigPlot == null)
@@ -1006,7 +1021,6 @@ namespace DE1LogView
 
             FormBigPlot.Show();
         }
-
         private void totalVolumePlotForAllShownF11()
         {
             if (FormBigPlot == null)
