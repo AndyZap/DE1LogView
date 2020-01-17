@@ -587,9 +587,9 @@ namespace DE1LogView
             if (d.elapsed.Count == 0)
                 return false;
 
-            // trim data at the end of the shot if the weight does not change
+            // trim data at the end of the shot if the weight does not change. Do not do for steam!
             int last = d.weight.Count - 1;
-            while (d.weight[last] == d.weight[last - 1])
+            while (d.name != "steam" && d.weight[last] == d.weight[last - 1])
             {
                 d.weight.RemoveAt(last);
 
@@ -613,7 +613,7 @@ namespace DE1LogView
             d.shot_time = d.elapsed[d.elapsed.Count - 1];
             d.id = DataStruct.getMaxId(Data);
 
-            if (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0)
+            if (d.name != "steam" && (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0))
                 d.enabled = false;
 
             // finally add to the master list
