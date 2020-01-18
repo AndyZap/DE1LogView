@@ -71,6 +71,11 @@ namespace DE1LogView
                     else if (LoadLineContainsKey(s, "ProfilesFolder")) { ProfilesFolder = LoadString(s, "ProfilesFolder"); }
                     else if (LoadLineContainsKey(s, "DataFolder")) { DataFolder = LoadString(s, "DataFolder"); }
                     else if (LoadLineContainsKey(s, "VideoFolder")) { VideoFolder = LoadString(s, "VideoFolder"); }
+                    else if (LoadLineContainsKey(s, "noSteamRecords"))
+                    {
+                        var str = LoadString(s, "noSteamRecords");
+                        noSteamRecordsToolStripMenuItem.Checked = str == "true";
+                    }
                 }
             }
 
@@ -107,6 +112,7 @@ namespace DE1LogView
             sb.AppendLine("ProfilesFolder           " + ProfilesFolder);
             sb.AppendLine("DataFolder               " + DataFolder);
             sb.AppendLine("VideoFolder              " + VideoFolder);
+            sb.AppendLine("noSteamRecords           " + (noSteamRecordsToolStripMenuItem.Checked ? "true" : "false"));
 
             string fname = ApplicationDirectory + "\\" + ApplicationNameNoExt + ".dat";
             File.WriteAllText(fname, sb.ToString());

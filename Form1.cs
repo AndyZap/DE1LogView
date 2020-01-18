@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.30";
+        string Revision = "DE1 Log View v1.31";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -315,6 +315,9 @@ namespace DE1LogView
                     continue;
 
                 if ((DateTime.Now - Data[key].date).TotalDays > max_days)
+                    continue;
+
+                if (noSteamRecordsToolStripMenuItem.Checked && Data[key].name == "steam")
                     continue;
 
                 sorted_keys.Add(key);
@@ -1034,6 +1037,10 @@ namespace DE1LogView
             FormBigPlot.ShowTotalVolumeGraphAll(all_keys);
 
             FormBigPlot.Show();
+        }
+        private void noSteamRecordsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            FilterData();
         }
 
         /*

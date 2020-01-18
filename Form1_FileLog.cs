@@ -740,6 +740,54 @@ namespace DE1LogView
                 return null;
             }
 
+            // fixes for the steam record ------------------------------------
+            if (d.name == "steam")
+            {
+                int target_length = d.elapsed.Count;
+                for (int i = 0; i < d.elapsed.Count; i++)
+                {
+                    if (d.flow[i] < 0.3 && d.pressure[i] < 0.5)
+                    {
+                        target_length = i;
+                        break;
+                    }
+                }
+
+                while (d.elapsed.Count > target_length)
+                {
+                    var last = d.elapsed.Count - 1;
+                    d.weight.RemoveAt(last);
+                    d.elapsed.RemoveAt(last);
+                    d.pressure.RemoveAt(last);
+                    d.flow.RemoveAt(last);
+                    d.flow_weight.RemoveAt(last);
+                    d.temperature_basket.RemoveAt(last);
+                    d.temperature_mix.RemoveAt(last);
+                    d.pressure_goal.RemoveAt(last);
+                    d.flow_goal.RemoveAt(last);
+                    d.temperature_goal.RemoveAt(last);
+                }
+
+                for (int i = 0; i < d.elapsed.Count; i++)
+                {
+                    d.weight[i] = 0.0;
+                    d.flow_weight[i] = 0.0;
+                    d.pressure_goal[i] = 0.0;
+                    d.flow_goal[i] = 0.0;
+                    d.temperature_goal[i] = 0.0;
+                }
+
+                d.bean_weight = 1;
+                d.coffee_weight = 1;
+                d.grind = "";
+                d.shot_time = 1;
+                d.notes = "";
+                d.profile = "";
+                d.has_video = false;
+                d.retained_volume = 1;
+            }
+
+
             return d;
         }
         private void ReadAllRecords(string fname, string video_folder = "")
