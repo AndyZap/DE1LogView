@@ -30,6 +30,7 @@ namespace DE1LogView
             public double shot_time = 0;
             public string notes = "";
             public string profile = "";
+            public string tds = "";
             public bool   has_video = false;
             public double retained_volume = 0;
 
@@ -58,6 +59,7 @@ namespace DE1LogView
                 sb.AppendLine("shot_time " + shot_time.ToString());
                 sb.AppendLine("notes " + notes);
                 sb.AppendLine("profile " + profile);
+                sb.AppendLine("tds " + tds);
 
                 sb.AppendLine(WriteList(elapsed, "elapsed", "0.0##"));
                 sb.AppendLine(WriteList(pressure, "pressure", "0.0#"));
@@ -295,6 +297,25 @@ namespace DE1LogView
                 return kpi;
             }
 
+            public string getEY()
+            {
+                if (tds == "")
+                    return "";
+
+                var words = tds.Split(',');
+                for(int i = words.Length-1; i >= 0; i--)
+                {
+                    if (words[i].StartsWith("*"))
+                        continue;
+
+                    var val = Convert.ToDouble(words[i]);
+
+                    return (val * getRatio()).ToString("0.0");
+                }
+
+                return "";
+            }
+
             private double getFirstDropTime()
             {
                 for(int i = 0; i < weight.Count; i++)
@@ -358,6 +379,21 @@ namespace DE1LogView
                 return coffee_weight / bean_weight;
             }
 
+            public double getCurrentRatio(double time)
+            {
+                if (weight.Count == 0)
+                    return 0.0;
+
+                for (int i = 0; i < elapsed.Count; i++)
+                {
+                    if (time <= elapsed[i])
+                        return weight[i] / bean_weight;
+                }
+
+                // return final ratio
+                return getRatio();
+            }
+
             public string getAgeStr(Dictionary<string, BeanEntryClass> bean_list)
             {
                 if (!bean_list.ContainsKey(name))
@@ -399,6 +435,7 @@ namespace DE1LogView
                 sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
                 sb.Append(grind + "  ");
                 sb.Append("R" + getRatio().ToString("0.0") + " ");
+                sb.Append("Ey" + getEY().PadRight(4) + " ");
                 sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
                 sb.Append(getKpi(prof_dict).ToString("0.0").PadLeft(5));
@@ -425,6 +462,7 @@ namespace DE1LogView
                 sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
                 sb.Append("G" + grind + "    ");
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
+                sb.Append("Ey" + getEY() + "    ");
                 sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
                 sb.Append("Kpi" + getKpi(prof_dict).ToString("0.0") + "    ");
@@ -690,6 +728,10 @@ namespace DE1LogView
                     {
                         d.profile = ReadString(line, "profile ");
                     }
+                    else if (line.StartsWith("tds "))
+                    {
+                        d.tds = ReadString(line, "tds ");
+                    }
 
                     else if (line.StartsWith("elapsed {"))
                     {
@@ -783,6 +825,7 @@ namespace DE1LogView
                 d.shot_time = 1;
                 d.notes = "";
                 d.profile = "";
+                d.tds = "";
                 d.has_video = false;
                 d.retained_volume = 1;
             }

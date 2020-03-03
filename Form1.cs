@@ -11,7 +11,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.31";
+        string Revision = "DE1 Log View v1.32";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -211,6 +211,9 @@ namespace DE1LogView
 
             myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
             e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labEY.Left; myrec.Width = labEY.Width;
+            e.Graphics.DrawString(d.getEY(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
             e.Graphics.DrawString(d.bean_weight.ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -720,8 +723,59 @@ namespace DE1LogView
             }
             FilterData();
 
-            MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files");
+            int num_tds = LoadTDS();
+            var str_tds = num_tds == 0 ? "" : (" and " + num_tds.ToString() + " TDS recs");
+
+            MessageBox.Show("Loaded " + (Data.Count - old_count).ToString() + " shot files" + str_tds);
         }
+
+        private int LoadTDS()
+        {
+            var tds_file_name = DataFolder + "\\TDS.csv";
+
+            if (!File.Exists(tds_file_name))
+                return 0;
+
+            // build TDS rec dictionary
+            Dictionary<int, string> tds_dict = new Dictionary<int, string>();
+            var lines = File.ReadAllLines(tds_file_name);
+            foreach (var str in lines)
+            {
+                var line = str.Trim();
+                if (line == "")
+                    continue;
+
+                var words = line.Split(',');
+                tds_dict[Convert.ToInt32(words[0])] = line.Remove(0, words[0].Length + 1);
+            }
+
+            // build Data ID to key dict
+            Dictionary<int, string> data_dict = new Dictionary<int, string>();
+            foreach (string key in Data.Keys)
+            {
+                var rec = Data[key];
+                data_dict[rec.id] = key;
+            }
+
+            // now check if we can add new records
+            int num_added = 0;
+            foreach (int tds_key in tds_dict.Keys)
+            {
+                if (!data_dict.ContainsKey(tds_key))
+                    continue;
+
+                var data_key = data_dict[tds_key];
+
+                if(Data[data_key].tds == "")
+                {
+                    Data[data_key].tds = tds_dict[tds_key];
+                    num_added++;
+                }
+            }
+
+            return num_added;
+        }
+
         private void beanInfoCtrlBF3ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!Data.ContainsKey(MainPlotKey))
@@ -763,7 +817,15 @@ namespace DE1LogView
             var x = GraphTop.ToDataX(e.X);
             var y = GraphTop.ToDataY(e.Y);
 
-            labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0");
+            // try to get the dynamic ratio for the current point
+            string current_ratio_txt = "";
+            if (Data.ContainsKey(MainPlotKey))
+            {
+                var ratio = Data[MainPlotKey].getCurrentRatio(x);
+                current_ratio_txt = " R" + ratio.ToString("0.0");
+            }
+
+            labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0") + current_ratio_txt;
         }
 
         private void splitContainer2_Panel2_MouseMove(object sender, MouseEventArgs e)

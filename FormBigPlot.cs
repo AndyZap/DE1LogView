@@ -141,7 +141,7 @@ namespace DE1LogView
             return output_list;
         }
 
-        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, AllLines, TotalVolumeAll}
+        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, EY, AllLines, TotalVolumeAll}
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
@@ -166,6 +166,8 @@ namespace DE1LogView
                 Graph.SetAxisTitles("GRIND", "PreINF");
             else if (plot_type == PlotTypeEnum.Ratio)
                 Graph.SetAxisTitles("GRIND", "Ratio");
+            else if (plot_type == PlotTypeEnum.EY)
+                Graph.SetAxisTitles("GRIND", "EY");
 
             Graph.data.Clear();
             foreach (var key in AllKeys)
@@ -184,6 +186,14 @@ namespace DE1LogView
                     val = ds.getPreinfTime();
                 else if (plot_type == PlotTypeEnum.Ratio)
                     val = ds.getRatio();
+                else if (plot_type == PlotTypeEnum.EY)
+                {
+                    var ey_str = ds.getEY();
+                    if (ey_str == "")
+                        continue;
+
+                    val = Convert.ToDouble(ey_str);
+                }
 
                 if (ds.notes.StartsWith("*"))
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
@@ -336,6 +346,10 @@ namespace DE1LogView
             {
                 ShowScatterGraph(AllKeys, PlotTypeEnum.Ratio);
             }
+            else if (e.KeyValue == 116) // F5
+            {
+                ShowScatterGraph(AllKeys, PlotTypeEnum.EY);
+            }
             else if (e.KeyValue == 122) // F11
             {
                 ShowTotalVolumeGraphAll(AllKeys);
@@ -425,6 +439,14 @@ namespace DE1LogView
                     val = ds.getPreinfTime();
                 else if (PlotType == PlotTypeEnum.Ratio)
                     val = ds.getRatio();
+                else if (PlotType == PlotTypeEnum.EY)
+                {
+                    var ey_str = ds.getEY();
+                    if (ey_str == "")
+                        continue;
+
+                    val = Convert.ToDouble(ey_str);
+                }
 
                 double g = Convert.ToDouble(ds.grind);
 
