@@ -202,6 +202,8 @@ namespace DE1LogView
                     var color = Color.Gray;
                     if (parent.ProfileInfoList.ContainsKey(ds.profile))
                         color = parent.ProfileInfoList[ds.profile].color;
+                    else if (ds.profile.StartsWith("_SRT")) // fix for SRT profiles
+                        color = Color.Black;
 
                     Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, color, 10, GraphPainter.SeriesTypeEnum.Dots);
                 }

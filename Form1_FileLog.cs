@@ -281,6 +281,11 @@ namespace DE1LogView
                     kpi_min_time = pi.kpi_min_time;
                     kpi_type = pi.kpi_type;
                 }
+                else if (profile.StartsWith("_SRT")) // fix for SRT profiles
+                {
+                    kpi_min_time = 15.0;
+                    kpi_type = KpiTypeEnum.Pressure;
+                }
 
                 double kpi = 0.0;
 
@@ -368,6 +373,10 @@ namespace DE1LogView
 
             public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
             {
+                // fix for SRT profiles
+                if (profile.StartsWith("_SRT"))
+                    return profile.Remove(0, 1);
+
                 if (!prof_dict.ContainsKey(profile))
                     return profile;
 

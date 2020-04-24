@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
@@ -11,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.32";
+        string Revision = "DE1 Log View v1.33";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -1103,6 +1104,70 @@ namespace DE1LogView
         private void noSteamRecordsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             FilterData();
+        }
+
+        private void writeSRTProfilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(!Directory.Exists(ProfilesFolder))
+            {
+                MessageBox.Show("Cannot find profiles folder");
+                return;
+            }
+
+            string template_name = ProfilesFolder + "\\_SRT_template.txt";
+            if(!File.Exists(template_name))
+            {
+                MessageBox.Show("Cannot find _SRT_template.txt in the profiles folder");
+                return;
+            }
+
+            var input_fnames = Directory.GetFiles(Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory, "SRT_*.txt", SearchOption.TopDirectoryOnly);
+               
+            foreach(var input_fname in input_fnames)
+            {
+                string template = File.ReadAllText(template_name);
+
+                var lines = File.ReadAllLines(input_fname);
+
+                var words = lines[0].Split('\t');
+                var T1 = GetTemplateVar(words[0]);
+                var F1 = GetTemplateVar(words[1]);
+                var P1 = GetTemplateVar(words[2]);
+                template = template.Replace("$T1$", T1).Replace("$F1$", F1).Replace("$P1$", P1);
+
+                words = lines[1].Split('\t');
+                var T2 = GetTemplateVar(words[0]);
+                var P2 = GetTemplateVar(words[1]);
+                var S2 = GetTemplateVar(words[2], time_reading: true);
+                template = template.Replace("$T2$", T2).Replace("$P2$", P2).Replace("$S2$", S2);
+
+                words = lines[2].Split('\t');
+                var T3 = GetTemplateVar(words[0]);
+                var F3 = GetTemplateVar(words[1]);
+                var S3 = GetTemplateVar(words[2], time_reading: true);
+                template = template.Replace("$T3$", T3).Replace("$F3$", F3).Replace("$S3$", S3);
+
+                words = lines[3].Split('\t');
+                var T4 = GetTemplateVar(words[0]);
+                var F4 = GetTemplateVar(words[1]);
+                template = template.Replace("$T4$", T4).Replace("$F4$", F4);
+
+
+                var new_fname = "_" + Path.GetFileNameWithoutExtension(input_fname);
+                template = template.Replace("$NAME$", new_fname);
+
+                File.WriteAllText(ProfilesFolder + "\\" + new_fname + ".tcl", template);
+            }
+
+            MessageBox.Show("OK, wrote " + input_fnames.Length.ToString() + " profiles");
+        }
+
+        string GetTemplateVar(string input, bool time_reading = false)
+        {
+            if(time_reading)
+                return Convert.ToDouble(input.Trim()).ToString("0") + ".00";
+            else
+                return Convert.ToDouble(input.Trim()).ToString("0.0") + "0";
         }
 
         /*
