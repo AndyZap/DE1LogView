@@ -281,7 +281,7 @@ namespace DE1LogView
                     kpi_min_time = pi.kpi_min_time;
                     kpi_type = pi.kpi_type;
                 }
-                else if (profile.StartsWith("_SRT")) // fix for SRT profiles
+                else if (profile.StartsWith("_SRT") || profile.StartsWith("_V60")) // fix for SRT and V60 profiles
                 {
                     kpi_min_time = 15.0;
                     kpi_type = KpiTypeEnum.Pressure;
@@ -374,7 +374,7 @@ namespace DE1LogView
             public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
             {
                 // fix for SRT profiles
-                if (profile.StartsWith("_SRT"))
+                if (profile.StartsWith("_SRT") || profile.StartsWith("_V60"))
                     return profile.Remove(0, 1);
 
                 if (!prof_dict.ContainsKey(profile))
@@ -636,7 +636,7 @@ namespace DE1LogView
 
             // trim data at the end of the shot if the weight does not change. Do not do for steam!
             int last = d.weight.Count - 1;
-            while (d.name != "steam" && d.weight[last] == d.weight[last - 1])
+            while (d.name != "steam" && d.name != "filter" && d.weight[last] == d.weight[last - 1])
             {
                 d.weight.RemoveAt(last);
 
@@ -660,7 +660,7 @@ namespace DE1LogView
             d.shot_time = d.elapsed[d.elapsed.Count - 1];
             d.id = DataStruct.getMaxId(Data);
 
-            if (d.name != "steam" && (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0))
+            if (d.name != "steam" && d.name != "filter" && (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0))
                 d.enabled = false;
 
             // finally add to the master list

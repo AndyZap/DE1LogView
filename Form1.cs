@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.33";
+        string Revision = "DE1 Log View v1.35";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -409,6 +409,7 @@ namespace DE1LogView
                     PrintReport();
                 if (e.KeyValue == 83)  // Ctrl S - Save
                 {
+                    btnSaveNotes_Click(null, EventArgs.Empty);
                     btnSaveData_Click(null, EventArgs.Empty);
                 }
             }
@@ -931,6 +932,7 @@ namespace DE1LogView
         }
         private void saveDataCtrlSToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            btnSaveNotes_Click(null, EventArgs.Empty);
             btnSaveData_Click(null, EventArgs.Empty);
         }
 
