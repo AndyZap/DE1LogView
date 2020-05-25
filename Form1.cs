@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.35";
+        string Revision = "DE1 Log View v1.37";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -322,6 +322,9 @@ namespace DE1LogView
                     continue;
 
                 if (noSteamRecordsToolStripMenuItem.Checked && Data[key].name == "steam")
+                    continue;
+
+                if (checkShowVideoOnly.Checked == true && Data[key].has_video == false)
                     continue;
 
                 sorted_keys.Add(key);
@@ -1132,26 +1135,26 @@ namespace DE1LogView
                 var lines = File.ReadAllLines(input_fname);
 
                 var words = lines[0].Split('\t');
-                var T1 = GetTemplateVar(words[0]);
-                var F1 = GetTemplateVar(words[1]);
-                var P1 = GetTemplateVar(words[2]);
+                var T1 = GetTemplateVar(words[1]);
+                var F1 = GetTemplateVar(words[3]);
+                var P1 = GetTemplateVar(words[5]);
                 template = template.Replace("$T1$", T1).Replace("$F1$", F1).Replace("$P1$", P1);
 
                 words = lines[1].Split('\t');
-                var T2 = GetTemplateVar(words[0]);
-                var P2 = GetTemplateVar(words[1]);
-                var S2 = GetTemplateVar(words[2], time_reading: true);
+                var T2 = GetTemplateVar(words[1]);
+                var P2 = GetTemplateVar(words[3]);
+                var S2 = GetTemplateVar(words[5], time_reading: true);
                 template = template.Replace("$T2$", T2).Replace("$P2$", P2).Replace("$S2$", S2);
 
                 words = lines[2].Split('\t');
-                var T3 = GetTemplateVar(words[0]);
-                var F3 = GetTemplateVar(words[1]);
-                var S3 = GetTemplateVar(words[2], time_reading: true);
+                var T3 = GetTemplateVar(words[1]);
+                var F3 = GetTemplateVar(words[3]);
+                var S3 = GetTemplateVar(words[5], time_reading: true);
                 template = template.Replace("$T3$", T3).Replace("$F3$", F3).Replace("$S3$", S3);
 
                 words = lines[3].Split('\t');
-                var T4 = GetTemplateVar(words[0]);
-                var F4 = GetTemplateVar(words[1]);
+                var T4 = GetTemplateVar(words[1]);
+                var F4 = GetTemplateVar(words[3]);
                 template = template.Replace("$T4$", T4).Replace("$F4$", F4);
 
 
@@ -1170,6 +1173,11 @@ namespace DE1LogView
                 return Convert.ToDouble(input.Trim()).ToString("0") + ".00";
             else
                 return Convert.ToDouble(input.Trim()).ToString("0.0") + "0";
+        }
+
+        private void checkShowVideoOnly_CheckedChanged(object sender, EventArgs e)
+        {
+            FilterData();
         }
 
         /*

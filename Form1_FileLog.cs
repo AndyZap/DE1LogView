@@ -442,8 +442,8 @@ namespace DE1LogView
 
                 sb.Append(name.PadRight(max_bean_len) + "   ");
                 sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
-                sb.Append(grind + "  ");
-                sb.Append("R" + getRatio().ToString("0.0") + " ");
+                sb.Append(grind.PadRight(6));
+                sb.Append("R" + getRatio().ToString("0.0").PadRight(5) + " ");
                 sb.Append("Ey" + getEY().PadRight(4) + " ");
                 sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
                 sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
