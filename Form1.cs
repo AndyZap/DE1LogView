@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.37";
+        string Revision = "DE1 Log View v1.38";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -683,9 +683,6 @@ namespace DE1LogView
         }
         private void bigDiffPlotCtrlDToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (FormBigPlot == null)
-                FormBigPlot = new FormBigPlot();
-
             List<string> all_keys = new List<string>();
 
             foreach (string s in listData.Items)
@@ -720,7 +717,15 @@ namespace DE1LogView
                     return;
                 }
 
-                if (!ImportShotFile(f))
+                try
+                {
+                    if (!ImportShotFile(f))
+                    {
+                        MessageBox.Show("ERROR: when reading shot file " + f);
+                        return;
+                    }
+                }
+                catch(Exception)
                 {
                     MessageBox.Show("ERROR: when reading shot file " + f);
                     return;

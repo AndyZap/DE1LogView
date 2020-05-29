@@ -613,6 +613,10 @@ namespace DE1LogView
                 {
                     d.bean_weight = ReadDouble(line, "dsv2_bean_weight ");
                 }
+                else if (line.StartsWith("DSx_bean_weight "))
+                {
+                    d.bean_weight = ReadDouble(line, "DSx_bean_weight ");
+                }
                 else if (line.StartsWith("grinder_setting {"))
                 {
                     d.grind = ReadString(line, "grinder_setting ");
@@ -1057,6 +1061,9 @@ namespace DE1LogView
         void ReadProfileInfo(string fname)
         {
             ProfileInfoList.Clear();
+
+            if (!File.Exists(fname))
+                return;
 
             var lines = File.ReadAllLines(fname);
             foreach (var line in lines)

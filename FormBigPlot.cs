@@ -10,12 +10,24 @@ namespace DE1LogView
     {
         public Form1 parent = null;
         public GraphPainter Graph = null;
+        Graphics graphics = null;
 
         public FormBigPlot()
         {
             InitializeComponent();
             Graph = new GraphPainter(panel1, this.Font);
             Graph.border_y2 = 100;
+        }
+
+        private const int CP_NOCLOSE_BUTTON = 0x200;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams myCp = base.CreateParams;
+                myCp.ClassStyle = myCp.ClassStyle | CP_NOCLOSE_BUTTON;
+                return myCp;
+            }
         }
 
         public void SetSplitter(int w)
@@ -322,8 +334,10 @@ namespace DE1LogView
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
+            graphics = e.Graphics;
+
             if (Graph != null)
-                Graph.Plot(e.Graphics);
+                Graph.Plot(graphics);
         }
 
         private void FormBigPlot_KeyDown(object sender, KeyEventArgs e)
@@ -479,6 +493,11 @@ namespace DE1LogView
             parent.SetSelected();
 
             ShowGraph(AllKeys);
+        }
+
+        private void FormBigPlot_Resize(object sender, EventArgs e)
+        {
+            panel1.Refresh();
         }
     }
 }
