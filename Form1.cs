@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.38";
+        string Revision = "DE1 Log View v1.39";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -505,7 +505,7 @@ namespace DE1LogView
 
         private void WiresharkToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var fname = @"D:\platform-tools\_ble_captures\7_de1_1\ws_output6.txt";
+            var fname = @"D:\platform-tools\_ble_captures\8_de_new_fw\ws_output1.txt";
             ConvertWireshark(fname);
         }
 

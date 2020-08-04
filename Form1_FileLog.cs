@@ -478,6 +478,7 @@ namespace DE1LogView
                 sb.Append(getAgeStr(bean_list) + "    ");
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
+                // sb.Append("AvP" + getAveragePressure_7_22().ToString("0.0") + "    "); // STEAM_STUDY
                 sb.Append(notes);
 
                 return sb.ToString();
@@ -504,6 +505,8 @@ namespace DE1LogView
                 total_list.Add(total);
                 for (int i = 1; i < elapsed.Count; i++)
                 {
+                    //if (elapsed[i] >= 7 && elapsed[i] <= 22)  // STEAM_STUDY to estimate 7-22 sec interval
+
                     total += flow[i]*(elapsed[i] - elapsed[i - 1]);  // method 1 (rectangular)
                     //total += 0.5 * (flow[i] + flow[i-1]) * (elapsed[i] - elapsed[i - 1]);  // method 2 (trapeziodal)
 
@@ -513,6 +516,25 @@ namespace DE1LogView
                 retained_volume = total_list[total_list.Count - 1] - weight[weight.Count - 1];
 
                 return total_list;
+            }
+
+            public double getAveragePressure_7_22() // STEAM_STUDY
+            {
+                if (pressure.Count == 0)
+                    return 0.0;
+
+                double total = 0;
+                int num_counts = 0;
+                for (int i = 1; i < elapsed.Count; i++)
+                {
+                    if (elapsed[i] >= 7 && elapsed[i] <= 22)  // to estimate 7-22 sec interval
+                    {
+                        total += pressure[i];
+                        num_counts++;
+                    }
+                }
+
+                return total/ num_counts;
             }
         }
 
@@ -827,8 +849,6 @@ namespace DE1LogView
                 {
                     d.weight[i] = 0.0;
                     d.flow_weight[i] = 0.0;
-                    d.pressure_goal[i] = 0.0;
-                    d.flow_goal[i] = 0.0;
                     d.temperature_goal[i] = 0.0;
                 }
 
@@ -836,7 +856,7 @@ namespace DE1LogView
                 d.coffee_weight = 1;
                 d.grind = "";
                 d.shot_time = 1;
-                d.notes = "";
+
                 d.profile = "";
                 d.tds = "";
                 d.has_video = false;

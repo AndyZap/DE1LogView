@@ -92,7 +92,7 @@ namespace DE1LogView
                 Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
                 Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
 
-                if (two_steam_plots == false)
+                if (two_steam_plots == false) // STEAM_STUDY - move up to disable temperature plots
                 {
                     var pi = ds2.getPreinfTime();
                     List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
@@ -304,8 +304,10 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
-                if (ds.name.ToLower() == "steam")
-                    continue;
+                // STEAM_STUDY
+                /*TimeSpan ts = DateTime.Now - ds.date;
+                  if (ts.TotalDays > 1)
+                    continue; */
 
                 Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 1, DashStyle.Solid); counter++;
@@ -376,7 +378,7 @@ namespace DE1LogView
             }
             else if (e.KeyValue == 38) // Up
             {
-                if (PlotType == PlotTypeEnum.AllLines)
+                if (PlotType == PlotTypeEnum.AllLines || PlotType == PlotTypeEnum.TotalVolumeAll)
                 {
                     int current_index = 0;
                     for (int i = 0; i < AllKeys.Count; i++)
@@ -396,12 +398,15 @@ namespace DE1LogView
                     parent.RefPlotKey = "";
                     parent.SetSelected();
 
-                    ShowLineGraphAll(AllKeys);
+                    if (PlotType == PlotTypeEnum.AllLines)
+                        ShowLineGraphAll(AllKeys);
+                    else if (PlotType == PlotTypeEnum.TotalVolumeAll)
+                        ShowTotalVolumeGraphAll(AllKeys);
                 }
             }
             else if (e.KeyValue == 40) // Down
             {
-                if (PlotType == PlotTypeEnum.AllLines)
+                if (PlotType == PlotTypeEnum.AllLines || PlotType == PlotTypeEnum.TotalVolumeAll)
                 {
                     int current_index = 0;
                     for (int i = 0; i < AllKeys.Count; i++)
@@ -420,7 +425,10 @@ namespace DE1LogView
                     parent.RefPlotKey = "";
                     parent.SetSelected();
 
-                    ShowLineGraphAll(AllKeys);
+                    if (PlotType == PlotTypeEnum.AllLines)
+                        ShowLineGraphAll(AllKeys);
+                    else if (PlotType == PlotTypeEnum.TotalVolumeAll)
+                        ShowTotalVolumeGraphAll(AllKeys);
                 }
             }
         }
