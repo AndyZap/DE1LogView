@@ -862,6 +862,19 @@ namespace DE1LogView
                 d.has_video = false;
                 d.retained_volume = 1;
             }
+            else if (d.flow_goal.Count != 0 && d.flow.Count != 0)  // remove the flow at 4 mls target at the end of the shot
+            {
+                for (int i = d.elapsed.Count - 1; i > 0; i--)
+                {
+                    if (d.flow_goal[i] == 4.0)
+                    {
+                        d.flow[i] = 0.0;
+                        d.flow_goal[i] = 0.0;
+                    }
+                    else
+                        break;
+                }
+            }
 
 
             return d;

@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.39";
+        string Revision = "DE1 Log View v1.40";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -1183,6 +1183,96 @@ namespace DE1LogView
         private void checkShowVideoOnly_CheckedChanged(object sender, EventArgs e)
         {
             FilterData();
+        }
+
+        // ------------------------------------------------------------------------------
+
+        private void pulseWatchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string folder = @"D:\_Kar\_PulseWatch";
+            var files_names = Directory.GetFiles(folder, "*.csv", SearchOption.TopDirectoryOnly);
+
+            StringBuilder sb_summary = new StringBuilder();
+            int summary_counter = 0;
+            List<string> summary_names = new List<string>();
+
+            foreach(var file_name in files_names)
+            {
+                var txt_file_name = file_name.Replace(".csv", ".txt");
+                if (!File.Exists(txt_file_name))
+                {
+                    var lines = File.ReadAllLines(file_name);
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var line in lines)
+                    {
+                        if (line == "")
+                            continue;
+
+                        if (line == "Time,Heart Rate")
+                            continue;
+
+
+                        var words = line.Split(',');
+                        DateTime dt = DateTime.Parse(words[0]);
+                        DateTime dt0 = DateTime.Parse("00:00:00");
+
+                        TimeSpan ts = dt - dt0;
+                        sb.AppendLine(ts.TotalHours.ToString("0.000") + "  " + words[1]);
+
+                    }
+
+                    File.WriteAllText(txt_file_name, sb.ToString());
+                }
+
+                summary_names.Add(Path.GetFileNameWithoutExtension(txt_file_name));
+                summary_counter++;
+
+                // summary updates
+                if (summary_counter == 4)
+                {
+                    sb_summary.AppendLine("NUM_PLOTS      2");
+                    sb_summary.AppendLine("X_SIZE         8");
+                    sb_summary.AppendLine("PLOT           1");
+                    sb_summary.AppendLine("HEIGHT         700");
+                    sb_summary.AppendLine("DATA           \"" + summary_names[0].Remove(0, 5) + "\" \"line solid\" \"blue\"    2 \"" + summary_names[0] + ".txt\"");
+                    sb_summary.AppendLine("DATA           \"" + summary_names[1].Remove(0, 5) + "\" \"line solid\" \"red\"     2 \"" + summary_names[1] + ".txt\"");
+
+                    sb_summary.AppendLine("PLOT           2");
+                    sb_summary.AppendLine("HEIGHT         700");
+                    sb_summary.AppendLine("DATA           \"" + summary_names[2].Remove(0, 5) + "\" \"line solid\" \"fuchsia\" 2 \"" + summary_names[2] + ".txt\"");
+                    sb_summary.AppendLine("DATA           \"" + summary_names[3].Remove(0, 5) + "\" \"line solid\" \"silver\"  2 \"" + summary_names[3] + ".txt\"");
+
+                    var summary_file_name = folder + "\\_" + summary_names[0].Remove(0, 5) + "___" + summary_names[3].Remove(0, 5) + ".ini";
+                    File.WriteAllText(summary_file_name, sb_summary.ToString());
+
+                    sb_summary.Clear();
+                    summary_names.Clear();
+                    summary_counter = 0;
+                }
+            }
+
+            // the final summary
+            if (summary_counter != 0)
+            {
+                while (summary_names.Count < 4)
+                    summary_names.Add(summary_names.Last());
+
+                sb_summary.AppendLine("NUM_PLOTS      2");
+                sb_summary.AppendLine("X_SIZE         8");
+                sb_summary.AppendLine("PLOT           1");
+                sb_summary.AppendLine("HEIGHT         700");
+                sb_summary.AppendLine("DATA           \"" + summary_names[0].Remove(0, 5) + "\" \"line solid\" \"blue\"    2 \"" + summary_names[0] + ".txt\"");
+                sb_summary.AppendLine("DATA           \"" + summary_names[1].Remove(0, 5) + "\" \"line solid\" \"red\"     2 \"" + summary_names[1] + ".txt\"");
+
+                sb_summary.AppendLine("PLOT           2");
+                sb_summary.AppendLine("HEIGHT         700");
+                sb_summary.AppendLine("DATA           \"" + summary_names[2].Remove(0, 5) + "\" \"line solid\" \"fuchsia\" 2 \"" + summary_names[2] + ".txt\"");
+                sb_summary.AppendLine("DATA           \"" + summary_names[3].Remove(0, 5) + "\" \"line solid\" \"silver\"  2 \"" + summary_names[3] + ".txt\"");
+
+                var summary_file_name = folder + "\\_" + summary_names[0].Remove(0, 5) + "___" + summary_names[3].Remove(0, 5) + ".ini";
+                File.WriteAllText(summary_file_name, sb_summary.ToString());
+            }
         }
 
         /*
