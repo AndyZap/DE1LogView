@@ -88,12 +88,17 @@ namespace DE1LogView
                     temperature_scaled1.Add(t / 10.0);
                 foreach (var t in ds2.temperature_basket)
                     temperature_scaled2.Add(t / 10.0);
-
+#if STEAM_STUDY
+                if (two_steam_plots == false) // with STEAM_STUDY disable temperature plots
+                {
+#endif
                 Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
                 Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
 
-                if (two_steam_plots == false) // STEAM_STUDY - move up to disable temperature plots
+#if STEAM_STUDY == false
+                if (two_steam_plots == false) // otherwise enable temperature plots
                 {
+#endif
                     var pi = ds2.getPreinfTime();
                     List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
                     List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
@@ -304,10 +309,11 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
-                // STEAM_STUDY
-                /*TimeSpan ts = DateTime.Now - ds.date;
+#if STEAM_STUDY
+                TimeSpan ts = DateTime.Now - ds.date;
                   if (ts.TotalDays > 1)
-                    continue; */
+                    continue;
+#endif
 
                 Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 1, DashStyle.Solid); counter++;

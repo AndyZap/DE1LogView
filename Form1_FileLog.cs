@@ -478,7 +478,9 @@ namespace DE1LogView
                 sb.Append(getAgeStr(bean_list) + "    ");
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
-                // sb.Append("AvP" + getAveragePressure_7_22().ToString("0.0") + "    "); // STEAM_STUDY
+#if STEAM_STUDY
+                sb.Append("AvP" + getAveragePressure_7_22().ToString("0.0") + "    ");
+#endif
                 sb.Append(notes);
 
                 return sb.ToString();
@@ -505,8 +507,9 @@ namespace DE1LogView
                 total_list.Add(total);
                 for (int i = 1; i < elapsed.Count; i++)
                 {
-                    //if (elapsed[i] >= 7 && elapsed[i] <= 22)  // STEAM_STUDY to estimate 7-22 sec interval
-
+#if STEAM_STUDY
+                    if (elapsed[i] >= 7 && elapsed[i] <= 22)  // to estimate 7-22 sec interval
+#endif
                     total += flow[i]*(elapsed[i] - elapsed[i - 1]);  // method 1 (rectangular)
                     //total += 0.5 * (flow[i] + flow[i-1]) * (elapsed[i] - elapsed[i - 1]);  // method 2 (trapeziodal)
 
@@ -518,7 +521,8 @@ namespace DE1LogView
                 return total_list;
             }
 
-            public double getAveragePressure_7_22() // STEAM_STUDY
+#if STEAM_STUDY
+            public double getAveragePressure_7_22()
             {
                 if (pressure.Count == 0)
                     return 0.0;
@@ -536,6 +540,7 @@ namespace DE1LogView
 
                 return total/ num_counts;
             }
+#endif
         }
 
         static List<double> ReadList(string line, string key, double min_limit = 0.0)
