@@ -479,7 +479,7 @@ namespace DE1LogView
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append(getNiceDateStr(DateTime.Now) + "    ");
 #if STEAM_STUDY
-                sb.Append("AvP" + getAveragePressure_7_22().ToString("0.0") + "    ");
+                sb.Append(getAveragePressure_7_22() + "    ");
 #endif
                 sb.Append(notes);
 
@@ -522,23 +522,29 @@ namespace DE1LogView
             }
 
 #if STEAM_STUDY
-            public double getAveragePressure_7_22()
+            public string getAveragePressure_7_22()
             {
                 if (pressure.Count == 0)
-                    return 0.0;
+                    return "";
 
-                double total = 0;
-                int num_counts = 0;
+                double sum = 0.0;
+                double sum2 = 0.0;
+                int num = 0;
+
                 for (int i = 1; i < elapsed.Count; i++)
                 {
                     if (elapsed[i] >= 7 && elapsed[i] <= 22)  // to estimate 7-22 sec interval
                     {
-                        total += pressure[i];
-                        num_counts++;
+                        sum += pressure[i];
+                        sum2 += pressure[i] * pressure[i];
+                        num++;
                     }
                 }
 
-                return total/ num_counts;
+                var average = sum / num;
+                var std = Math.Sqrt(num * sum2 - sum * sum) / num;
+
+                return "AvP" + average.ToString("0.0") +  " Std" + std.ToString("0.00");
             }
 #endif
         }
