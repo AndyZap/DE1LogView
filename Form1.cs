@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.42";
+        string Revision = "DE1 Log View v1.43";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -832,7 +832,8 @@ namespace DE1LogView
             if (Data.ContainsKey(MainPlotKey))
             {
                 var ratio = Data[MainPlotKey].getCurrentRatio(x);
-                current_ratio_txt = " R" + ratio.ToString("0.0");
+                var weight = Data[MainPlotKey].getCurrentWeight(x);
+                current_ratio_txt = "  " + weight.ToString("0.0") + "g/" + ratio.ToString("0.0");
             }
 
             labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0") + current_ratio_txt;

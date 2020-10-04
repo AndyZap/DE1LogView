@@ -402,6 +402,20 @@ namespace DE1LogView
                 // return final ratio
                 return getRatio();
             }
+            public double getCurrentWeight(double time)
+            {
+                if (weight.Count == 0)
+                    return 0.0;
+
+                for (int i = 0; i < elapsed.Count; i++)
+                {
+                    if (time <= elapsed[i])
+                        return weight[i];
+                }
+
+                // return final weight
+                return coffee_weight;
+            }
 
             public string getAgeStr(Dictionary<string, BeanEntryClass> bean_list)
             {
