@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.43";
+        string Revision = "DE1 Log View v1.44";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -599,7 +599,7 @@ namespace DE1LogView
 
         private void FixProfileFileNamesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var fnames = Directory.GetFiles(ProfilesFolder, "*.tcl", SearchOption.TopDirectoryOnly);
+            var fnames = Directory.GetFiles(ProfilesFolder, "_*.tcl", SearchOption.TopDirectoryOnly);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Files fixed:");
@@ -936,6 +936,50 @@ namespace DE1LogView
                 }
             }
 
+            // START AAZ TESTING PROFILE ---------
+            /*sb.AppendLine(""); sb.AppendLine("");
+
+
+            var fnames = Directory.GetFiles(ProfilesFolder, "_*.tcl", SearchOption.TopDirectoryOnly);
+
+            Dictionary<string, int> profiles_counts = new Dictionary<string, int> ();
+            Dictionary<string, int> profiles_stars = new Dictionary<string, int>();
+            HashSet<string> not_found_profiles = new HashSet<string>();
+
+            foreach (var fname in fnames)
+            {
+                var profile_name = GetProfileName(fname);
+                profiles_counts.Add(profile_name, 0);
+                profiles_stars.Add(profile_name, 0);
+            }
+
+            foreach(var d in Data.Values)
+            {
+                if(!profiles_counts.ContainsKey(d.profile))
+                {
+                    if (!not_found_profiles.Contains(d.profile))
+                        not_found_profiles.Add(d.profile);
+                }
+                else
+                {
+                    profiles_counts[d.profile] += 1;
+                    if(d.notes.StartsWith("*"))
+                        profiles_stars[d.profile] += 1;
+                }
+            }
+
+            foreach(var key in profiles_counts.Keys)
+                sb.AppendLine(key.Remove(0,1) + "\t" + profiles_counts[key] + "\t" + profiles_stars[key]);
+
+            sb.AppendLine("");
+            sb.AppendLine("Not found:");
+
+            foreach (var s in not_found_profiles)
+                sb.AppendLine(s);
+
+            */
+            // END AAZ TESTING PROFILE ---------
+
             FormBigPlot.ShowLog(sb.ToString());
             FormBigPlot.Show();
         }
@@ -1119,19 +1163,25 @@ namespace DE1LogView
 
         private void writeSRTProfilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(!Directory.Exists(ProfilesFolder))
+            if (!Directory.Exists(ProfilesFolder))
             {
                 MessageBox.Show("Cannot find profiles folder");
                 return;
             }
 
             string template_name = ProfilesFolder + "\\_SRT_template.txt";
-            if(!File.Exists(template_name))
+            if (!File.Exists(template_name))
             {
                 MessageBox.Show("Cannot find _SRT_template.txt in the profiles folder");
                 return;
             }
 
+            int num_srt_profiles = writeSRTProfiles(template_name);
+            int num_lc_profiles = writeLCProfiles(template_name);
+            MessageBox.Show("OK, wrote " + num_srt_profiles.ToString() + " SRT profiles and " + num_lc_profiles.ToString() + " LC profiles");
+        }
+        private int writeSRTProfiles(string template_name) 
+        { 
             var input_fnames = Directory.GetFiles(Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory, "SRT_*.txt", SearchOption.TopDirectoryOnly);
                
             foreach(var input_fname in input_fnames)
@@ -1170,7 +1220,56 @@ namespace DE1LogView
                 File.WriteAllText(ProfilesFolder + "\\" + new_fname + ".tcl", template);
             }
 
-            MessageBox.Show("OK, wrote " + input_fnames.Length.ToString() + " profiles");
+            return input_fnames.Length;
+        }
+
+        private int writeLCProfiles(string template_name)
+        {
+            // LC_B10_R12_18_92.txt
+
+            var input_fnames = Directory.GetFiles(Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory, "LC_*.txt", SearchOption.TopDirectoryOnly);
+
+            foreach (var input_fname in input_fnames)
+            {
+                string template = File.ReadAllText(template_name);
+
+
+                var words = Path.GetFileNameWithoutExtension(input_fname).Split('_');
+                if (words.Length != 5)
+                    return 0;
+
+                var __T = words[4] + ".0";
+                var __F = words[3][0] + "." + words[3][1];
+                var __B = words[1].Remove(0, 1);
+                var __R = words[2].Remove(0, 1);
+
+                var T1 = __T;
+                var F1 = "4.0";
+                var P1 = "4.0";
+                template = template.Replace("$T1$", T1).Replace("$F1$", F1).Replace("$P1$", P1);
+
+                var T2 = __T;
+                var P2 = "2.5";
+                var S2 = __B;
+                template = template.Replace("$T2$", T2).Replace("$P2$", P2).Replace("$S2$", S2);
+
+                var T3 = __T;
+                var F3 = __F;
+                var S3 = __R;
+                template = template.Replace("$T3$", T3).Replace("$F3$", F3).Replace("$S3$", S3);
+
+                var T4 = __T;
+                var F4 = __F;
+                template = template.Replace("$T4$", T4).Replace("$F4$", F4);
+
+
+                var new_fname = "_" + Path.GetFileNameWithoutExtension(input_fname);
+                template = template.Replace("$NAME$", new_fname);
+
+                File.WriteAllText(ProfilesFolder + "\\" + new_fname + ".tcl", template);
+            }
+
+            return input_fnames.Length;
         }
 
         string GetTemplateVar(string input, bool time_reading = false)

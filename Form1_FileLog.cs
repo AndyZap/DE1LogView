@@ -373,8 +373,8 @@ namespace DE1LogView
 
             public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
             {
-                // fix for SRT profiles
-                if (profile.StartsWith("_SRT") || profile.StartsWith("_V60"))
+                // fix for all my profiles
+                if (profile.StartsWith("_"))
                     return profile.Remove(0, 1);
 
                 if (!prof_dict.ContainsKey(profile))
