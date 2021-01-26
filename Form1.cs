@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.44";
+        string Revision = "DE1 Log View v1.46";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -117,15 +117,18 @@ namespace DE1LogView
 
             gp.SetData(4, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid);
 
-            List<double> temperature_scaled = new List<double>();
-            List<double> temperature_target_scaled = new List<double>();
-            foreach (var t in ds.temperature_basket)
-                temperature_scaled.Add(t / 10.0);
-            foreach (var t in ds.temperature_goal)
-                temperature_target_scaled.Add(t / 10.0);
+            if (noTemperatureCtrlTToolStripMenuItem.Checked == false)
+            {
+                List<double> temperature_scaled = new List<double>();
+                List<double> temperature_target_scaled = new List<double>();
+                foreach (var t in ds.temperature_basket)
+                    temperature_scaled.Add(t / 10.0);
+                foreach (var t in ds.temperature_goal)
+                    temperature_target_scaled.Add(t / 10.0);
 
-            gp.SetData(5, ds.elapsed, temperature_target_scaled, Color.Red, 2, DashStyle.Dash);
-            gp.SetData(6, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid);
+                gp.SetData(5, ds.elapsed, temperature_target_scaled, Color.Red, 2, DashStyle.Dash);
+                gp.SetData(6, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid);
+            }
 
             var pi = ds.getPreinfTime();
             List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
@@ -133,6 +136,24 @@ namespace DE1LogView
             gp.SetData(7, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
 
             gp.SetAutoLimits();
+
+            if (noResistanceCtrlRToolStripMenuItem.Checked == false)
+            {
+                List<double> resistance = new List<double>();
+                for (int i = 0; i < ds.elapsed.Count; i++)
+                {
+                    var res = ds.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds.pressure[i]) / ds.flow[i]; // use as per AdAstra
+                    // var res = ds.flow[i] == 0.0 ? 100.0 : ds.pressure[i] / (ds.flow[i] * ds.flow[i]); // de1app definition
+                    // resistance.Add(res/4.0);
+                    if (ds.pressure[i] < 1.0)
+                        res = 0.0;
+
+                    resistance.Add(res);
+                }
+
+                gp.SetData(8, ds.elapsed, resistance, Color.Fuchsia, 2, DashStyle.Solid);
+            }
+
 
             gp.panel.Refresh();
         }
@@ -408,12 +429,20 @@ namespace DE1LogView
                     bigDiffPlotCtrlDToolStripMenuItem_Click(null, EventArgs.Empty);
                 if (e.KeyValue == 80)  // Ctrl P - show/diff profiles
                     DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
-                if (e.KeyValue == 82)  // Ctrl R - report
-                    PrintReport();
                 if (e.KeyValue == 83)  // Ctrl S - Save
                 {
                     btnSaveNotes_Click(null, EventArgs.Empty);
                     btnSaveData_Click(null, EventArgs.Empty);
+                }
+                if (e.KeyValue == 82)  // Ctrl R - Resistance on/off
+                {
+                    noResistanceCtrlRToolStripMenuItem.Checked = !noResistanceCtrlRToolStripMenuItem.Checked;
+                    listData_SelectedIndexChanged(null, EventArgs.Empty);
+                }
+                if (e.KeyValue == 84)  // Ctrl T - Temperature on/off
+                {
+                    noTemperatureCtrlTToolStripMenuItem.Checked = !noTemperatureCtrlTToolStripMenuItem.Checked;
+                    listData_SelectedIndexChanged(null, EventArgs.Empty);
                 }
             }
             else if (e.KeyValue == 112) // F1
@@ -427,10 +456,6 @@ namespace DE1LogView
             else if (e.KeyValue == 114) // F3
             {
                 beanInfoCtrlBF3ToolStripMenuItem_Click(null, EventArgs.Empty);
-            }
-            else if (e.KeyValue == 115) // F4
-            {
-                DiffProfilesToolStripMenuItem_Click(null, EventArgs.Empty);
             }
             else if (e.KeyValue == 116) // F5
             {
@@ -688,6 +713,9 @@ namespace DE1LogView
             foreach (string s in listData.Items)
                 all_keys.Add(s);
 
+
+            FormBigPlot.noTemperature = noTemperatureCtrlTToolStripMenuItem.Checked;
+            FormBigPlot.noResistance = noResistanceCtrlRToolStripMenuItem.Checked;
             FormBigPlot.ShowGraph(all_keys);
 
             FormBigPlot.Show();
@@ -725,9 +753,9 @@ namespace DE1LogView
                         return;
                     }
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-                    MessageBox.Show("ERROR: when reading shot file " + f);
+                    MessageBox.Show("ERROR: when reading shot file " + f + ", exception " + ex.Message);
                     return;
                 }
             }
@@ -1374,6 +1402,17 @@ namespace DE1LogView
                 File.WriteAllText(summary_file_name, sb_summary.ToString());
             }
         }
+
+        private void noTemperatureCtrlTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listData_SelectedIndexChanged(null, EventArgs.Empty);
+        }
+
+        private void noResistanceCtrlRToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listData_SelectedIndexChanged(null, EventArgs.Empty);
+        }
+
 
         /*
         void SearchByNotes()

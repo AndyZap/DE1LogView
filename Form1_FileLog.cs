@@ -44,6 +44,7 @@ namespace DE1LogView
             public List<double> pressure_goal = new List<double>();
             public List<double> flow_goal = new List<double>();
             public List<double> temperature_goal = new List<double>();
+            public List<double> espresso_frame = new List<double>();
 
             public DataStruct() { }
 
@@ -71,6 +72,7 @@ namespace DE1LogView
                 sb.AppendLine(WriteList(pressure_goal, "pressure_goal", "0.0"));
                 sb.AppendLine(WriteList(flow_goal, "flow_goal", "0.0"));
                 sb.AppendLine(WriteList(temperature_goal, "temperature_goal", "0.0"));
+                sb.AppendLine(WriteList(espresso_frame, "espresso_frame", "0"));
                 sb.AppendLine();
             }
 
@@ -652,17 +654,25 @@ namespace DE1LogView
                 {
                     d.temperature_goal = ReadList(line, "espresso_temperature_goal ");
                 }
+                else if (line.StartsWith("espresso_frame {"))
+                {
+                    d.espresso_frame = ReadList(line, "espresso_frame ");
+                }
                 else if (line.StartsWith("drink_weight "))
                 {
                     d.coffee_weight = ReadDouble(line, "drink_weight ");
                 }
-                else if (line.StartsWith("dsv2_bean_weight "))
+                else if (line.StartsWith("dsv2_bean_weight ") && d.bean_weight == 0.0)      // old string from DSV skin
                 {
-                    d.bean_weight = ReadDouble(line, "dsv2_bean_weight ");
+                    d.bean_weight = ReadDouble(line, "dsv2_bean_weight "); 
                 }
-                else if (line.StartsWith("DSx_bean_weight "))
+                else if (line.StartsWith("DSx_bean_weight ") && d.bean_weight == 0.0)       // old string from DSV skin
                 {
                     d.bean_weight = ReadDouble(line, "DSx_bean_weight ");
+                }
+                else if (line.StartsWith("grinder_dose_weight ") && d.bean_weight == 0.0)   // new string from insight skin
+                {
+                    d.bean_weight = ReadDouble(line, "grinder_dose_weight ");
                 }
                 else if (line.StartsWith("grinder_setting {"))
                 {
@@ -689,6 +699,9 @@ namespace DE1LogView
             int last = d.weight.Count - 1;
             while (d.name != "steam" && d.name != "filter" && d.weight[last] == d.weight[last - 1])
             {
+                if (d.weight[last] == 0)
+                    break;
+
                 d.weight.RemoveAt(last);
 
                 while (d.elapsed.Count != d.weight.Count)
@@ -702,6 +715,7 @@ namespace DE1LogView
                     d.pressure_goal.RemoveAt(last);
                     d.flow_goal.RemoveAt(last);
                     d.temperature_goal.RemoveAt(last);
+                    d.espresso_frame.RemoveAt(last);
                 }
 
                 last = d.weight.Count - 1;
@@ -833,6 +847,10 @@ namespace DE1LogView
                     {
                         d.temperature_goal = ReadList(line, "temperature_goal {");
                     }
+                    else if (line.StartsWith("espresso_frame {"))
+                    {
+                        d.espresso_frame = ReadList(line, "espresso_frame {");
+                    }
                     else
                         return null;
                 }
@@ -868,6 +886,7 @@ namespace DE1LogView
                     d.pressure_goal.RemoveAt(last);
                     d.flow_goal.RemoveAt(last);
                     d.temperature_goal.RemoveAt(last);
+                    d.espresso_frame.RemoveAt(last);
                 }
 
                 for (int i = 0; i < d.elapsed.Count; i++)
@@ -901,6 +920,9 @@ namespace DE1LogView
                 }
             }
 
+            // fix for records without espresso_frame
+            while (d.espresso_frame.Count != d.elapsed.Count)
+                d.espresso_frame.Add(0.0);
 
             return d;
         }

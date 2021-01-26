@@ -12,6 +12,9 @@ namespace DE1LogView
         public GraphPainter Graph = null;
         Graphics graphics = null;
 
+        public bool noTemperature = true;
+        public bool noResistance = true;
+
         public FormBigPlot()
         {
             InitializeComponent();
@@ -88,12 +91,18 @@ namespace DE1LogView
                     temperature_scaled1.Add(t / 10.0);
                 foreach (var t in ds2.temperature_basket)
                     temperature_scaled2.Add(t / 10.0);
+
+
 #if STEAM_STUDY
                 if (two_steam_plots == false) // with STEAM_STUDY disable temperature plots
                 {
 #endif
-                Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
-                Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
+
+                if (noTemperature == false)
+                {
+                    Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
+                    Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
+                }
 
 #if STEAM_STUDY == false
                 if (two_steam_plots == false) // otherwise enable temperature plots
@@ -110,6 +119,41 @@ namespace DE1LogView
                 }
 
                 Graph.SetAutoLimits();
+
+
+                if (noResistance == false)
+                {
+                    {
+                        var ds_t = ds1;
+                        List<double> res_t = new List<double>();
+                        for (int i = 0; i < ds_t.elapsed.Count; i++)
+                        {
+                            var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
+                            if (ds_t.pressure[i] < 1.0)
+                                res = 0.0;
+
+                            res_t.Add(res);
+                        }
+
+                        Graph.SetData(10, ds_t.elapsed, res_t, Color.Fuchsia, 2, DashStyle.Solid);
+                    }
+
+                    {
+                        var ds_t = ds2;
+                        List<double> res_t = new List<double>();
+                        for (int i = 0; i < ds_t.elapsed.Count; i++)
+                        {
+                            var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
+                            if (ds_t.pressure[i] < 1.0)
+                                res = 0.0;
+
+                            res_t.Add(res);
+                        }
+
+                        Graph.SetData(10, ds_t.elapsed, res_t, Color.Fuchsia, 2, DashStyle.Dash);
+                    }
+                }
+
 
                 Graph.panel.Refresh();
             }
