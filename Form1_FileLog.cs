@@ -924,8 +924,28 @@ namespace DE1LogView
             while (d.espresso_frame.Count != d.elapsed.Count)
                 d.espresso_frame.Add(0.0);
 
+            // smoothing for the DE1 data
+            SmoothArrayData(d.pressure);
+            SmoothArrayData(d.flow);
+            SmoothArrayData(d.pressure_goal);
+            SmoothArrayData(d.flow_goal);
+
             return d;
         }
+
+        private void SmoothArrayData(List<double> list)
+        {
+            if (list.Count < 3)
+                return;
+
+            List<double> tmp_list = new List<double>();
+            foreach (var x in list)
+                tmp_list.Add(x);
+
+            for(int i = 1; i < list.Count-1; i++)
+                list[i] = (tmp_list[i - 1] + tmp_list[i] + tmp_list[i + 1]) / 3.0;
+        }
+
         private void ReadAllRecords(string fname, string video_folder = "")
         {
             List<string> record_lines = new List<string>();
