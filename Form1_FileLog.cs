@@ -250,8 +250,8 @@ namespace DE1LogView
                 }
                 else // fixes for the REGULAR records
                 {
-
-                    // FIX this - now we can use the frame
+                    // old way to fix the end of the shot
+                    /*
                     if (flow_goal.Count != 0 && flow.Count != 0)  // remove the flow at 4 mls target at the end of the shot
                     {
                         for (int i = elapsed.Count - 1; i > 0; i--)
@@ -263,6 +263,16 @@ namespace DE1LogView
                             }
                             else
                                 break;
+                        }
+                    }*/
+
+                    // new way to fix the end of the shot
+                    for (int i = 0; i < elapsed.Count; i++)
+                    {
+                        if (espresso_frame[i] == -1)
+                        {
+                            flow_goal[i] = 0.0;
+                            pressure_goal[i] = 0.0;
                         }
                     }
                 }
