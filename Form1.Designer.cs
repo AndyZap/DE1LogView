@@ -54,10 +54,8 @@
             this.labVideo = new System.Windows.Forms.Label();
             this.labBeanWeight = new System.Windows.Forms.Label();
             this.labDaysSinceRoast = new System.Windows.Forms.Label();
-            this.labKpi = new System.Windows.Forms.Label();
-            this.labAvFlow = new System.Windows.Forms.Label();
-            this.labPI = new System.Windows.Forms.Label();
-            this.labEY = new System.Windows.Forms.Label();
+            this.labMaxPr = new System.Windows.Forms.Label();
+            this.labMaxFlow = new System.Windows.Forms.Label();
             this.labRatio = new System.Windows.Forms.Label();
             this.labGrind = new System.Windows.Forms.Label();
             this.labProfile = new System.Windows.Forms.Label();
@@ -135,7 +133,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Resize += new System.EventHandler(this.splitContainer1_Panel2_Resize);
             this.splitContainer1.Size = new System.Drawing.Size(1109, 739);
-            this.splitContainer1.SplitterDistance = 301;
+            this.splitContainer1.SplitterDistance = 298;
             this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -162,7 +160,7 @@
             this.splitContainer2.Panel2.Cursor = System.Windows.Forms.Cursors.Cross;
             this.splitContainer2.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer2_Panel2_Paint);
             this.splitContainer2.Panel2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.splitContainer2_Panel2_MouseMove);
-            this.splitContainer2.Size = new System.Drawing.Size(301, 739);
+            this.splitContainer2.Size = new System.Drawing.Size(298, 739);
             this.splitContainer2.SplitterDistance = 374;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -171,7 +169,7 @@
             this.labelTopR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTopR.BackColor = System.Drawing.SystemColors.Window;
             this.labelTopR.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTopR.Location = new System.Drawing.Point(93, 0);
+            this.labelTopR.Location = new System.Drawing.Point(90, 0);
             this.labelTopR.Name = "labelTopR";
             this.labelTopR.Size = new System.Drawing.Size(205, 18);
             this.labelTopR.TabIndex = 1;
@@ -185,7 +183,7 @@
             this.labelTopL.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTopL.Location = new System.Drawing.Point(0, 0);
             this.labelTopL.Name = "labelTopL";
-            this.labelTopL.Size = new System.Drawing.Size(87, 18);
+            this.labelTopL.Size = new System.Drawing.Size(84, 18);
             this.labelTopL.TabIndex = 0;
             // 
             // labelBotR
@@ -193,7 +191,7 @@
             this.labelBotR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelBotR.BackColor = System.Drawing.SystemColors.Window;
             this.labelBotR.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelBotR.Location = new System.Drawing.Point(173, 0);
+            this.labelBotR.Location = new System.Drawing.Point(170, 0);
             this.labelBotR.Name = "labelBotR";
             this.labelBotR.Size = new System.Drawing.Size(126, 18);
             this.labelBotR.TabIndex = 3;
@@ -207,7 +205,7 @@
             this.labelBotL.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelBotL.Location = new System.Drawing.Point(1, 0);
             this.labelBotL.Name = "labelBotL";
-            this.labelBotL.Size = new System.Drawing.Size(163, 18);
+            this.labelBotL.Size = new System.Drawing.Size(160, 18);
             this.labelBotL.TabIndex = 2;
             // 
             // panel4
@@ -217,13 +215,13 @@
             this.panel4.Location = new System.Drawing.Point(0, 695);
             this.panel4.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(801, 44);
+            this.panel4.Size = new System.Drawing.Size(804, 44);
             this.panel4.TabIndex = 6;
             // 
             // txtCopy
             // 
             this.txtCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtCopy.Location = new System.Drawing.Point(759, 11);
+            this.txtCopy.Location = new System.Drawing.Point(762, 11);
             this.txtCopy.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.txtCopy.Name = "txtCopy";
             this.txtCopy.Size = new System.Drawing.Size(43, 26);
@@ -243,7 +241,7 @@
             this.panel3.Location = new System.Drawing.Point(0, 625);
             this.panel3.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(801, 44);
+            this.panel3.Size = new System.Drawing.Size(804, 44);
             this.panel3.TabIndex = 5;
             // 
             // checkShowVideoOnly
@@ -308,7 +306,7 @@
             // btnSaveNotes
             // 
             this.btnSaveNotes.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnSaveNotes.Location = new System.Drawing.Point(713, 0);
+            this.btnSaveNotes.Location = new System.Drawing.Point(716, 0);
             this.btnSaveNotes.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.btnSaveNotes.Name = "btnSaveNotes";
             this.btnSaveNotes.Size = new System.Drawing.Size(88, 44);
@@ -335,7 +333,7 @@
             this.panel5.Location = new System.Drawing.Point(0, 565);
             this.panel5.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(801, 60);
+            this.panel5.Size = new System.Drawing.Size(804, 60);
             this.panel5.TabIndex = 4;
             // 
             // txtNotes
@@ -344,7 +342,7 @@
             this.txtNotes.Location = new System.Drawing.Point(0, 0);
             this.txtNotes.Multiline = true;
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(801, 60);
+            this.txtNotes.Size = new System.Drawing.Size(804, 60);
             this.txtNotes.TabIndex = 0;
             // 
             // listData
@@ -361,7 +359,7 @@
             this.listData.Location = new System.Drawing.Point(0, 87);
             this.listData.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.listData.Name = "listData";
-            this.listData.Size = new System.Drawing.Size(801, 478);
+            this.listData.Size = new System.Drawing.Size(804, 478);
             this.listData.TabIndex = 3;
             this.listData.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listData_DrawItem);
             this.listData.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.listData_MeasureItem);
@@ -374,10 +372,8 @@
             this.panel2.Controls.Add(this.labVideo);
             this.panel2.Controls.Add(this.labBeanWeight);
             this.panel2.Controls.Add(this.labDaysSinceRoast);
-            this.panel2.Controls.Add(this.labKpi);
-            this.panel2.Controls.Add(this.labAvFlow);
-            this.panel2.Controls.Add(this.labPI);
-            this.panel2.Controls.Add(this.labEY);
+            this.panel2.Controls.Add(this.labMaxPr);
+            this.panel2.Controls.Add(this.labMaxFlow);
             this.panel2.Controls.Add(this.labRatio);
             this.panel2.Controls.Add(this.labGrind);
             this.panel2.Controls.Add(this.labProfile);
@@ -387,13 +383,13 @@
             this.panel2.Location = new System.Drawing.Point(0, 53);
             this.panel2.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(801, 34);
+            this.panel2.Size = new System.Drawing.Size(804, 34);
             this.panel2.TabIndex = 2;
             // 
             // labDate
             // 
             this.labDate.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDate.Location = new System.Drawing.Point(654, 0);
+            this.labDate.Location = new System.Drawing.Point(585, 0);
             this.labDate.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labDate.Name = "labDate";
             this.labDate.Size = new System.Drawing.Size(99, 34);
@@ -404,7 +400,7 @@
             // labVideo
             // 
             this.labVideo.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labVideo.Location = new System.Drawing.Point(635, 0);
+            this.labVideo.Location = new System.Drawing.Point(566, 0);
             this.labVideo.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labVideo.Name = "labVideo";
             this.labVideo.Size = new System.Drawing.Size(19, 34);
@@ -415,7 +411,7 @@
             // labBeanWeight
             // 
             this.labBeanWeight.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labBeanWeight.Location = new System.Drawing.Point(590, 0);
+            this.labBeanWeight.Location = new System.Drawing.Point(521, 0);
             this.labBeanWeight.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labBeanWeight.Name = "labBeanWeight";
             this.labBeanWeight.Size = new System.Drawing.Size(45, 34);
@@ -426,7 +422,7 @@
             // labDaysSinceRoast
             // 
             this.labDaysSinceRoast.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labDaysSinceRoast.Location = new System.Drawing.Point(549, 0);
+            this.labDaysSinceRoast.Location = new System.Drawing.Point(480, 0);
             this.labDaysSinceRoast.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labDaysSinceRoast.Name = "labDaysSinceRoast";
             this.labDaysSinceRoast.Size = new System.Drawing.Size(41, 34);
@@ -434,49 +430,27 @@
             this.labDaysSinceRoast.Text = "Age";
             this.labDaysSinceRoast.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labKpi
+            // labMaxPr
             // 
-            this.labKpi.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labKpi.Location = new System.Drawing.Point(503, 0);
-            this.labKpi.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labKpi.Name = "labKpi";
-            this.labKpi.Size = new System.Drawing.Size(46, 34);
-            this.labKpi.TabIndex = 3;
-            this.labKpi.Text = "KPI";
-            this.labKpi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labMaxPr.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labMaxPr.Location = new System.Drawing.Point(421, 0);
+            this.labMaxPr.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labMaxPr.Name = "labMaxPr";
+            this.labMaxPr.Size = new System.Drawing.Size(59, 34);
+            this.labMaxPr.TabIndex = 3;
+            this.labMaxPr.Text = "MaxPr";
+            this.labMaxPr.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labAvFlow
+            // labMaxFlow
             // 
-            this.labAvFlow.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labAvFlow.Location = new System.Drawing.Point(451, 0);
-            this.labAvFlow.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labAvFlow.Name = "labAvFlow";
-            this.labAvFlow.Size = new System.Drawing.Size(52, 34);
-            this.labAvFlow.TabIndex = 5;
-            this.labAvFlow.Text = "AvFL";
-            this.labAvFlow.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labPI
-            // 
-            this.labPI.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labPI.Location = new System.Drawing.Point(414, 0);
-            this.labPI.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labPI.Name = "labPI";
-            this.labPI.Size = new System.Drawing.Size(37, 34);
-            this.labPI.TabIndex = 11;
-            this.labPI.Text = "Pi";
-            this.labPI.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labEY
-            // 
-            this.labEY.Dock = System.Windows.Forms.DockStyle.Left;
-            this.labEY.Location = new System.Drawing.Point(358, 0);
-            this.labEY.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.labEY.Name = "labEY";
-            this.labEY.Size = new System.Drawing.Size(56, 34);
-            this.labEY.TabIndex = 14;
-            this.labEY.Text = "EY";
-            this.labEY.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labMaxFlow.Dock = System.Windows.Forms.DockStyle.Left;
+            this.labMaxFlow.Location = new System.Drawing.Point(362, 0);
+            this.labMaxFlow.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.labMaxFlow.Name = "labMaxFlow";
+            this.labMaxFlow.Size = new System.Drawing.Size(59, 34);
+            this.labMaxFlow.TabIndex = 5;
+            this.labMaxFlow.Text = "MaxFL";
+            this.labMaxFlow.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labRatio
             // 
@@ -484,7 +458,7 @@
             this.labRatio.Location = new System.Drawing.Point(318, 0);
             this.labRatio.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.labRatio.Name = "labRatio";
-            this.labRatio.Size = new System.Drawing.Size(40, 34);
+            this.labRatio.Size = new System.Drawing.Size(44, 34);
             this.labRatio.TabIndex = 6;
             this.labRatio.Text = "Ratio";
             this.labRatio.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -541,13 +515,13 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(5, 2, 5, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(801, 53);
+            this.panel1.Size = new System.Drawing.Size(804, 53);
             this.panel1.TabIndex = 1;
             // 
             // btnMenu
             // 
             this.btnMenu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMenu.Location = new System.Drawing.Point(709, 0);
+            this.btnMenu.Location = new System.Drawing.Point(712, 0);
             this.btnMenu.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMenu.Name = "btnMenu";
             this.btnMenu.Size = new System.Drawing.Size(88, 50);
@@ -848,9 +822,9 @@
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.ListBox listData;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label labAvFlow;
+        private System.Windows.Forms.Label labMaxFlow;
         private System.Windows.Forms.Label labGrind;
-        private System.Windows.Forms.Label labKpi;
+        private System.Windows.Forms.Label labMaxPr;
         private System.Windows.Forms.Label labBeanWeight;
         private System.Windows.Forms.Label labDate;
         private System.Windows.Forms.Label labName;
@@ -865,7 +839,6 @@
         private System.Windows.Forms.Button btnImportData;
         private System.Windows.Forms.TextBox txtCopy;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.Label labPI;
         private System.Windows.Forms.Label labelTopL;
         private System.Windows.Forms.Label labelTopR;
         private System.Windows.Forms.Button btnSaveNotes;
@@ -903,7 +876,6 @@
         private System.Windows.Forms.Label labVideo;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
         private System.Windows.Forms.ToolStripMenuItem noSteamRecordsToolStripMenuItem;
-        private System.Windows.Forms.Label labEY;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem9;
         private System.Windows.Forms.ToolStripMenuItem writeSRTProfilesToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkShowVideoOnly;

@@ -19,41 +19,382 @@ namespace DE1LogView
         public Dictionary<string, ProfileInfo> ProfileInfoList = new Dictionary<string, ProfileInfo>();
         public class DataStruct
         {
-            public string date_str = "";
-            public DateTime date = DateTime.MinValue;
             public bool enabled = true;
-            public int id = 0;
-            public string name = "";
-            public double bean_weight = 0;
-            public double coffee_weight = 0;
-            public string grind = "";
-            public double shot_time = 0;
             public string notes = "";
-            public string profile = "";
             public string tds = "";
-            public bool   has_video = false;
+            public bool has_video = false;
             public double retained_volume = 0;
 
-            public List<double> elapsed = new List<double>();
-            public List<double> pressure = new List<double>();
-            public List<double> weight = new List<double>();
-            public List<double> flow = new List<double>();
-            public List<double> flow_weight = new List<double>();
-            public List<double> temperature_basket = new List<double>();
-            public List<double> temperature_mix = new List<double>();
-            public List<double> pressure_goal = new List<double>();
-            public List<double> flow_goal = new List<double>();
-            public List<double> temperature_goal = new List<double>();
-            public List<double> espresso_frame = new List<double>();
+            // readonly part
+            public readonly string date_str = "";
+            public readonly DateTime date = DateTime.MinValue;
+            public readonly int id = 0;
+            public readonly string bean_name = "";
+            public readonly double bean_weight = 0;
+            public readonly double coffee_weight = 0;
+            public readonly string grind = "";
+            public readonly double shot_time = 0;
+            public readonly string profile = "";
+
+            public readonly List<double> elapsed = new List<double>();
+            public readonly List<double> pressure = new List<double>();
+            public readonly List<double> weight = new List<double>();
+            public readonly List<double> flow = new List<double>();
+            public readonly List<double> flow_weight = new List<double>();
+            public readonly List<double> temperature_basket = new List<double>();
+            public readonly List<double> temperature_mix = new List<double>();
+            public readonly List<double> pressure_goal = new List<double>();
+            public readonly List<double> flow_goal = new List<double>();
+            public readonly List<double> temperature_goal = new List<double>();
+            public readonly List<double> espresso_frame = new List<double>();
 
             public DataStruct() { }
+
+            public DataStruct(string shot_fname, int record_id, ref string read_error) // ctor from shot record
+            {
+                var lines = File.ReadAllLines(shot_fname);
+                try
+                {
+                    foreach (var s in lines)
+                    {
+                        var line = s.Trim().Replace("  ", " ").Replace("  ", " ").Replace("  ", " "); // trim and remove double spaces
+                        if (String.IsNullOrEmpty(line))
+                            continue;
+
+                        if (line.StartsWith("clock "))
+                        {
+                            string clock_str = line.Replace("clock ", "").Trim();
+                            date = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(clock_str)).LocalDateTime;
+                            date_str = date.ToString("yyyy MM dd ddd HH:mm");
+
+                        }
+                        else if (line.StartsWith("espresso_elapsed {"))
+                        {
+                            elapsed = ReadList(line, "espresso_elapsed ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_pressure {"))
+                        {
+                            pressure = ReadList(line, "espresso_pressure ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_weight {"))
+                        {
+                            weight = ReadList(line, "espresso_weight ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_flow {"))
+                        {
+                            flow = ReadList(line, "espresso_flow ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_flow_weight {"))
+                        {
+                            flow_weight = ReadList(line, "espresso_flow_weight ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_temperature_basket {"))
+                        {
+                            temperature_basket = ReadList(line, "espresso_temperature_basket ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_temperature_mix {"))
+                        {
+                            temperature_mix = ReadList(line, "espresso_temperature_mix ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_pressure_goal {"))
+                        {
+                            pressure_goal = ReadList(line, "espresso_pressure_goal ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_flow_goal {"))
+                        {
+                            flow_goal = ReadList(line, "espresso_flow_goal ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_temperature_goal {"))
+                        {
+                            temperature_goal = ReadList(line, "espresso_temperature_goal ", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_frame {"))
+                        {
+                            espresso_frame = ReadList(line, "espresso_frame ", min_limit: -100); // no min limit here
+                        }
+                        else if (line.StartsWith("drink_weight "))
+                        {
+                            coffee_weight = ReadDouble(line, "drink_weight ");
+                        }
+                        else if (line.StartsWith("dsv2_bean_weight ") && bean_weight == 0.0)      // old string from DSV skin
+                        {
+                            bean_weight = ReadDouble(line, "dsv2_bean_weight ");
+                        }
+                        else if (line.StartsWith("DSx_bean_weight ") && bean_weight == 0.0)       // old string from DSV skin
+                        {
+                            bean_weight = ReadDouble(line, "DSx_bean_weight ");
+                        }
+                        else if (line.StartsWith("grinder_dose_weight ") && bean_weight == 0.0)   // new string from insight skin
+                        {
+                            bean_weight = ReadDouble(line, "grinder_dose_weight ");
+                        }
+                        else if (line.StartsWith("grinder_setting {"))
+                        {
+                            grind = ReadString(line, "grinder_setting ");
+                        }
+                        else if (line.StartsWith("bean_brand {"))
+                        {
+                            bean_name = ReadString(line, "bean_brand ");
+                        }
+                        else if (line.StartsWith("espresso_notes {"))
+                        {
+                            notes = ReadString(line, "espresso_notes ");
+                        }
+                        else if (line.StartsWith("profile_title {"))
+                        {
+                            profile = ReadString(line, "profile_title ");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    read_error = "Exception: " + ex.Message;
+                    return;
+                }
+
+                if (elapsed.Count == 0)
+                {
+                    read_error = "Error: no time data or empty record";
+                    return;
+                }
+
+                if (bean_name != "steam" && bean_name != "filter" && (weight[weight.Count - 1] == 0.0 || bean_weight == 0.0))
+                {
+                    read_error = "Error: no weight data from scale or bean weight is zero";
+                    return;
+                }
+
+
+                // trim data at the end of the shot if the weight does not change. Do not do for steam!
+                {
+                    int last = weight.Count - 1;
+                    while (bean_name != "steam" && bean_name != "filter" && weight[last] == weight[last - 1])
+                    {
+                        if (weight[last] == 0.0)
+                            break;
+
+                        weight.RemoveAt(last);
+
+                        while (elapsed.Count != weight.Count)
+                        {
+                            elapsed.RemoveAt(last);
+                            pressure.RemoveAt(last);
+                            flow.RemoveAt(last);
+                            flow_weight.RemoveAt(last);
+                            temperature_basket.RemoveAt(last);
+                            temperature_mix.RemoveAt(last);
+                            pressure_goal.RemoveAt(last);
+                            flow_goal.RemoveAt(last);
+                            temperature_goal.RemoveAt(last);
+                            espresso_frame.RemoveAt(last);
+                        }
+
+                        last = weight.Count - 1;
+                    }
+                }
+
+                // setup the fields which are not saved in the file
+                shot_time = elapsed[elapsed.Count - 1];
+                id        = record_id;
+
+                //while (espresso_frame.Count != elapsed.Count) // fix for old records without espresso_frame, do not need this
+                //    espresso_frame.Add(0.0);
+
+                if (bean_name == "steam") // fixes for the STEAM
+                {
+                    int target_length = elapsed.Count;
+                    for (int i = 0; i < elapsed.Count; i++)
+                    {
+                        if (flow[i] < 0.3 && pressure[i] < 0.5)
+                        {
+                            target_length = i;
+                            break;
+                        }
+                    }
+
+                    while (elapsed.Count > target_length)
+                    {
+                        int last = elapsed.Count - 1;
+                        weight.RemoveAt(last);
+                        elapsed.RemoveAt(last);
+                        pressure.RemoveAt(last);
+                        flow.RemoveAt(last);
+                        flow_weight.RemoveAt(last);
+                        temperature_basket.RemoveAt(last);
+                        temperature_mix.RemoveAt(last);
+                        pressure_goal.RemoveAt(last);
+                        flow_goal.RemoveAt(last);
+                        temperature_goal.RemoveAt(last);
+                        espresso_frame.RemoveAt(last);
+                    }
+
+                    for (int i = 0; i < elapsed.Count; i++)
+                    {
+                        weight[i] = 0.0;
+                        flow_weight[i] = 0.0;
+                        temperature_goal[i] = 0.0;
+                    }
+
+                    bean_weight = 1;
+                    coffee_weight = 1;
+                    grind = "";
+                    shot_time = 1;
+
+                    profile = "";
+                    tds = "";
+                    has_video = false;
+                    retained_volume = 1;
+                }
+                else // fixes for the REGULAR records
+                {
+
+                    // FIX this - now we can use the frame
+                    if (flow_goal.Count != 0 && flow.Count != 0)  // remove the flow at 4 mls target at the end of the shot
+                    {
+                        for (int i = elapsed.Count - 1; i > 0; i--)
+                        {
+                            if (flow_goal[i] == 4.0)
+                            {
+                                flow[i] = 0.0;
+                                flow_goal[i] = 0.0;
+                            }
+                            else
+                                break;
+                        }
+                    }
+                }
+
+                // smoothing for the DE1 data - TODO this next
+                //SmoothArrayData(d.pressure);
+                //SmoothArrayData(d.flow);
+            }
+
+            public DataStruct(List<string> lines, ref string read_error)
+            {
+                try
+                {
+                    foreach (var line in lines)
+                    {
+                        if (line.StartsWith("clock "))
+                        {
+                            date_str = line.Replace("clock ", "").Trim();
+                            date = DateTime.Parse(date_str);
+                        }
+                        else if (line.StartsWith("enabled "))
+                        {
+                            enabled = 1 == (int)ReadDouble(line, "enabled ");
+                        }
+                        else if (line.StartsWith("record_id "))
+                        {
+                            id = (int)ReadDouble(line, "record_id ");
+                        }
+                        else if (line.StartsWith("name "))
+                        {
+                            bean_name = ReadString(line, "name ");
+                        }
+                        else if (line.StartsWith("bean_weight "))
+                        {
+                            bean_weight = ReadDouble(line, "bean_weight ");
+                        }
+                        else if (line.StartsWith("coffee_weight "))
+                        {
+                            coffee_weight = ReadDouble(line, "coffee_weight ");
+                        }
+                        else if (line.StartsWith("grind "))
+                        {
+                            grind = ReadString(line, "grind ");
+                        }
+                        else if (line.StartsWith("shot_time "))
+                        {
+                            shot_time = ReadDouble(line, "shot_time ");
+                        }
+                        else if (line.StartsWith("notes "))
+                        {
+                            notes = ReadString(line, "notes ");
+                        }
+                        else if (line.StartsWith("profile "))
+                        {
+                            profile = ReadString(line, "profile ");
+                        }
+                        else if (line.StartsWith("tds "))
+                        {
+                            tds = ReadString(line, "tds ");
+                        }
+                        else if (line.StartsWith("elapsed {"))
+                        {
+                            elapsed = ReadList(line, "elapsed {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("pressure {"))
+                        {
+                            pressure = ReadList(line, "pressure {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("weight {"))
+                        {
+                            weight = ReadList(line, "weight {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("flow {"))
+                        {
+                            flow = ReadList(line, "flow {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("flow_weight {"))
+                        {
+                            flow_weight = ReadList(line, "flow_weight {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("temperature_basket {"))
+                        {
+                            temperature_basket = ReadList(line, "temperature_basket {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("temperature_mix {"))
+                        {
+                            temperature_mix = ReadList(line, "temperature_mix {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("pressure_goal {"))
+                        {
+                            pressure_goal = ReadList(line, "pressure_goal {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("flow_goal {"))
+                        {
+                            flow_goal = ReadList(line, "flow_goal {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("temperature_goal {"))
+                        {
+                            temperature_goal = ReadList(line, "temperature_goal {", min_limit: 0);
+                        }
+                        else if (line.StartsWith("espresso_frame {")) // no min limit here
+                        {
+                            espresso_frame = ReadList(line, "espresso_frame {", min_limit: -100);
+                        }
+                        else
+                        {
+                            read_error = "Unknown line: " + line;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    read_error = "Exception: " + ex.Message;
+                }
+            }
+
+            private void SmoothArrayData(List<double> list)
+            {
+                if (list.Count < 3)
+                    return;
+
+                List<double> tmp_list = new List<double>();
+                foreach (var x in list)
+                    tmp_list.Add(x);
+
+                for (int i = 1; i < list.Count - 1; i++)
+                    list[i] = (tmp_list[i - 1] + tmp_list[i] + tmp_list[i + 1]) / 3.0;
+            }
 
             public void WriteRecord(StringBuilder sb)
             {
                 sb.AppendLine("clock " + date_str);
                 sb.AppendLine("enabled " + (enabled ? "1" : "0"));
                 sb.AppendLine("record_id " + id.ToString());
-                sb.AppendLine("name " + name);
+                sb.AppendLine("name " + bean_name);
                 sb.AppendLine("bean_weight " + bean_weight.ToString());
                 sb.AppendLine("coffee_weight " + coffee_weight.ToString());
                 sb.AppendLine("grind " + grind);
@@ -89,219 +430,33 @@ namespace DE1LogView
                 return sb.ToString().Replace(" }", "}");
             }
 
-            // These are functions to work with the old format --------------------------
-
-            public DataStruct(string s) // init from the csv file line
-            {
-                var words = s.Replace("\"", "").Split(',');
-
-                date_str = words[0];
-                name = words[1].ToLower();
-                bean_weight = Convert.ToDouble(words[2]);
-                coffee_weight = Convert.ToDouble(words[3]);
-                grind = words[4];
-                shot_time = Convert.ToDouble(words[5]);
-                notes = words[6].Trim();
-
-                var vector_data = words[7].Split(';');
-                foreach (var v in vector_data)
-                {
-                    if (String.IsNullOrEmpty(v.Trim()))
-                        continue;
-
-                    weight.Add(Convert.ToDouble(v));
-                }
-
-                if (words.Length > 8)
-                {
-                    vector_data = words[8].Split(';');
-                    foreach (var v in vector_data)
-                    {
-                        if (String.IsNullOrEmpty(v.Trim()))
-                            continue;
-
-                        pressure.Add(Convert.ToDouble(v));
-                    }
-                }
-
-                SetupIncreasingAndFlowArrays();
-
-                SetupNoPreinfArrays();
-
-                date = DateTime.Parse(date_str);
-                date_str = date.ToString("yyyy MM dd ddd HH:mm");
-
-                if (bean_weight < 0)
-                    enabled = false;
-            }
-            public void SetupIncreasingAndFlowArrays()
-            {
-                List<double> tmp = new List<double>();
-                int counter = 0;
-                foreach (var d in weight)
-                {
-                    elapsed.Add(counter);
-                    flow_weight.Add(0.0);
-                    tmp.Add(0.0);
-                    if (pressure.Count < weight.Count)
-                        pressure.Add(0.0);
-
-                    counter++;
-                }
-
-                if (weight.Count < 3)  // no processing, simply copy the data
-                    return;
-
-                // chop the possible bump in the weight graphs at the beginning - e.g. after tare
-                if (weight.Count > 5)
-                {
-                    for (int i = 5; i >= 1; i--)
-                    {
-                        if (weight[i] < weight[i - 1])
-                            weight[i - 1] = weight[i];
-                    }
-                }
-
-                // chop the bump in the pressure graphs at the beginning
-                if (pressure.Count > 5)
-                {
-                    for (int i = 5; i >= 1; i--)
-                    {
-                        if (pressure[i] < pressure[i - 1])
-                            pressure[i - 1] = pressure[i];
-                    }
-                }
-
-                for (int i = 1; i < weight.Count; i++)
-                    tmp[i] = weight[i] - weight[i - 1];
-
-                for (int i = 1; i < weight.Count - 1; i++)  // average over 3 sec
-                    flow_weight[i] = (tmp[i] + tmp[i - 1] + tmp[i + 1]) / 3.0;
-
-                flow_weight[weight.Count - 1] = flow_weight[weight.Count - 2];
-
-
-            }
-            public void SetupNoPreinfArrays()
-            {
-                // copy data
-                foreach (var d in weight)
-                    data_increasing_nopi.Add(d);
-
-                foreach (var d in pressure)
-                    pressure_nopi.Add(d);
-
-                foreach (var d in flow_weight)
-                    flow_nopi.Add(d);
-
-                // find first point when the flow_weight is about 1 g/s
-                for (int i = 0; i < flow_weight.Count; i++)
-                {
-                    if (flow_weight[i] > _GOOD_FLOW_VALUE)
-                    {
-                        good_flow_index = i;
-                        break;
-                    }
-                }
-
-                // now find the starting index to chop the pre-infusion/bloom part
-                int tokeep_index = 0;
-                for (int i = good_flow_index; i >= 0; i--)
-                {
-                    if (good_flow_index > _BLOOM_TIME_INDEX)
-                    {
-                        if (flow_weight[i] < _GOOD_FLOW_VALUE / 2) // Bloom algo - get the half-point
-                        {
-                            tokeep_index = i;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (flow_weight[i] < _GOOD_FLOW_SMALL_VALUE) // all the rest algo - check against small value
-                        {
-                            tokeep_index = i;
-                            break;
-                        }
-                    }
-                }
-                if (good_flow_index > _BLOOM_TIME_INDEX)  // extra adjustment for Bloom algo
-                    tokeep_index -= good_flow_index - tokeep_index;
-
-                data_increasing_nopi.RemoveRange(0, tokeep_index);
-                pressure_nopi.RemoveRange(0, tokeep_index);
-                flow_nopi.RemoveRange(0, tokeep_index);
-            }
-            public List<double> getWeightPoints(List<int> points)
-            {
-                if (points.Count != 2)
-                    throw new Exception("WeightPoints not set correctly");
-
-                List<double> output = new List<double>(points.Count + 1);
-
-                // make an array which extends after the last point
-                List<double> values = new List<double>();
-                foreach (var d in weight)
-                    values.Add(d);
-
-                while (values.Count < points[1] + 10)
-                    values.Add(coffee_weight);
-
-
-                // here are the 3 bars:
-                output.Add(values[points[0]] / coffee_weight);
-
-                output.Add(values[points[1]] / coffee_weight - output[0]);
-
-                output.Add(1.0 - (output[1] + output[0]));
-
-                return output;
-            }
-
             // derived vars
-            readonly double _GOOD_FLOW_VALUE = 1;
-            readonly double _BLOOM_TIME_INDEX = 30;
-            readonly double _GOOD_FLOW_SMALL_VALUE = 0.1;
-
-            private int good_flow_index = 0;
             public List<double> data_increasing_nopi = new List<double>();
             public List<double> flow_nopi = new List<double>();
             public List<double> pressure_nopi = new List<double>();
             public int saved_plot_index = -1;  // -1 means this has not been saved in the data struct
 
-            public double getKpi(Dictionary<string, ProfileInfo> prof_dict)
+            public double getMaxPressure()
             {
                 if (pressure.Count == 0)
                     return 0.0;
 
-                double kpi_min_time = 15.0;
-                KpiTypeEnum kpi_type = KpiTypeEnum.Pressure;
+                var first_drop = getFirstDropTime();
 
-                if (prof_dict.ContainsKey(profile))
+                double max_press = 0.0;
+                for (int i = 1; i < pressure.Count; i++)
                 {
-                    var pi = prof_dict[profile];
-                    kpi_min_time = pi.kpi_min_time;
-                    kpi_type = pi.kpi_type;
-                }
-                else if (profile.StartsWith("_SRT") || profile.StartsWith("_V60")) // fix for SRT and V60 profiles
-                {
-                    kpi_min_time = 15.0;
-                    kpi_type = KpiTypeEnum.Pressure;
-                }
-
-                double kpi = 0.0;
-
-                for (int i = 0; i < elapsed.Count; i++)
-                {
-                    if (elapsed[i] < kpi_min_time)
+                    if (elapsed[i] < first_drop)
                         continue;
 
-                    if (kpi_type == KpiTypeEnum.Pressure)
-                        kpi = Math.Max(kpi, pressure[i]);
-                    else if (kpi_type == KpiTypeEnum.Flow)
-                        kpi = Math.Max(kpi, flow[i]);
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                        continue;
+
+                    if (pressure[i] > max_press)
+                        max_press = pressure[i];
                 }
-                return kpi;
+
+                return max_press;
             }
 
             public string getEY()
@@ -344,8 +499,8 @@ namespace DE1LogView
                     if (elapsed[i] < first_drop)
                         continue;
 
-                    if (elapsed[i] > shot_time - 8.0) // skip last 8 sec
-                        break;
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                        continue;
 
                     if ((flow.Count != 0 && flow[i] < 0.2) || (flow_weight.Count != 0 && flow_weight[i] < 0.07))
                         flow_time -= elapsed[i] - elapsed[i - 1];
@@ -354,14 +509,27 @@ namespace DE1LogView
                 return flow_time;
             }
 
-            public double getAverageWeightFlow()
+            public double getMaxWeightFlow()
             {
+                if (flow_weight.Count == 0)
+                    return 0.0;
+
                 var first_drop = getFirstDropTime();
-                double flow_time = shot_time - first_drop;
 
-                flow_time = flowTimeAdjustment(flow_time, first_drop);
+                double max_flow = 0.0;
+                for (int i = 1; i < flow_weight.Count; i++)
+                {
+                    if (elapsed[i] < first_drop)
+                        continue;
 
-                return coffee_weight / flow_time;
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                        continue;
+
+                    if (flow_weight[i] > max_flow)
+                        max_flow = flow_weight[i];
+                }
+
+                return max_flow;
             }
             public double getPreinfTime()
             {
@@ -421,10 +589,10 @@ namespace DE1LogView
 
             public string getAgeStr(Dictionary<string, BeanEntryClass> bean_list)
             {
-                if (!bean_list.ContainsKey(name))
+                if (!bean_list.ContainsKey(bean_name))
                     return "";
 
-                var age = bean_list[name].DatesSinceRoast(date);
+                var age = bean_list[bean_name].DatesSinceRoast(date);
 
                 if (age == 0)
                     return "";
@@ -456,22 +624,23 @@ namespace DE1LogView
             {
                 StringBuilder sb = new StringBuilder();
 
-                sb.Append(name.PadRight(max_bean_len) + "   ");
+                sb.Append(bean_name.PadRight(max_bean_len) + "   ");
                 sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
                 sb.Append(grind.PadRight(6));
                 sb.Append("R" + getRatio().ToString("0.0").PadRight(5) + " ");
                 sb.Append("Ey" + getEY().PadRight(4) + " ");
-                sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
-                sb.Append("F" + getAverageWeightFlow().ToString("0.0").PadRight(6));
-                sb.Append(getKpi(prof_dict).ToString("0.0").PadLeft(5));
+                //sb.Append("Pi" + getPreinfTime().ToString("0").PadRight(4));
+                sb.Append("F" + getMaxWeightFlow().ToString("0.0").PadRight(4));
+                sb.Append("P" + getMaxPressure().ToString("0.0").PadRight(4));
+
                 var age = getAgeStr(bean_list);
                 sb.Append(age.PadLeft(age.Contains("*") ? 6: 5).PadRight(7));
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
                 sb.Append("#" + id.ToString().PadRight(5) + " ");
-                sb.Append(getNiceDateStr(DateTime.Now).PadRight(12));
+                sb.Append(getNiceDateStr(DateTime.MaxValue).PadRight(9));
 
-                getTotalWaterVolume();
-                sb.Append("Rv" + retained_volume.ToString("0.0") + " ");
+                //getTotalWaterVolume();
+                //sb.Append("Rv" + retained_volume.ToString("0.0") + " ");
 
                 sb.Append((notes.StartsWith("*") ? "" : "  ") + notes);
 
@@ -483,17 +652,17 @@ namespace DE1LogView
                 StringBuilder sb = new StringBuilder();
 
                 sb.Append("#" + id.ToString().PadRight(5));
-                sb.Append(name + "    ");
+                sb.Append(bean_name + "    ");
                 sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
                 sb.Append("G" + grind + "    ");
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
                 sb.Append("Ey" + getEY() + "    ");
-                sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
-                sb.Append("F" + getAverageWeightFlow().ToString("0.0") + "   ");
-                sb.Append("Kpi" + getKpi(prof_dict).ToString("0.0") + "    ");
+                //sb.Append("Pi" + getPreinfTime().ToString("0") + "   ");
+                sb.Append("F" + getMaxWeightFlow().ToString("0.0") + "   ");
+                sb.Append("P" + getMaxPressure().ToString("0.0") + "    ");
                 sb.Append(getAgeStr(bean_list) + "    ");
                 sb.Append("B" + bean_weight.ToString("0.0") + "    ");
-                sb.Append(getNiceDateStr(DateTime.Now) + "    ");
+                sb.Append(getNiceDateStr(DateTime.MaxValue) + "    ");
 #if STEAM_STUDY
                 sb.Append(getAveragePressure_7_22() + "    ");
 #endif
@@ -565,7 +734,7 @@ namespace DE1LogView
 #endif
         }
 
-        static List<double> ReadList(string line, string key, double min_limit = 0.0)
+        static List<double> ReadList(string line, string key, double min_limit)
         {
             var str = line.Remove(0, key.Length);
 
@@ -595,144 +764,6 @@ namespace DE1LogView
         {
             return Convert.ToDouble(ReadString(line, key));
         }
-
-        bool ImportShotFile(string fname)
-        {
-            DataStruct d = new DataStruct();
-
-            var lines = File.ReadAllLines(fname);
-            foreach (var s in lines)
-            {
-                var line = s.Trim().Replace("  ", " ").Replace("  ", " ").Replace("  ", " "); // trim and remove double spaces
-                if (String.IsNullOrEmpty(line))
-                    continue;
-
-                if (line.StartsWith("clock "))
-                {
-                    string clock_str = line.Replace("clock ", "").Trim();
-                    d.date = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(clock_str)).LocalDateTime;
-                    d.date_str = d.date.ToString("yyyy MM dd ddd HH:mm");
-
-                }
-                else if (line.StartsWith("espresso_elapsed {"))
-                {
-                    d.elapsed = ReadList(line, "espresso_elapsed ");
-                }
-                else if (line.StartsWith("espresso_pressure {"))
-                {
-                    d.pressure = ReadList(line, "espresso_pressure ");
-                }
-                else if (line.StartsWith("espresso_weight {"))
-                {
-                    d.weight = ReadList(line, "espresso_weight ");
-                }
-                else if (line.StartsWith("espresso_flow {"))
-                {
-                    d.flow = ReadList(line, "espresso_flow ");
-                }
-                else if (line.StartsWith("espresso_flow_weight {"))
-                {
-                    d.flow_weight = ReadList(line, "espresso_flow_weight ");
-                }
-                else if (line.StartsWith("espresso_temperature_basket {"))
-                {
-                    d.temperature_basket = ReadList(line, "espresso_temperature_basket ");
-                }
-                else if (line.StartsWith("espresso_temperature_mix {"))
-                {
-                    d.temperature_mix = ReadList(line, "espresso_temperature_mix ");
-                }
-                else if (line.StartsWith("espresso_pressure_goal {"))
-                {
-                    d.pressure_goal = ReadList(line, "espresso_pressure_goal ");
-                }
-                else if (line.StartsWith("espresso_flow_goal {"))
-                {
-                    d.flow_goal = ReadList(line, "espresso_flow_goal ");
-                }
-                else if (line.StartsWith("espresso_temperature_goal {"))
-                {
-                    d.temperature_goal = ReadList(line, "espresso_temperature_goal ");
-                }
-                else if (line.StartsWith("espresso_frame {"))
-                {
-                    d.espresso_frame = ReadList(line, "espresso_frame ");
-                }
-                else if (line.StartsWith("drink_weight "))
-                {
-                    d.coffee_weight = ReadDouble(line, "drink_weight ");
-                }
-                else if (line.StartsWith("dsv2_bean_weight ") && d.bean_weight == 0.0)      // old string from DSV skin
-                {
-                    d.bean_weight = ReadDouble(line, "dsv2_bean_weight "); 
-                }
-                else if (line.StartsWith("DSx_bean_weight ") && d.bean_weight == 0.0)       // old string from DSV skin
-                {
-                    d.bean_weight = ReadDouble(line, "DSx_bean_weight ");
-                }
-                else if (line.StartsWith("grinder_dose_weight ") && d.bean_weight == 0.0)   // new string from insight skin
-                {
-                    d.bean_weight = ReadDouble(line, "grinder_dose_weight ");
-                }
-                else if (line.StartsWith("grinder_setting {"))
-                {
-                    d.grind = ReadString(line, "grinder_setting ");
-                }
-                else if (line.StartsWith("bean_brand {"))
-                {
-                    d.name = ReadString(line, "bean_brand ");
-                }
-                else if (line.StartsWith("espresso_notes {"))
-                {
-                    d.notes = ReadString(line, "espresso_notes ");
-                }
-                else if (line.StartsWith("profile_title {"))
-                {
-                    d.profile = ReadString(line, "profile_title ");
-                }
-            }
-
-            if (d.elapsed.Count == 0)
-                return false;
-
-            // trim data at the end of the shot if the weight does not change. Do not do for steam!
-            int last = d.weight.Count - 1;
-            while (d.name != "steam" && d.name != "filter" && d.weight[last] == d.weight[last - 1])
-            {
-                if (d.weight[last] == 0)
-                    break;
-
-                d.weight.RemoveAt(last);
-
-                while (d.elapsed.Count != d.weight.Count)
-                {
-                    d.elapsed.RemoveAt(last);
-                    d.pressure.RemoveAt(last);
-                    d.flow.RemoveAt(last);
-                    d.flow_weight.RemoveAt(last);
-                    d.temperature_basket.RemoveAt(last);
-                    d.temperature_mix.RemoveAt(last);
-                    d.pressure_goal.RemoveAt(last);
-                    d.flow_goal.RemoveAt(last);
-                    d.temperature_goal.RemoveAt(last);
-                    d.espresso_frame.RemoveAt(last);
-                }
-
-                last = d.weight.Count - 1;
-            }
-
-            // setup the fields which are not saved in the file
-            d.shot_time = d.elapsed[d.elapsed.Count - 1];
-            d.id = DataStruct.getMaxId(Data);
-
-            if (d.name != "steam" && d.name != "filter" && (d.weight[d.weight.Count - 1] == 0.0 || d.bean_weight == 0.0))
-                d.enabled = false;
-
-            // finally add to the master list
-            Data.Add(d.date_str, d);
-
-            return true;
-        }
         string ReadDateFromShotFile(string fname)
         {
             var lines = File.ReadAllLines(fname);
@@ -753,198 +784,6 @@ namespace DE1LogView
 
             return "";
         }
-        private DataStruct ReadRecord(List<string> lines)
-        {
-            DataStruct d = new DataStruct();
-
-            try
-            {
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("clock "))
-                    {
-                        d.date_str = line.Replace("clock ", "").Trim();
-                        d.date = DateTime.Parse(d.date_str);
-                    }
-                    else if (line.StartsWith("enabled "))
-                    {
-                        d.enabled = 1 == (int)ReadDouble(line, "enabled ");
-                    }
-                    else if (line.StartsWith("record_id "))
-                    {
-                        d.id = (int)ReadDouble(line, "record_id ");
-                    }
-                    else if (line.StartsWith("name "))
-                    {
-                        d.name = ReadString(line, "name ");
-                    }
-                    else if (line.StartsWith("bean_weight "))
-                    {
-                        d.bean_weight = ReadDouble(line, "bean_weight ");
-                    }
-                    else if (line.StartsWith("coffee_weight "))
-                    {
-                        d.coffee_weight = ReadDouble(line, "coffee_weight ");
-                    }
-                    else if (line.StartsWith("grind "))
-                    {
-                        d.grind = ReadString(line, "grind ");
-                    }
-                    else if (line.StartsWith("shot_time "))
-                    {
-                        d.shot_time = ReadDouble(line, "shot_time ");
-                    }
-                    else if (line.StartsWith("notes "))
-                    {
-                        d.notes = ReadString(line, "notes ");
-                    }
-                    else if (line.StartsWith("profile "))
-                    {
-                        d.profile = ReadString(line, "profile ");
-                    }
-                    else if (line.StartsWith("tds "))
-                    {
-                        d.tds = ReadString(line, "tds ");
-                    }
-
-                    else if (line.StartsWith("elapsed {"))
-                    {
-                        d.elapsed = ReadList(line, "elapsed {");
-                    }
-                    else if (line.StartsWith("pressure {"))
-                    {
-                        d.pressure = ReadList(line, "pressure {");
-                    }
-                    else if (line.StartsWith("weight {"))
-                    {
-                        d.weight = ReadList(line, "weight {");
-                    }
-                    else if (line.StartsWith("flow {"))
-                    {
-                        d.flow = ReadList(line, "flow {");
-                    }
-                    else if (line.StartsWith("flow_weight {"))
-                    {
-                        d.flow_weight = ReadList(line, "flow_weight {");
-                    }
-                    else if (line.StartsWith("temperature_basket {"))
-                    {
-                        d.temperature_basket = ReadList(line, "temperature_basket {");
-                    }
-                    else if (line.StartsWith("temperature_mix {"))
-                    {
-                        d.temperature_mix = ReadList(line, "temperature_mix {");
-                    }
-                    else if (line.StartsWith("pressure_goal {"))
-                    {
-                        d.pressure_goal = ReadList(line, "pressure_goal {");
-                    }
-                    else if (line.StartsWith("flow_goal {"))
-                    {
-                        d.flow_goal = ReadList(line, "flow_goal {");
-                    }
-                    else if (line.StartsWith("temperature_goal {"))
-                    {
-                        d.temperature_goal = ReadList(line, "temperature_goal {");
-                    }
-                    else if (line.StartsWith("espresso_frame {"))
-                    {
-                        d.espresso_frame = ReadList(line, "espresso_frame {");
-                    }
-                    else
-                        return null;
-                }
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-            // fixes for the steam record ------------------------------------
-            if (d.name == "steam")
-            {
-                int target_length = d.elapsed.Count;
-                for (int i = 0; i < d.elapsed.Count; i++)
-                {
-                    if (d.flow[i] < 0.3 && d.pressure[i] < 0.5)
-                    {
-                        target_length = i;
-                        break;
-                    }
-                }
-
-                while (d.elapsed.Count > target_length)
-                {
-                    var last = d.elapsed.Count - 1;
-                    d.weight.RemoveAt(last);
-                    d.elapsed.RemoveAt(last);
-                    d.pressure.RemoveAt(last);
-                    d.flow.RemoveAt(last);
-                    d.flow_weight.RemoveAt(last);
-                    d.temperature_basket.RemoveAt(last);
-                    d.temperature_mix.RemoveAt(last);
-                    d.pressure_goal.RemoveAt(last);
-                    d.flow_goal.RemoveAt(last);
-                    d.temperature_goal.RemoveAt(last);
-                    d.espresso_frame.RemoveAt(last);
-                }
-
-                for (int i = 0; i < d.elapsed.Count; i++)
-                {
-                    d.weight[i] = 0.0;
-                    d.flow_weight[i] = 0.0;
-                    d.temperature_goal[i] = 0.0;
-                }
-
-                d.bean_weight = 1;
-                d.coffee_weight = 1;
-                d.grind = "";
-                d.shot_time = 1;
-
-                d.profile = "";
-                d.tds = "";
-                d.has_video = false;
-                d.retained_volume = 1;
-            }
-            else if (d.flow_goal.Count != 0 && d.flow.Count != 0)  // remove the flow at 4 mls target at the end of the shot
-            {
-                for (int i = d.elapsed.Count - 1; i > 0; i--)
-                {
-                    if (d.flow_goal[i] == 4.0)
-                    {
-                        d.flow[i] = 0.0;
-                        d.flow_goal[i] = 0.0;
-                    }
-                    else
-                        break;
-                }
-            }
-
-            // fix for records without espresso_frame
-            while (d.espresso_frame.Count != d.elapsed.Count)
-                d.espresso_frame.Add(0.0);
-
-            // smoothing for the DE1 data
-            SmoothArrayData(d.pressure);
-            SmoothArrayData(d.flow);
-            SmoothArrayData(d.pressure_goal);
-            SmoothArrayData(d.flow_goal);
-
-            return d;
-        }
-
-        private void SmoothArrayData(List<double> list)
-        {
-            if (list.Count < 3)
-                return;
-
-            List<double> tmp_list = new List<double>();
-            foreach (var x in list)
-                tmp_list.Add(x);
-
-            for(int i = 1; i < list.Count-1; i++)
-                list[i] = (tmp_list[i - 1] + tmp_list[i] + tmp_list[i + 1]) / 3.0;
-        }
 
         private void ReadAllRecords(string fname, string video_folder = "")
         {
@@ -963,10 +802,12 @@ namespace DE1LogView
                 {
                     if (record_lines.Count != 0)
                     {
-                        DataStruct d = ReadRecord(record_lines);
-                        if (d == null)
+                        string read_status = "";
+                        DataStruct d = new DataStruct(record_lines, ref read_status);
+                        if (read_status != "")
                         {
-                            MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString());
+                            MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString() 
+                                + " Error:" + read_status);
                             return;
                         }
 
@@ -984,11 +825,12 @@ namespace DE1LogView
 
             if (record_lines.Count != 0)
             {
-                DataStruct d = ReadRecord(record_lines);
-
-                if (d == null)
+                string read_status = "";
+                DataStruct d = new DataStruct(record_lines, ref read_status);
+                if (read_status != "")
                 {
-                    MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString());
+                    MessageBox.Show("ERROR reading DE1LogView.csv file, see record which ends at line " + (counter - 1).ToString()
+                        + " Error:" + read_status);
                     return;
                 }
 
@@ -1174,31 +1016,6 @@ namespace DE1LogView
                 ProfileInfo p = new ProfileInfo(line);
                 ProfileInfoList[p.full_name] = p;
             }
-        }
-
-        // OLD format ------------------
-        private void ReadOldFileFormat(string fname)
-        {
-            var lines = File.ReadAllLines(fname);
-            foreach (var s in lines)
-            {
-                var line = s.Trim();
-                if (String.IsNullOrEmpty(line))
-                    continue;
-
-                if (line.StartsWith("date,beanName,beanWeight,coffeeWeight,grind"))   // skip the header
-                    continue;
-
-                DataStruct d = new DataStruct(line);
-
-                if (!Data.ContainsKey(d.date_str))
-                {
-                    d.id = DataStruct.getMaxId(Data);
-                    Data.Add(d.date_str, d);
-                }
-            }
-
-            FilterData();
         }
     }
 }

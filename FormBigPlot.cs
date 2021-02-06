@@ -69,7 +69,7 @@ namespace DE1LogView
                 Form1.DataStruct ds1 = parent.Data[parent.MainPlotKey];
                 Form1.DataStruct ds2 = parent.Data[parent.RefPlotKey];
 
-                bool two_steam_plots = ds1.name.ToLower() == "steam" && ds1.name.ToLower() == "steam";
+                bool two_steam_plots = ds1.bean_name.ToLower() == "steam" && ds1.bean_name.ToLower() == "steam";
 
                 labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList);
                 labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
@@ -129,7 +129,8 @@ namespace DE1LogView
                         for (int i = 0; i < ds_t.elapsed.Count; i++)
                         {
                             var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
-                            if (ds_t.pressure[i] < 1.0)
+
+                            if (ds_t.flow_goal[i] <= 0.1 && ds_t.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                                 res = 0.0;
 
                             res_t.Add(res);
@@ -144,7 +145,8 @@ namespace DE1LogView
                         for (int i = 0; i < ds_t.elapsed.Count; i++)
                         {
                             var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
-                            if (ds_t.pressure[i] < 1.0)
+
+                            if (ds_t.flow_goal[i] <= 0.1 && ds_t.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                                 res = 0.0;
 
                             res_t.Add(res);
@@ -202,12 +204,12 @@ namespace DE1LogView
             return output_list;
         }
 
-        public enum PlotTypeEnum { Lines, AvFlow, Kpi, Pi, Ratio, EY, AllLines, TotalVolumeAll}
+        public enum PlotTypeEnum { Lines, MaxFlow, MaxPress, Pi, Ratio, EY, AllLines, TotalVolumeAll}
         public List<string> AllKeys = new List<string>();
         public PlotTypeEnum PlotType;
         string BestKey = "";
 
-        public void ShowScatterGraph(List<string> all_keys, PlotTypeEnum plot_type = PlotTypeEnum.AvFlow)
+        public void ShowScatterGraph(List<string> all_keys, PlotTypeEnum plot_type = PlotTypeEnum.MaxFlow)
         {
             splitBigPlot.Visible = false;
             labelTopL.Visible = true;
@@ -219,10 +221,10 @@ namespace DE1LogView
 
             AllKeys = SmartPlotSort(all_keys);
             
-            if (plot_type == PlotTypeEnum.AvFlow)
-                Graph.SetAxisTitles("GRIND", "Av Flow");
-            else if (plot_type == PlotTypeEnum.Kpi)
-                Graph.SetAxisTitles("GRIND", "KPI");
+            if (plot_type == PlotTypeEnum.MaxFlow)
+                Graph.SetAxisTitles("GRIND", "Max Flow");
+            else if (plot_type == PlotTypeEnum.MaxPress)
+                Graph.SetAxisTitles("GRIND", "Max Pressure");
             else if (plot_type == PlotTypeEnum.Pi)
                 Graph.SetAxisTitles("GRIND", "PreINF");
             else if (plot_type == PlotTypeEnum.Ratio)
@@ -235,14 +237,14 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
-                if (ds.name.ToLower() == "steam")
+                if (ds.bean_name.ToLower() == "steam")
                     continue;
 
                 double val = 0.0;
-                if (plot_type == PlotTypeEnum.AvFlow)
-                    val = ds.getAverageWeightFlow();
-                else if (plot_type == PlotTypeEnum.Kpi)
-                    val = ds.getKpi(parent.ProfileInfoList);
+                if (plot_type == PlotTypeEnum.MaxFlow)
+                    val = ds.getMaxWeightFlow();
+                else if (plot_type == PlotTypeEnum.MaxPress)
+                    val = ds.getMaxPressure();
                 else if (plot_type == PlotTypeEnum.Pi)
                     val = ds.getPreinfTime();
                 else if (plot_type == PlotTypeEnum.Ratio)
@@ -256,8 +258,16 @@ namespace DE1LogView
                     val = Convert.ToDouble(ey_str);
                 }
 
+                double grind = 0.0;
+                if (ds.grind.EndsWith("-"))
+                    grind = Convert.ToDouble(ds.grind.Replace("-", "")) - 0.13;
+                else if (ds.grind.EndsWith("+"))
+                    grind = Convert.ToDouble(ds.grind.Replace("+", "")) + 0.13;
+                else
+                    grind = Convert.ToDouble(ds.grind);
+
                 if (ds.notes.StartsWith("*"))
-                    Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
+                    Graph.SetDotsOrTriangles(int.MaxValue, grind, val, Color.Red, 50, GraphPainter.SeriesTypeEnum.Triangles);
                 else
                 {
                     var color = Color.Gray;
@@ -266,7 +276,7 @@ namespace DE1LogView
                     else if (ds.profile.StartsWith("_SRT")) // fix for SRT profiles
                         color = Color.Black;
 
-                    Graph.SetDotsOrTriangles(int.MaxValue, Convert.ToDouble(ds.grind), val, color, 10, GraphPainter.SeriesTypeEnum.Dots);
+                    Graph.SetDotsOrTriangles(int.MaxValue, grind, val, color, 10, GraphPainter.SeriesTypeEnum.Dots);
                 }
 
             }
@@ -300,7 +310,7 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[key];
 
-                if (ds.name.ToLower() == "steam")
+                if (ds.bean_name.ToLower() == "steam")
                     continue;
 
                 Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 1, DashStyle.Solid); counter++;
@@ -400,11 +410,11 @@ namespace DE1LogView
             }
             else if (e.KeyValue == 112) // F1
             {
-                ShowScatterGraph(AllKeys, PlotTypeEnum.AvFlow);
+                ShowScatterGraph(AllKeys, PlotTypeEnum.MaxFlow);
             }
             else if (e.KeyValue == 113) // F2
             {
-                ShowScatterGraph(AllKeys, PlotTypeEnum.Kpi);
+                ShowScatterGraph(AllKeys, PlotTypeEnum.MaxPress);
             }
             else if (e.KeyValue == 114) // F3
             {
@@ -501,14 +511,14 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[AllKeys[i]];
 
-                if (ds.name.ToLower() == "steam")
+                if (ds.bean_name.ToLower() == "steam")
                     continue;
 
                 double val = 0.0;
-                if (PlotType == PlotTypeEnum.AvFlow)
-                    val = ds.getAverageWeightFlow();
-                else if (PlotType == PlotTypeEnum.Kpi)
-                    val = ds.getKpi(parent.ProfileInfoList);
+                if (PlotType == PlotTypeEnum.MaxFlow)
+                    val = ds.getMaxWeightFlow();
+                else if (PlotType == PlotTypeEnum.MaxPress)
+                    val = ds.getMaxPressure();
                 else if (PlotType == PlotTypeEnum.Pi)
                     val = ds.getPreinfTime();
                 else if (PlotType == PlotTypeEnum.Ratio)
@@ -522,7 +532,13 @@ namespace DE1LogView
                     val = Convert.ToDouble(ey_str);
                 }
 
-                double g = Convert.ToDouble(ds.grind);
+                double g = 0.0;
+                if (ds.grind.EndsWith("-"))
+                    g = Convert.ToDouble(ds.grind.Replace("-", "")) - 0.13;
+                else if (ds.grind.EndsWith("+"))
+                    g = Convert.ToDouble(ds.grind.Replace("+", "")) + 0.13;
+                else
+                    g = Convert.ToDouble(ds.grind);
 
                 var graph_x = Graph.ToGraphX(g);
                 var graph_y = Graph.ToGraphY(val);

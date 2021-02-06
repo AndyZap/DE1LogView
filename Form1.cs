@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.47";
+        string Revision = "DE1 Log View v1.48";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -50,14 +50,8 @@ namespace DE1LogView
             ReadProfileInfo(profile_fname);
 
             string data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\" + ApplicationNameNoExt + ".csv";
-            string old_data_fname = (Directory.Exists(DataFolder) ? DataFolder : ApplicationDirectory) + "\\CoffeeLogger.csv";
-
             string video_folder = Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory;
-
-            if ((File.Exists(data_fname) == false) && (File.Exists(old_data_fname) == true))
-                ReadOldFileFormat(old_data_fname);
-            else if (File.Exists(data_fname))
-                ReadAllRecords(data_fname, video_folder);
+            ReadAllRecords(data_fname, video_folder);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -145,7 +139,7 @@ namespace DE1LogView
                     var res = ds.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds.pressure[i]) / ds.flow[i]; // use as per AdAstra
                     // var res = ds.flow[i] == 0.0 ? 100.0 : ds.pressure[i] / (ds.flow[i] * ds.flow[i]); // de1app definition
                     // resistance.Add(res/4.0);
-                    if (ds.pressure[i] < 1.0)
+                    if (ds.flow_goal[i] <= 0.1 && ds.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                         res = 0.0;
 
                     resistance.Add(res);
@@ -226,7 +220,7 @@ namespace DE1LogView
             myrec.Y += 2;
 
             myrec.X = labName.Left; myrec.Width = labName.Width;
-            e.Graphics.DrawString(d.name, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            e.Graphics.DrawString(d.bean_name, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
             e.Graphics.DrawString(d.getShortProfileName(ProfileInfoList), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -234,26 +228,26 @@ namespace DE1LogView
             myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
             e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labEY.Left; myrec.Width = labEY.Width;
-            e.Graphics.DrawString(d.getEY(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            //myrec.X = labEY.Left; myrec.Width = labEY.Width;
+            //e.Graphics.DrawString(d.getEY(), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labBeanWeight.Left; myrec.Width = labBeanWeight.Width;
             e.Graphics.DrawString(d.bean_weight.ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labKpi.Left; myrec.Width = labKpi.Width;
-            e.Graphics.DrawString(d.getKpi(ProfileInfoList).ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
+            e.Graphics.DrawString(d.getRatio().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labMaxFlow.Left; myrec.Width = labMaxFlow.Width;
+            e.Graphics.DrawString(d.getMaxWeightFlow().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            myrec.X = labMaxPr.Left; myrec.Width = labMaxPr.Width;
+            e.Graphics.DrawString(d.getMaxPressure().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labDaysSinceRoast.Left; myrec.Width = labDaysSinceRoast.Width;
             e.Graphics.DrawString(d.getAgeStr(BeanList), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
-            myrec.X = labRatio.Left; myrec.Width = labRatio.Width;
-            e.Graphics.DrawString(d.getRatio().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labAvFlow.Left; myrec.Width = labAvFlow.Width;
-            e.Graphics.DrawString(d.getAverageWeightFlow().ToString("0.0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
-
-            myrec.X = labPI.Left; myrec.Width = labPI.Width;
-            e.Graphics.DrawString(d.getPreinfTime().ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+            //myrec.X = labPI.Left; myrec.Width = labPI.Width;
+            //e.Graphics.DrawString(d.getPreinfTime().ToString("0"), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labDate.Left; myrec.Width = labDate.Width;
             e.Graphics.DrawString(d.getNiceDateStr(DateTime.Now), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -297,7 +291,7 @@ namespace DE1LogView
 
             list.Sort(delegate (DataStruct a1, DataStruct a2)
             {
-                if (a1.name != a2.name) { return a2.name.CompareTo(a1.name); }
+                if (a1.bean_name != a2.bean_name) { return a2.bean_name.CompareTo(a1.bean_name); }
                 else if (a1.profile != a2.profile) { return a2.profile.CompareTo(a1.profile); }
                 else if (a1.grind != a2.grind) { return a2.grind.CompareTo(a1.grind); }
                 else if (a1.bean_weight != a2.bean_weight) { return a2.bean_weight.CompareTo(a1.bean_weight); }
@@ -330,7 +324,7 @@ namespace DE1LogView
 
             foreach (var key in Data.Keys)
             {
-                if (!String.IsNullOrEmpty(flt_name) && Data[key].name.ToLower().Contains(flt_name) == false)
+                if (!String.IsNullOrEmpty(flt_name) && Data[key].bean_name.ToLower().Contains(flt_name) == false)
                     continue;
 
                 if (!String.IsNullOrEmpty(flt_profile) && Data[key].getShortProfileName(ProfileInfoList).ToLower().Contains(flt_profile) == false)
@@ -342,7 +336,7 @@ namespace DE1LogView
                 if ((DateTime.Now - Data[key].date).TotalDays > max_days)
                     continue;
 
-                if (noSteamRecordsToolStripMenuItem.Checked && Data[key].name == "steam")
+                if (noSteamRecordsToolStripMenuItem.Checked && Data[key].bean_name == "steam")
                     continue;
 
                 if (checkShowVideoOnly.Checked == true && Data[key].has_video == false)
@@ -720,7 +714,7 @@ namespace DE1LogView
 
             FormBigPlot.Show();
         }
-        void btnImportData_Click(object sender, EventArgs e)  // this comes from button
+        void btnImportData_Click(object sender, EventArgs e)
         {
             if (!Directory.Exists(ShotsFolder))
             {
@@ -745,19 +739,17 @@ namespace DE1LogView
                     return;
                 }
 
-                try
+
+                string read_status = "";
+                DataStruct d = new DataStruct(f, DataStruct.getMaxId(Data), ref read_status);
+
+                if (read_status != "")
                 {
-                    if (!ImportShotFile(f))
-                    {
-                        MessageBox.Show("ERROR: when reading shot file " + f);
-                        return;
-                    }
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show("ERROR: when reading shot file " + f + ", exception " + ex.Message);
+                    MessageBox.Show("ERROR: when reading shot file " + f + ", " + read_status);
                     return;
                 }
+
+                Data.Add(d.date_str, d); // if the record is not empty, add to the master list
             }
             FilterData();
 
@@ -820,7 +812,7 @@ namespace DE1LogView
                 return;
 
             var text = "";
-            var key = Data[MainPlotKey].name;
+            var key = Data[MainPlotKey].bean_name;
 
 
             if (BeanList.ContainsKey(key))
@@ -884,7 +876,7 @@ namespace DE1LogView
             foreach (string item in listData.Items)
             {
                 var d = Data[item];
-                max_bean_len = Math.Max(d.name.Length, max_bean_len);
+                max_bean_len = Math.Max(d.bean_name.Length, max_bean_len);
                 max_profile_len = Math.Max(d.getShortProfileName(ProfileInfoList).Length, max_profile_len);
 
             }
@@ -898,7 +890,7 @@ namespace DE1LogView
 
                     var ds = Data[key];
 
-                    if (ds.name.ToLower() == "steam")
+                    if (ds.bean_name.ToLower() == "steam")
                         continue;
 
                     keys.Add(key);
@@ -912,7 +904,7 @@ namespace DE1LogView
 
                     var ds = Data[key];
 
-                    if (ds.name.ToLower() == "steam")
+                    if (ds.bean_name.ToLower() == "steam")
                         continue;
 
                     keys.Add(item);
@@ -926,15 +918,15 @@ namespace DE1LogView
                 int num = 0;
                 List<double> all_values = new List<double>();
 
-                var last_name = Data[keys[0]].name;
+                var last_name = Data[keys[0]].bean_name;
                 foreach (var key in keys)
                 {
-                    if (last_name != Data[key].name)
+                    if (last_name != Data[key].bean_name)
                         sb.AppendLine("");
 
                     sb.AppendLine(Data[key].getAsInfoText(ProfileInfoList, BeanList, max_bean_len: max_bean_len, max_profile_len: max_profile_len));
 
-                    last_name = Data[key].name;
+                    last_name = Data[key].bean_name;
 
                     // calc retained volume stats
                     var rv = Data[key].retained_volume;
