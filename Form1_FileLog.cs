@@ -36,17 +36,20 @@ namespace DE1LogView
             public readonly double shot_time = 0;
             public readonly string profile = "";
 
-            public readonly List<double> elapsed = new List<double>();
-            public readonly List<double> pressure = new List<double>();
-            public readonly List<double> weight = new List<double>();
-            public readonly List<double> flow = new List<double>();
-            public readonly List<double> flow_weight = new List<double>();
-            public readonly List<double> temperature_basket = new List<double>();
-            public readonly List<double> temperature_mix = new List<double>();
-            public readonly List<double> pressure_goal = new List<double>();
-            public readonly List<double> flow_goal = new List<double>();
-            public readonly List<double> temperature_goal = new List<double>();
-            public readonly List<double> espresso_frame = new List<double>();
+            public  readonly List<double> elapsed = new List<double>();
+            private readonly List<double> flow = new List<double>();      // use the smoothed versions outside the class
+            private readonly List<double> pressure = new List<double>();  // use the smoothed versions outside the class
+            public  readonly List<double> weight = new List<double>();
+            public  readonly List<double> flow_weight = new List<double>();
+            public  readonly List<double> temperature_basket = new List<double>();
+            public  readonly List<double> temperature_mix = new List<double>();
+            public  readonly List<double> pressure_goal = new List<double>();
+            public  readonly List<double> flow_goal = new List<double>();
+            public  readonly List<double> temperature_goal = new List<double>();
+            public  readonly List<double> espresso_frame = new List<double>();
+
+            public  readonly List<double> pressure_smooth = new List<double>();
+            public  readonly List<double> flow_smooth = new List<double>();
 
             public DataStruct() { }
 
@@ -264,9 +267,9 @@ namespace DE1LogView
                     }
                 }
 
-                // smoothing for the DE1 data - TODO this next
-                //SmoothArrayData(d.pressure);
-                //SmoothArrayData(d.flow);
+                // generate the smooth flow and pressure arrays
+                flow_smooth = SmoothArrayData(flow);
+                pressure_smooth = SmoothArrayData(pressure);
             }
 
             public DataStruct(List<string> lines, ref string read_error)
@@ -374,19 +377,25 @@ namespace DE1LogView
                 {
                     read_error = "Exception: " + ex.Message;
                 }
+
+                // generate the smooth flow and pressure arrays
+                flow_smooth = SmoothArrayData(flow);
+                pressure_smooth = SmoothArrayData(pressure);
             }
 
-            private void SmoothArrayData(List<double> list)
+            private List<double> SmoothArrayData(List<double> list)
             {
-                if (list.Count < 3)
-                    return;
-
-                List<double> tmp_list = new List<double>();
+                List<double> out_list = new List<double>();
                 foreach (var x in list)
-                    tmp_list.Add(x);
+                    out_list.Add(x);
+
+                if (list.Count < 3)
+                    return out_list;
 
                 for (int i = 1; i < list.Count - 1; i++)
-                    list[i] = (tmp_list[i - 1] + tmp_list[i] + tmp_list[i + 1]) / 3.0;
+                    out_list[i] = (list[i - 1] + list[i] + list[i + 1]) / 3.0;
+
+                return out_list;
             }
 
             public void WriteRecord(StringBuilder sb)
@@ -438,22 +447,22 @@ namespace DE1LogView
 
             public double getMaxPressure()
             {
-                if (pressure.Count == 0)
+                if (pressure_smooth.Count == 0)
                     return 0.0;
 
                 var first_drop = getFirstDropTime();
 
                 double max_press = 0.0;
-                for (int i = 1; i < pressure.Count; i++)
+                for (int i = 1; i < pressure_smooth.Count; i++)
                 {
                     if (elapsed[i] < first_drop)
                         continue;
 
-                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow goal
                         continue;
 
-                    if (pressure[i] > max_press)
-                        max_press = pressure[i];
+                    if (pressure_smooth[i] > max_press)
+                        max_press = pressure_smooth[i];
                 }
 
                 return max_press;
@@ -499,10 +508,10 @@ namespace DE1LogView
                     if (elapsed[i] < first_drop)
                         continue;
 
-                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow goal
                         continue;
 
-                    if ((flow.Count != 0 && flow[i] < 0.2) || (flow_weight.Count != 0 && flow_weight[i] < 0.07))
+                    if ((flow_smooth.Count != 0 && flow_smooth[i] < 0.2) || (flow_weight.Count != 0 && flow_weight[i] < 0.07))
                         flow_time -= elapsed[i] - elapsed[i - 1];
                 }
 
@@ -522,7 +531,7 @@ namespace DE1LogView
                     if (elapsed[i] < first_drop)
                         continue;
 
-                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow
+                    if (flow_goal[i] <= 0.1 && pressure_goal[i] <= 0.1) // skip when no pressure/flow goal
                         continue;
 
                     if (flow_weight[i] > max_flow)
@@ -709,7 +718,7 @@ namespace DE1LogView
 #if STEAM_STUDY
             public string getAveragePressure_7_22()
             {
-                if (pressure.Count == 0)
+                if (pressure_smooth.Count == 0)
                     return "";
 
                 double sum = 0.0;
@@ -720,8 +729,8 @@ namespace DE1LogView
                 {
                     if (elapsed[i] >= 7 && elapsed[i] <= 22)  // to estimate 7-22 sec interval
                     {
-                        sum += pressure[i];
-                        sum2 += pressure[i] * pressure[i];
+                        sum += pressure_smooth[i];
+                        sum2 += pressure_smooth[i] * pressure_smooth[i];
                         num++;
                     }
                 }
@@ -732,7 +741,7 @@ namespace DE1LogView
                 return "AvP" + average.ToString("0.0") +  " Std" + std.ToString("0.00");
             }
 #endif
-        }
+        } // End of DataStruct
 
         static List<double> ReadList(string line, string key, double min_limit)
         {

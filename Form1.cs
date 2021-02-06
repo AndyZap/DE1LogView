@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.48";
+        string Revision = "DE1 Log View v1.49";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -106,8 +106,8 @@ namespace DE1LogView
             gp.SetData(0, ds.elapsed, ds.flow_goal, Color.Blue, 2, DashStyle.Dash);
             gp.SetData(1, ds.elapsed, ds.pressure_goal, Color.LimeGreen, 2, DashStyle.Dash);
 
-            gp.SetData(2, ds.elapsed, ds.flow, Color.Blue, 3, DashStyle.Solid);
-            gp.SetData(3, ds.elapsed, ds.pressure, Color.LimeGreen, 3, DashStyle.Solid);
+            gp.SetData(2, ds.elapsed, ds.flow_smooth, Color.Blue, 3, DashStyle.Solid);
+            gp.SetData(3, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid);
 
             gp.SetData(4, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid);
 
@@ -136,8 +136,8 @@ namespace DE1LogView
                 List<double> resistance = new List<double>();
                 for (int i = 0; i < ds.elapsed.Count; i++)
                 {
-                    var res = ds.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds.pressure[i]) / ds.flow[i]; // use as per AdAstra
-                    // var res = ds.flow[i] == 0.0 ? 100.0 : ds.pressure[i] / (ds.flow[i] * ds.flow[i]); // de1app definition
+                    var res = ds.flow_smooth[i] == 0.0 ? 100.0 : Math.Sqrt(ds.pressure_smooth[i]) / ds.flow_smooth[i]; // use as per AdAstra
+                    // var res = ds.flow_smooth[i] == 0.0 ? 100.0 : ds.pressure_smooth[i] / (ds.flow_smooth[i] * ds.flow_smooth[i]); // de1app definition
                     // resistance.Add(res/4.0);
                     if (ds.flow_goal[i] <= 0.1 && ds.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                         res = 0.0;

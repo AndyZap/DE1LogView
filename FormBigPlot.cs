@@ -77,12 +77,12 @@ namespace DE1LogView
                 Graph.SetAxisTitles("", "");
                 Graph.data.Clear();
 
-                Graph.SetData(0, ds2.elapsed, ds2.flow, Color.Blue, 3, DashStyle.Dash);
-                Graph.SetData(1, ds2.elapsed, ds2.pressure, Color.LimeGreen, 3, DashStyle.Dash);
+                Graph.SetData(0, ds2.elapsed, ds2.flow_smooth, Color.Blue, 3, DashStyle.Dash);
+                Graph.SetData(1, ds2.elapsed, ds2.pressure_smooth, Color.LimeGreen, 3, DashStyle.Dash);
                 Graph.SetData(2, ds2.elapsed, ds2.flow_weight, Color.Brown, 3, DashStyle.Dash);
 
-                Graph.SetData(3, ds1.elapsed, ds1.flow, Color.Blue, 3, DashStyle.Solid);
-                Graph.SetData(4, ds1.elapsed, ds1.pressure, Color.LimeGreen, 3, DashStyle.Solid);
+                Graph.SetData(3, ds1.elapsed, ds1.flow_smooth, Color.Blue, 3, DashStyle.Solid);
+                Graph.SetData(4, ds1.elapsed, ds1.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid);
                 Graph.SetData(5, ds1.elapsed, ds1.flow_weight, Color.Brown, 3, DashStyle.Solid);
 
                 List<double> temperature_scaled1 = new List<double>();
@@ -128,7 +128,7 @@ namespace DE1LogView
                         List<double> res_t = new List<double>();
                         for (int i = 0; i < ds_t.elapsed.Count; i++)
                         {
-                            var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
+                            var res = ds_t.flow_smooth[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure_smooth[i]) / ds_t.flow_smooth[i]; // use as per AdAstra
 
                             if (ds_t.flow_goal[i] <= 0.1 && ds_t.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                                 res = 0.0;
@@ -144,7 +144,7 @@ namespace DE1LogView
                         List<double> res_t = new List<double>();
                         for (int i = 0; i < ds_t.elapsed.Count; i++)
                         {
-                            var res = ds_t.flow[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure[i]) / ds_t.flow[i]; // use as per AdAstra
+                            var res = ds_t.flow_smooth[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure_smooth[i]) / ds_t.flow_smooth[i]; // use as per AdAstra
 
                             if (ds_t.flow_goal[i] <= 0.1 && ds_t.pressure_goal[i] <= 0.1) // skip when no pressure/flow
                                 res = 0.0;
@@ -313,8 +313,8 @@ namespace DE1LogView
                 if (ds.bean_name.ToLower() == "steam")
                     continue;
 
-                Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 1, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.pressure, Color.LimeGreen, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.flow_smooth, Color.Blue, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 1, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 1, DashStyle.Solid); counter++;
 
                 List<double> temperature_scaled = new List<double>();
@@ -329,8 +329,8 @@ namespace DE1LogView
 
                 labelTopL.Text = ds.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
 
-                Graph.SetData(counter, ds.elapsed, ds.flow, Color.Blue, 3, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.pressure, Color.LimeGreen, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.flow_smooth, Color.Blue, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid); counter++;
 
                 List<double> temperature_scaled = new List<double>();
