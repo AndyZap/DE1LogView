@@ -69,6 +69,16 @@ namespace DE1LogView
                 Form1.DataStruct ds1 = parent.Data[parent.MainPlotKey];
                 Form1.DataStruct ds2 = parent.Data[parent.RefPlotKey];
 
+                double time_ref1 = 0.0; // ds1.GetTimeRef(parent.ProfileInfoList);  // TODO
+                double time_ref2 = 0.0; // ds2.GetTimeRef(parent.ProfileInfoList);
+
+                List<double> elap1 = new List<double>();
+                List<double> elap2 = new List<double>();
+                foreach (var t in ds1.elapsed)
+                    elap1.Add(t- time_ref1);
+                foreach (var t in ds2.elapsed)
+                    elap2.Add(t - time_ref2);
+
                 bool two_steam_plots = ds1.bean_name.ToLower() == "steam" && ds1.bean_name.ToLower() == "steam";
 
                 labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList);
@@ -77,13 +87,13 @@ namespace DE1LogView
                 Graph.SetAxisTitles("", "");
                 Graph.data.Clear();
 
-                Graph.SetData(0, ds2.elapsed, ds2.flow_smooth, Color.Blue, 3, DashStyle.Dash);
-                Graph.SetData(1, ds2.elapsed, ds2.pressure_smooth, Color.LimeGreen, 3, DashStyle.Dash);
-                Graph.SetData(2, ds2.elapsed, ds2.flow_weight, Color.Brown, 3, DashStyle.Dash);
+                Graph.SetData(0, elap2, ds2.flow_smooth, Color.Blue, 3, DashStyle.Dash);
+                Graph.SetData(1, elap2, ds2.pressure_smooth, Color.LimeGreen, 3, DashStyle.Dash);
+                Graph.SetData(2, elap2, ds2.flow_weight, Color.Brown, 3, DashStyle.Dash);
 
-                Graph.SetData(3, ds1.elapsed, ds1.flow_smooth, Color.Blue, 3, DashStyle.Solid);
-                Graph.SetData(4, ds1.elapsed, ds1.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid);
-                Graph.SetData(5, ds1.elapsed, ds1.flow_weight, Color.Brown, 3, DashStyle.Solid);
+                Graph.SetData(3, elap1, ds1.flow_smooth, Color.Blue, 3, DashStyle.Solid);
+                Graph.SetData(4, elap1, ds1.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid);
+                Graph.SetData(5, elap1, ds1.flow_weight, Color.Brown, 3, DashStyle.Solid);
 
                 List<double> temperature_scaled1 = new List<double>();
                 List<double> temperature_scaled2 = new List<double>();
@@ -100,20 +110,20 @@ namespace DE1LogView
 
                 if (noTemperature == false)
                 {
-                    Graph.SetData(6, ds2.elapsed, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
-                    Graph.SetData(7, ds1.elapsed, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
+                    Graph.SetData(6, elap2, temperature_scaled2, Color.Red, 3, DashStyle.Dash);
+                    Graph.SetData(7, elap1, temperature_scaled1, Color.Red, 3, DashStyle.Solid);
                 }
 
 #if STEAM_STUDY == false
                 if (two_steam_plots == false) // otherwise enable temperature plots
                 {
 #endif
-                    var pi = ds2.getPreinfTime();
+                    var pi = ds2.getPreinfTime() - time_ref2;
                     List<double> x_pi = new List<double>(); x_pi.Add(pi); x_pi.Add(pi);
                     List<double> y_pi = new List<double>(); y_pi.Add(0); y_pi.Add(1);
                     Graph.SetData(8, x_pi, y_pi, Color.Brown, 2, DashStyle.Dash);
 
-                    pi = ds1.getPreinfTime();
+                    pi = ds1.getPreinfTime() - time_ref1;
                     x_pi.Clear(); x_pi.Add(pi); x_pi.Add(pi);
                     Graph.SetData(9, x_pi, y_pi, Color.Brown, 2, DashStyle.Solid);
                 }
@@ -121,12 +131,12 @@ namespace DE1LogView
                 Graph.SetAutoLimits();
 
 
-                if (noResistance == false)
+                if (noResistance == false && ds1.pressure_goal.Count != 0 && ds2.pressure_goal.Count != 0)
                 {
                     {
                         var ds_t = ds1;
                         List<double> res_t = new List<double>();
-                        for (int i = 0; i < ds_t.elapsed.Count; i++)
+                        for (int i = 0; i < elap1.Count; i++)
                         {
                             var res = ds_t.flow_smooth[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure_smooth[i]) / ds_t.flow_smooth[i]; // use as per AdAstra
 
@@ -136,13 +146,13 @@ namespace DE1LogView
                             res_t.Add(res);
                         }
 
-                        Graph.SetData(10, ds_t.elapsed, res_t, Color.Fuchsia, 2, DashStyle.Solid);
+                        Graph.SetData(10, elap1, res_t, Color.Fuchsia, 2, DashStyle.Solid);
                     }
 
                     {
                         var ds_t = ds2;
                         List<double> res_t = new List<double>();
-                        for (int i = 0; i < ds_t.elapsed.Count; i++)
+                        for (int i = 0; i < elap2.Count; i++)
                         {
                             var res = ds_t.flow_smooth[i] == 0.0 ? 100.0 : Math.Sqrt(ds_t.pressure_smooth[i]) / ds_t.flow_smooth[i]; // use as per AdAstra
 
@@ -152,7 +162,7 @@ namespace DE1LogView
                             res_t.Add(res);
                         }
 
-                        Graph.SetData(10, ds_t.elapsed, res_t, Color.Fuchsia, 2, DashStyle.Dash);
+                        Graph.SetData(10, elap2, res_t, Color.Fuchsia, 2, DashStyle.Dash);
                     }
                 }
 

@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.50";
+        string Revision = "DE1 Log View v1.51";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -131,7 +131,7 @@ namespace DE1LogView
 
             gp.SetAutoLimits();
 
-            if (noResistanceCtrlRToolStripMenuItem.Checked == false)
+            if (noResistanceCtrlRToolStripMenuItem.Checked == false && ds.pressure_goal.Count != 0)
             {
                 List<double> resistance = new List<double>();
                 for (int i = 0; i < ds.elapsed.Count; i++)
@@ -853,7 +853,8 @@ namespace DE1LogView
             {
                 var ratio = Data[MainPlotKey].getCurrentRatio(x);
                 var weight = Data[MainPlotKey].getCurrentWeight(x);
-                current_ratio_txt = "  " + weight.ToString("0.0") + "g/" + ratio.ToString("0.0");
+                var frame = Data[MainPlotKey].getCurrentFrame(x);
+                current_ratio_txt = "  Fr" + frame.ToString("0") + " " + weight.ToString("0.0") + "g/" + ratio.ToString("0.0");
             }
 
             labelTopR.Text = x.ToString("0.0") + ", " + y.ToString("0.0") + current_ratio_txt;

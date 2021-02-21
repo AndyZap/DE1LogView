@@ -457,7 +457,7 @@ namespace DE1LogView
 
             public double getMaxPressure()
             {
-                if (pressure_smooth.Count == 0)
+                if (pressure_smooth.Count == 0 || pressure_goal.Count == 0)
                     return 0.0;
 
                 var first_drop = getFirstDropTime();
@@ -512,6 +512,9 @@ namespace DE1LogView
             {
                 double flow_time = f;
 
+                if (flow_weight.Count == 0 || flow_goal.Count == 0)
+                    return flow_time;
+
                 // remove 0 flow points
                 for (int i = 1; i < elapsed.Count; i++)
                 {
@@ -530,7 +533,7 @@ namespace DE1LogView
 
             public double getMaxWeightFlow()
             {
-                if (flow_weight.Count == 0)
+                if (flow_weight.Count == 0 || flow_goal.Count == 0)
                     return 0.0;
 
                 var first_drop = getFirstDropTime();
@@ -604,6 +607,19 @@ namespace DE1LogView
 
                 // return final weight
                 return coffee_weight;
+            }
+            public double getCurrentFrame(double time)
+            {
+                if (espresso_frame.Count == 0)
+                    return 0.0;
+
+                for (int i = 0; i < elapsed.Count; i++)
+                {
+                    if (time <= elapsed[i])
+                        return espresso_frame[i];
+                }
+
+                return -1; // end of shot, -1 frame
             }
 
             public string getAgeStr(Dictionary<string, BeanEntryClass> bean_list)
@@ -723,6 +739,24 @@ namespace DE1LogView
                 retained_volume = total_list[total_list.Count - 1] - weight[weight.Count - 1];
 
                 return total_list;
+            }
+
+            public double GetTimeRef(Dictionary<string, ProfileInfo> prof_dict)
+            {
+                // get the ref frame from the profile
+                int ref_frame = 0;
+                if (prof_dict.ContainsKey(profile))
+                    ref_frame = prof_dict[profile].ref_frame;
+
+                double ref_time = 0;
+
+                for(int i = 1; i < elapsed.Count; i++)
+                {
+                    if (espresso_frame[i - 1] != ref_frame && espresso_frame[i] == ref_frame)
+                        ref_time = elapsed[i];
+                }
+
+                return ref_time;
             }
 
 #if STEAM_STUDY
@@ -996,6 +1030,7 @@ namespace DE1LogView
             public KpiTypeEnum kpi_type = KpiTypeEnum.Flow;
             public double kpi_min_time = 0;
             public Color color = Color.Yellow;
+            public int ref_frame = 0;
 
             public ProfileInfo(string s)
             {
