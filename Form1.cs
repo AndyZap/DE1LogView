@@ -524,7 +524,7 @@ namespace DE1LogView
 
         private void WiresharkToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var fname = @"D:\platform-tools\_ble_captures\8_de_new_fw\ws_output1.txt";
+            var fname = @"D:\platform-tools\_ble_captures\AcaiaLunar\ws_output.txt";
             ConvertWireshark(fname);
         }
 

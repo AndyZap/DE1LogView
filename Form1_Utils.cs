@@ -119,7 +119,7 @@ namespace DE1LogView
         }
 
         // Wireshark converter  -------------------------------------------------
-        private void ConvertWireshark(string fname) // @"D:\platform-tools\__data\7_de1_1\ws_output4.txt"
+        private void ConvertWireshark(string fname)
         {
             var lines = File.ReadAllLines(fname);
 
@@ -127,9 +127,16 @@ namespace DE1LogView
             string time = "";
             string bits = "";
             string opcode = "";
+
+#if ACAIA_LOG
+
+#else
             string charact = "";
+#endif
 
             bool read_header = true;
+            bool read_bits = false;
+            bool was_reading_bits = false;
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Frame" + "\t" + "time" + "\t" + "opcode_ch" + "\t" + "bits");
@@ -141,7 +148,20 @@ namespace DE1LogView
                 var line = s.Trim();
 
                 if (string.IsNullOrEmpty(line))
+                {
+                    if (was_reading_bits)
+                    {
+                        read_header = true;
+                        read_bits = false;
+                        was_reading_bits = false;
+#if ACAIA_LOG
+                        if(opcode != "")
+                            sb.AppendLine(frame + "\t" + time + "\t" + opcode + "\t" + bits);
+#endif
+                    }
+
                     continue;
+                }
 
                 if (line.StartsWith("Frame")
                 || line.StartsWith("Bluetooth")
@@ -151,11 +171,20 @@ namespace DE1LogView
                 || line.StartsWith("[Service")
                 || line.StartsWith("[Request")
                 || line.StartsWith("[Response")
+                || line.StartsWith("[Characteristic")
                 || line.StartsWith("[UUID: Client Characteristic")
                 || line.StartsWith("[UUID: GATT")
                 || line.StartsWith("[UUID: Generic")
                 || line.StartsWith("[UUID: Peripheral")
                 || line.StartsWith("[UUID: Service")
+                || line.StartsWith("[UUID: Database")
+                || line.StartsWith("[UUID: Internet")
+                || line.StartsWith("[UUID: Age (")  // this one we need to Acaia
+                || line.StartsWith("[UUID: Battery")
+                || line.StartsWith("[UUID: Device")
+                || line.StartsWith("[UUID: PnP ID")
+
+
                 || line.StartsWith("Starting")
                 || line.StartsWith("Ending")
                 || line.StartsWith("UUID")
@@ -168,6 +197,55 @@ namespace DE1LogView
                 )
                     continue;
 
+
+#if ACAIA_LOG
+                if (line.StartsWith("0000"))
+                {
+                    if (read_bits)
+                        bits = line.Trim().Substring(6, 3 * 16).Trim();
+
+                    was_reading_bits = true;
+                }
+                else if (line.StartsWith("0010"))
+                {
+                    if (read_bits)
+                        bits += " " + line.Trim().Substring(6, 3 * 16).Trim();
+
+                    was_reading_bits = true;
+                }
+                else if (read_header)
+                {
+                    var words = line.Trim().Split(' ');
+                    frame = words[0].PadLeft(10);
+                    time = Convert.ToDouble(words[1]).ToString("0.00").PadLeft(12);
+                    read_header = false;
+                }
+                else if (line.StartsWith("Opcode:"))
+                {
+                    if (line == "Opcode: Handle Value Notification (0x1b)") opcode = " _N_";
+
+                    else if (line.StartsWith("Opcode: Read By Group Type Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Group Type Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Type Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read By Type Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Error Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Find Information Request")) opcode = "";
+                    else if (line.StartsWith("Opcode: Find Information Response")) opcode = "";
+                    else if (line.StartsWith("Opcode: Write Request (0x12)")) opcode = " W__";
+                    else if (line.StartsWith("Opcode: Write Command (0x52)")) opcode = " W__";
+
+                    else if (line.StartsWith("Opcode: Write Response (0x13)")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read Request (0x0a)")) opcode = "";
+                    else if (line.StartsWith("Opcode: Read Response (0x0b)")) opcode = " __R";
+
+
+                    else { MessageBox.Show("Do not know line: " + line + " " + counter.ToString()); break; }
+                }
+                else if (line.StartsWith("Age:"))
+                {
+                    read_bits = true;
+                }
+#else
                 if (line.StartsWith("0000") || line.StartsWith("0010"))
                 {
                     if (opcode != "")
@@ -222,6 +300,7 @@ namespace DE1LogView
                     .Replace(")", "").Replace("(", "").Replace("0x", "")
                     .Trim().ToUpper();
                 }
+#endif
                 else
                 {
                     MessageBox.Show("Do not know line: " + line + " " + counter.ToString());
