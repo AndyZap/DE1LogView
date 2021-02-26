@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.51";
+        string Revision = "DE1 Log View v1.52";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -824,7 +824,6 @@ namespace DE1LogView
                 sb.AppendLine("ShortName    " + b.ShortName);
                 sb.AppendLine("FullName     " + b.FullName);
                 sb.AppendLine("Country      " + b.Country);
-                sb.AppendLine("CountryCode  " + b.CountryCode);
                 sb.AppendLine("From         " + b.From);
                 sb.AppendLine("Roasted      " + (b.Roasted == DateTime.MinValue ? "" : b.Roasted.ToString("dd/MM/yyyy")));
                 sb.AppendLine("Frozen       " + (b.Frozen == DateTime.MinValue ? "" : b.Frozen.ToString("dd/MM/yyyy")));
@@ -832,7 +831,6 @@ namespace DE1LogView
                 sb.AppendLine("Process      " + b.Process);
                 sb.AppendLine("Varietals    " + b.Varietals);
                 sb.AppendLine("Notes        " + b.Notes);
-                sb.AppendLine("Cupping      " + b.Cupping);
                 text = sb.ToString();
             }
             else
@@ -1138,7 +1136,6 @@ namespace DE1LogView
                     sb.Append(b.ShortName.PadRight(14));
                     sb.Append(b.FullName.PadRight(25));
                     sb.Append(b.Country.PadRight(14));
-                    sb.Append(b.CountryCode.PadRight(5));
                     sb.Append(b.From.PadRight(14));
                     sb.Append(b.Frozen.ToString("dd/MM/yyyy"));
 

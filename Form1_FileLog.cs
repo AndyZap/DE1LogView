@@ -51,8 +51,6 @@ namespace DE1LogView
             public  readonly List<double> pressure_smooth = new List<double>();
             public  readonly List<double> flow_smooth = new List<double>();
 
-            public DataStruct() { }
-
             public DataStruct(string shot_fname, int record_id, ref string read_error) // ctor from shot record
             {
                 var lines = File.ReadAllLines(shot_fname);
@@ -448,12 +446,6 @@ namespace DE1LogView
 
                 return sb.ToString().Replace(" }", "}");
             }
-
-            // derived vars
-            public List<double> data_increasing_nopi = new List<double>();
-            public List<double> flow_nopi = new List<double>();
-            public List<double> pressure_nopi = new List<double>();
-            public int saved_plot_index = -1;  // -1 means this has not been saved in the data struct
 
             public double getMaxPressure()
             {
@@ -904,7 +896,6 @@ namespace DE1LogView
             public string ShortName = "";
             public string FullName = "";
             public string Country = "";
-            public string CountryCode = "";
             public string From = "";
             public DateTime Roasted = DateTime.MinValue;
             public DateTime Frozen = DateTime.MinValue;
@@ -912,7 +903,6 @@ namespace DE1LogView
             public string Process = "";
             public string Varietals = "";
             public string Notes = "";
-            public string Cupping = "";
 
             public BeanEntryClass(string s)
             {
@@ -921,23 +911,20 @@ namespace DE1LogView
                 ShortName = words[0].Trim().ToLower();
                 FullName = words[1].Trim();
                 Country = words[2].Trim();
-                CountryCode = words[3].Trim();
-                From = words[4].Trim();
+                From = words[3].Trim();
 
-                var dt = words[5].Trim();
+                var dt = words[4].Trim();
                 Roasted = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
 
-                dt = words[6].Trim();
+                dt = words[5].Trim();
                 Frozen = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
 
-                dt = words[7].Trim();
+                dt = words[6].Trim();
                 Defrosted = dt == "" ? DateTime.MinValue : DateTime.Parse(dt);
 
-                Process = words[8].Trim();
-                Varietals = words[9].Trim();
-                Notes = words[10].Trim();
-                if(words.Length >=12)
-                    Cupping = words[11].Trim();
+                Process = words[7].Trim();
+                Varietals = words[8].Trim();
+                Notes = words[9].Trim();
             }
 
             public override string ToString()
@@ -946,15 +933,13 @@ namespace DE1LogView
                 sb.Append(ShortName + ",");
                 sb.Append(FullName + ",");
                 sb.Append(Country + ",");
-                sb.Append(CountryCode + ",");
                 sb.Append(From + ",");
                 sb.Append(Roasted == DateTime.MinValue ? "," : Roasted.ToString("dd/MM/yyyy") + ",");
                 sb.Append(Frozen == DateTime.MinValue ? "," : Frozen.ToString("dd/MM/yyyy") + ",");
                 sb.Append(Defrosted == DateTime.MinValue ? "," : Defrosted.ToString("dd/MM/yyyy") + ",");
                 sb.Append(Process + ",");
                 sb.Append(Varietals + ",");
-                sb.Append(Notes + ",");
-                sb.Append(Cupping);
+                sb.Append(Notes);
 
                 return sb.ToString();
             }
