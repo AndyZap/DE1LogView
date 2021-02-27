@@ -555,16 +555,12 @@ namespace DE1LogView
                 return shot_time - flow_time;
             }
 
-            public string getShortProfileName(Dictionary<string, ProfileInfo> prof_dict)
+            public string getShortProfileName()
             {
-                // fix for all my profiles
                 if (profile.StartsWith("_"))
                     return profile.Remove(0, 1);
-
-                if (!prof_dict.ContainsKey(profile))
+                else
                     return profile;
-
-                return prof_dict[profile].short_name;
             }
 
             public double getRatio()
@@ -645,14 +641,13 @@ namespace DE1LogView
                 return nice_d;
             }
 
-            public string getAsInfoText(Dictionary<string, ProfileInfo> prof_dict,
-                                        Dictionary<string, BeanEntryClass> bean_list,
+            public string getAsInfoText(Dictionary<string, BeanEntryClass> bean_list,
                                         int max_bean_len, int max_profile_len)
             {
                 StringBuilder sb = new StringBuilder();
 
                 sb.Append(bean_name.PadRight(max_bean_len) + "   ");
-                sb.Append(getShortProfileName(prof_dict).PadRight(max_profile_len) + "   ");
+                sb.Append(getShortProfileName().PadRight(max_profile_len) + "   ");
                 sb.Append(grind.PadRight(6));
                 sb.Append("R" + getRatio().ToString("0.0").PadRight(5) + " ");
                 sb.Append("Ey" + getEY().PadRight(4) + " ");
@@ -673,14 +668,13 @@ namespace DE1LogView
 
                 return sb.ToString();
             }
-            public string getAsInfoTextForGraph(Dictionary<string, ProfileInfo> prof_dict,
-                                        Dictionary<string, BeanEntryClass> bean_list)
+            public string getAsInfoTextForGraph(Dictionary<string, BeanEntryClass> bean_list)
             {
                 StringBuilder sb = new StringBuilder();
 
                 sb.Append("#" + id.ToString().PadRight(5));
                 sb.Append(bean_name + "    ");
-                sb.Append("\""+ getShortProfileName(prof_dict) + "\"    ");
+                sb.Append("\""+ getShortProfileName() + "\"    ");
                 sb.Append("G" + grind + "    ");
                 sb.Append("R" + getRatio().ToString("0.0") + "    ");
                 sb.Append("Ey" + getEY() + "    ");
@@ -1011,28 +1005,22 @@ namespace DE1LogView
         public class ProfileInfo
         {
             public string full_name = "";
-            public string short_name = "";
-            public KpiTypeEnum kpi_type = KpiTypeEnum.Flow;
-            public double kpi_min_time = 0;
-            public Color color = Color.Yellow;
-            public int ref_frame = 0;
+            public int    ref_frame = 0;
+            public Color  color = Color.Yellow;
 
             public ProfileInfo(string s)
             {
                 var words = s.Split(',');
                 full_name = words[0].Trim();
-                short_name = words[1].Trim();
-                kpi_type = words[2].Trim() == "Pressure" ? KpiTypeEnum.Pressure : KpiTypeEnum.Flow;
-                kpi_min_time = Convert.ToDouble(words[3].Trim());
+                ref_frame = Convert.ToInt32(words[1].Trim());
 
-                var cl_str = words[4].Trim();
-                if(cl_str == "Blue") color = Color.Blue;
+                var cl_str = words[2].Trim();
+                if     (cl_str == "Blue") color = Color.Blue;
                 else if(cl_str == "Fuchsia") color = Color.Fuchsia;
                 else if(cl_str == "Lime") color = Color.Lime;
                 else if(cl_str == "Black") color = Color.Black;
                 else if(cl_str == "YellowGreen") color = Color.YellowGreen;
                 else if(cl_str == "Green") color = Color.Green;
-                else if(cl_str == "Fuchsia") color = Color.Fuchsia;
                 else if(cl_str == "Aqua") color = Color.Aqua;
                 else if(cl_str == "Silver") color = Color.Silver;
                 else color = Color.Silver;
@@ -1049,8 +1037,11 @@ namespace DE1LogView
             var lines = File.ReadAllLines(fname);
             foreach (var line in lines)
             {
-                if (line.StartsWith("Full name,Short name,KPI"))
+                if (line.StartsWith("Name,"))
                     continue;
+
+                if(String.IsNullOrEmpty(line.Trim()))
+                        continue;
 
                 ProfileInfo p = new ProfileInfo(line);
                 ProfileInfoList[p.full_name] = p;

@@ -69,8 +69,8 @@ namespace DE1LogView
                 Form1.DataStruct ds1 = parent.Data[parent.MainPlotKey];
                 Form1.DataStruct ds2 = parent.Data[parent.RefPlotKey];
 
-                double time_ref1 = 0.0; // ds1.GetTimeRef(parent.ProfileInfoList);  // TODO
-                double time_ref2 = 0.0; // ds2.GetTimeRef(parent.ProfileInfoList);
+                double time_ref1 = ds1.GetTimeRef(parent.ProfileInfoList);
+                double time_ref2 = ds2.GetTimeRef(parent.ProfileInfoList);
 
                 List<double> elap1 = new List<double>();
                 List<double> elap2 = new List<double>();
@@ -81,8 +81,8 @@ namespace DE1LogView
 
                 bool two_steam_plots = ds1.bean_name.ToLower() == "steam" && ds1.bean_name.ToLower() == "steam";
 
-                labelTopL.Text = ds1.getAsInfoTextForGraph (parent.ProfileInfoList, parent.BeanList);
-                labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+                labelTopL.Text = ds1.getAsInfoTextForGraph (parent.BeanList);
+                labelTopL1.Text = ds2.getAsInfoTextForGraph(parent.BeanList);
 
                 Graph.SetAxisTitles("", "");
                 Graph.data.Clear();
@@ -337,7 +337,7 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[parent.MainPlotKey];
 
-                labelTopL.Text = ds.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+                labelTopL.Text = ds.getAsInfoTextForGraph(parent.BeanList);
 
                 Graph.SetData(counter, ds.elapsed, ds.flow_smooth, Color.Blue, 3, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid); counter++;
@@ -387,7 +387,7 @@ namespace DE1LogView
             {
                 Form1.DataStruct ds = parent.Data[parent.MainPlotKey];
 
-                labelTopL.Text = ds.getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+                labelTopL.Text = ds.getAsInfoTextForGraph(parent.BeanList);
 
                 Graph.SetData(counter, ds.elapsed, ds.getTotalWaterVolume(), Color.Blue, 3, DashStyle.Solid); counter++;
                 Graph.SetData(counter, ds.elapsed, ds.weight, Color.Brown, 3, DashStyle.Solid); counter++;
@@ -562,7 +562,7 @@ namespace DE1LogView
             }
 
             if (min_dist <= 10)
-                labelTopL.Text = parent.Data[BestKey].getAsInfoTextForGraph(parent.ProfileInfoList, parent.BeanList);
+                labelTopL.Text = parent.Data[BestKey].getAsInfoTextForGraph(parent.BeanList);
             else
                 labelTopL.Text = "";
         }

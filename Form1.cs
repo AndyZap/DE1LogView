@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.52";
+        string Revision = "DE1 Log View v1.53";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -86,17 +86,17 @@ namespace DE1LogView
         {
             if (gp == GraphBot)
             {
-                labelBotL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList);
+                labelBotL.Text = ds.getAsInfoTextForGraph(BeanList);
                 labelBotR.Text = "";
             }
             else if (gp == GraphTop)
             {
-                labelTopL.Text = ds.getAsInfoTextForGraph(ProfileInfoList, BeanList);
+                labelTopL.Text = ds.getAsInfoTextForGraph(BeanList);
                 labelTopR.Text = "";
             }
             else if (gp == FormBigPlot.Graph)
             {
-                FormBigPlot.SetLabelText(ds.getAsInfoTextForGraph(ProfileInfoList, BeanList));
+                FormBigPlot.SetLabelText(ds.getAsInfoTextForGraph(BeanList));
             }
 
             gp.SetAxisTitles("", "");
@@ -223,7 +223,11 @@ namespace DE1LogView
             e.Graphics.DrawString(d.bean_name, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labProfile.Left; myrec.Width = labProfile.Width;
-            e.Graphics.DrawString(d.getShortProfileName(ProfileInfoList), e.Font, myBrush, myrec, StringFormat.GenericTypographic);
+
+            Brush profBrush = Brushes.Silver;
+            if (ProfileInfoList.ContainsKey(d.profile))
+                profBrush = new SolidBrush(ProfileInfoList[d.profile].color);
+            e.Graphics.DrawString(d.getShortProfileName(), e.Font, profBrush, myrec, StringFormat.GenericTypographic);
 
             myrec.X = labGrind.Left; myrec.Width = labGrind.Width;
             e.Graphics.DrawString(d.grind, e.Font, myBrush, myrec, StringFormat.GenericTypographic);
@@ -327,7 +331,7 @@ namespace DE1LogView
                 if (!String.IsNullOrEmpty(flt_name) && Data[key].bean_name.ToLower().Contains(flt_name) == false)
                     continue;
 
-                if (!String.IsNullOrEmpty(flt_profile) && Data[key].getShortProfileName(ProfileInfoList).ToLower().Contains(flt_profile) == false)
+                if (!String.IsNullOrEmpty(flt_profile) && Data[key].getShortProfileName().ToLower().Contains(flt_profile) == false)
                     continue;
 
                 if (!Data[key].enabled)
@@ -470,7 +474,7 @@ namespace DE1LogView
             if (!Data.ContainsKey(MainPlotKey))
                 return;
 
-            txtCopy.Text = Data[MainPlotKey].getAsInfoTextForGraph(ProfileInfoList, BeanList);
+            txtCopy.Text = Data[MainPlotKey].getAsInfoTextForGraph(BeanList);
             txtCopy.SelectAll();
             txtCopy.Copy();
         }
@@ -876,7 +880,7 @@ namespace DE1LogView
             {
                 var d = Data[item];
                 max_bean_len = Math.Max(d.bean_name.Length, max_bean_len);
-                max_profile_len = Math.Max(d.getShortProfileName(ProfileInfoList).Length, max_profile_len);
+                max_profile_len = Math.Max(d.getShortProfileName().Length, max_profile_len);
 
             }
 
@@ -923,7 +927,7 @@ namespace DE1LogView
                     if (last_name != Data[key].bean_name)
                         sb.AppendLine("");
 
-                    sb.AppendLine(Data[key].getAsInfoText(ProfileInfoList, BeanList, max_bean_len: max_bean_len, max_profile_len: max_profile_len));
+                    sb.AppendLine(Data[key].getAsInfoText(BeanList, max_bean_len, max_profile_len));
 
                     last_name = Data[key].bean_name;
 
