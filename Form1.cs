@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.53";
+        string Revision = "DE1 Log View v1.54";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 

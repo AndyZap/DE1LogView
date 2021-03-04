@@ -315,6 +315,7 @@ namespace DE1LogView
 
             Graph.SetAxisTitles("", "");
             Graph.data.Clear();
+
             int counter = 0;
             foreach (var key in AllKeys)
             {
@@ -323,30 +324,48 @@ namespace DE1LogView
                 if (ds.bean_name.ToLower() == "steam")
                     continue;
 
-                Graph.SetData(counter, ds.elapsed, ds.flow_smooth, Color.Blue, 1, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 1, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 1, DashStyle.Solid); counter++;
+                double time_ref = ds.GetTimeRef(parent.ProfileInfoList);
 
-                List<double> temperature_scaled = new List<double>();
-                foreach (var t in ds.temperature_basket)
-                    temperature_scaled.Add(t / 10.0);
-                Graph.SetData(counter, ds.elapsed, temperature_scaled, Color.Red, 1, DashStyle.Solid); counter++;
+                List<double> elap = new List<double>();
+                foreach (var t in ds.elapsed)
+                    elap.Add(t - time_ref);
+
+                Graph.SetData(counter, elap, ds.flow_smooth, Color.Blue, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, elap, ds.pressure_smooth, Color.LimeGreen, 1, DashStyle.Solid); counter++;
+                Graph.SetData(counter, elap, ds.flow_weight, Color.Brown, 1, DashStyle.Solid); counter++;
+
+                if (noTemperature == false)
+                {
+                    List<double> temperature_scaled = new List<double>();
+                    foreach (var t in ds.temperature_basket)
+                        temperature_scaled.Add(t / 10.0);
+                    Graph.SetData(counter, elap, temperature_scaled, Color.Red, 1, DashStyle.Solid); counter++;
+                }
             }
 
             if(parent.Data.ContainsKey(parent.MainPlotKey))
             {
                 Form1.DataStruct ds = parent.Data[parent.MainPlotKey];
 
+                double time_ref = ds.GetTimeRef(parent.ProfileInfoList);
+
+                List<double> elap = new List<double>();
+                foreach (var t in ds.elapsed)
+                    elap.Add(t - time_ref);
+
                 labelTopL.Text = ds.getAsInfoTextForGraph(parent.BeanList);
 
-                Graph.SetData(counter, ds.elapsed, ds.flow_smooth, Color.Blue, 3, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid); counter++;
-                Graph.SetData(counter, ds.elapsed, ds.flow_weight, Color.Brown, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, elap, ds.flow_smooth, Color.Blue, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, elap, ds.pressure_smooth, Color.LimeGreen, 3, DashStyle.Solid); counter++;
+                Graph.SetData(counter, elap, ds.flow_weight, Color.Brown, 3, DashStyle.Solid); counter++;
 
-                List<double> temperature_scaled = new List<double>();
-                foreach (var t in ds.temperature_basket)
-                    temperature_scaled.Add(t / 10.0);
-                Graph.SetData(counter, ds.elapsed, temperature_scaled, Color.Red, 3, DashStyle.Solid); counter++;
+                if (noTemperature == false)
+                {
+                    List<double> temperature_scaled = new List<double>();
+                    foreach (var t in ds.temperature_basket)
+                        temperature_scaled.Add(t / 10.0);
+                    Graph.SetData(counter, elap, temperature_scaled, Color.Red, 3, DashStyle.Solid); counter++;
+                }
             }
 
             Graph.SetAutoLimits();
