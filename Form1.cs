@@ -12,7 +12,7 @@ namespace DE1LogView
 {
     public partial class Form1 : Form
     {
-        string Revision = "DE1 Log View v1.54";
+        string Revision = "DE1 Log View v1.55";
         string ApplicationDirectory = "";
         string ApplicationNameNoExt = "";
 
@@ -1059,9 +1059,13 @@ namespace DE1LogView
 
             var id = Data[MainPlotKey].id;
 
-            string fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + "-1.m4v";
-            if (!File.Exists(fname))
-                return;
+            string fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + ".mov";
+            if (!File.Exists(fname))  // old format
+            {
+                fname = (Directory.Exists(VideoFolder) ? VideoFolder : ApplicationDirectory) + "\\" + id.ToString() + "-1.m4v";
+                if (!File.Exists(fname))
+                    return;
+            }
 
             try
             {

@@ -851,8 +851,13 @@ namespace DE1LogView
                         }
 
                         // flag if the video exists
-                        string video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                        string video_file = video_folder + "\\" + d.id.ToString() + ".mov";
                         d.has_video = File.Exists(video_file);
+                        if(d.has_video == false) // old format
+                        {
+                            video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                            d.has_video = File.Exists(video_file);
+                        }
 
                         Data.Add(d.date_str, d);
                     }
@@ -874,8 +879,13 @@ namespace DE1LogView
                 }
 
                 // flag if the video exists
-                string video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                string video_file = video_folder + "\\" + d.id.ToString() + ".mov";
                 d.has_video = File.Exists(video_file);
+                if (d.has_video == false) // old format
+                {
+                    video_file = video_folder + "\\" + d.id.ToString() + "-1.m4v";
+                    d.has_video = File.Exists(video_file);
+                }
 
                 Data.Add(d.date_str, d);
             }
